@@ -1,9 +1,11 @@
 mod command_line;
 pub mod consts;
+pub mod map;
 mod movement;
 
 use crate::command_line::{spawn_text_input, submit_text};
-use crate::movement::{jitter_rectangle, pan_camera, spawn_jitter_rect};
+use crate::map::spawn_map;
+use crate::movement::{jitter_rectangle, set_camera_position};
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
@@ -21,23 +23,14 @@ fn main() {
         }))
         .add_plugins(TabNavigationPlugin)
         .insert_resource(Time::<Fixed>::from_hz(144.0))
-        .add_systems(Startup, setup)
+        .add_systems(Startup, (setup, set_camera_position).chain())
         .add_systems(FixedUpdate, jitter_rectangle)
-        .add_systems(Update, (pan_camera, submit_text))
+        .add_systems(Update, (submit_text, set_camera_position))
         .run();
 }
 
-fn setup(
-    mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>, asset_server: Res<AssetServer>,
-) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((Camera2d, IsDefaultUiCamera));
-    commands.spawn((
-        Mesh2d(meshes.add(Circle::new(50.0))),
-        MeshMaterial2d(materials.add(Color::srgb(0.85, 0.20, 0.25))),
-        Transform::from_xyz(-120.0, 0.0, 0.0),
-    ));
-
-    spawn_jitter_rect(&mut commands, asset_server);
+    spawn_map(&mut commands, asset_server);
     spawn_text_input(&mut commands);
 }
