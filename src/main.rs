@@ -5,7 +5,7 @@ mod movement;
 
 use crate::command_line::{spawn_text_input, submit_text};
 use crate::map::spawn_map;
-use crate::movement::{jitter_rectangle, set_camera_position};
+use crate::movement::{bullet_movement, bullet_spawning, set_camera_position};
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
@@ -22,9 +22,9 @@ fn main() {
             ..default()
         }))
         .add_plugins(TabNavigationPlugin)
-        .insert_resource(Time::<Fixed>::from_hz(144.0))
+        .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
         .add_systems(Startup, (setup, set_camera_position).chain())
-        .add_systems(FixedUpdate, jitter_rectangle)
+        .add_systems(FixedUpdate, (bullet_spawning, bullet_movement).chain())
         .add_systems(Update, (submit_text, set_camera_position))
         .run();
 }
