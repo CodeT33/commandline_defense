@@ -32,12 +32,12 @@ enum Direction {
         }
     }
 
-    fn rotate_behind(current_direction: Direction) -> Direction {
+    fn rotate_left(current_direction: Direction) -> Direction {
         match current_direction {
-            Direction::Right => Direction::Left,
-            Direction::Down => Direction::Up,
-            Direction::Left => Direction::Right,
-            Direction::Up => Direction::Down,
+            Direction::Right => Direction::Up,
+            Direction::Down => Direction::Right,
+            Direction::Left => Direction::Down,
+            Direction::Up => Direction::Left,
         }
     }
 
@@ -196,7 +196,7 @@ impl MapTiles {
             self.map_size,
         );
 
-        self.tiles[index] == TileType::Path
+        is_path_tile(&self.tiles[index])
     }
 
     fn move_in_direction(
@@ -235,20 +235,37 @@ impl MapTiles {
         let mut enemy_path = EnemyPath{path_corners: Vec::new(), path_length: 0};
 
         println!("The path starts at: {:?}", temp_position);
-
         println!("Start to follow path\n");
 
-        for i in 0..20 {
-            println!("Search for path at: {:?} {:?}", temp_position, temp_direction);
+        loop {
             while (self.is_path_in_direction(temp_position, temp_direction)) {
                 temp_position = self.move_in_direction(temp_position, temp_direction);
-                println!("Found it and moved to it");
                 enemy_path.path_length += 1;
+                println!("Moved to {:?}, {:?}, {:?}", temp_position, temp_direction, enemy_path.path_length);
             }
-            println!("Found corner: {:?}", temp_position);
+            println!("No path in front of: {:?}. Checking for corners.", temp_position);
             enemy_path.path_corners.push(temp_position);
-            let direction_right = rotate_right(temp_direction);
-            temp_direction = rotate_right(temp_direction);
+
+            let right_direction = rotate_right(temp_direction);
+
+            if (self.is_path_in_direction(temp_position, right_direction)) {
+                println!("Found path to the RIGHT. Turning from {:?} to {:?}.", temp_direction, right_direction);
+
+                temp_direction = right_direction;
+                continue;
+            }
+
+            let left_direction = rotate_left(temp_direction);
+
+            if (self.is_path_in_direction(temp_position, left_direction)) {
+                println!("Found path to the LEFT. Turning from {:?} to {:?}.", temp_direction, left_direction);
+
+                temp_direction = left_direction;
+                continue;
+            }
+
+            println!("Found end at: {:?}", temp_position);
+            break;
         }
 
         println!("Path is {} tiles long", enemy_path.path_length);
@@ -259,15 +276,14 @@ impl MapTiles {
         while path in front
             move
             length += 1
-        save position
-        look for next turn
-            rotate right
-                test for path
-            rotate behind
-                test for path
-
-
-
+        save position of corner
+        rotate right
+            test for path
+                -> start again in while with the actual direction
+        rotate behind
+            test for path
+                -> start again in while with the actual direction
+        if nothing except the direction we came from can be found, the end is reached
         */
 
     }
