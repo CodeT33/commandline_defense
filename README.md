@@ -5,8 +5,7 @@ A video game where you have to defend against enemies while you build a factory 
 
 ## Color codes
 
-`#00ffff` (aqua) path start
-`#ff00ff` (pink) path end
+`#ff00ff` (pink) path start
 `#ffff00` (yellow) path
 
 `#ff0000` (red) restricted
