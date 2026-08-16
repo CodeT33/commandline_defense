@@ -29,7 +29,7 @@ pub fn spawn_jitter_rect(commands: &mut Commands, asset_server: Res<AssetServer>
     commands.spawn((
         Jitter,
         Sprite {
-            image: asset_server.load(consts::sprite_paths::ANGRY_BIRB),
+            image: asset_server.load(consts::paths::sprite::ANGRY_BIRB),
             custom_size: Some(RECT_SIZE),
             ..default()
         },
