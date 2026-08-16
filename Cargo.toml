@@ -18,5 +18,5 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = { version = "0.19", default-features = false, features = ["2d", "ui"] }
+bevy = { version = "0.19", default-features = false, features = ["2d", "ui", "jpeg"] }
 rand = "0.10.2"

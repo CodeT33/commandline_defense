@@ -1,10 +1,8 @@
 use crate::consts;
-use bevy::input_focus::InputFocus;
+use crate::consts::MAP_SIZE_TILES;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use rand::RngExt;
-
-const RECT_SIZE: Vec2 = Vec2::new(140.0, 80.0);
 
 #[derive(Component)]
 pub struct Jitter;
@@ -16,7 +14,7 @@ pub fn jitter_rectangle(
         return;
     };
 
-    let half = Vec2::new(window.width(), window.height()) * 0.5 - RECT_SIZE * 0.5;
+    let half = Vec2::new(window.width(), window.height()) * 0.5 - consts::RECT_SIZE * 0.5;
     let mut rng = rand::rng();
 
     for mut tf in &mut q {
@@ -30,7 +28,7 @@ pub fn spawn_jitter_rect(commands: &mut Commands, asset_server: Res<AssetServer>
         Jitter,
         Sprite {
             image: asset_server.load(consts::paths::sprite::ANGRY_BIRB),
-            custom_size: Some(RECT_SIZE),
+            custom_size: Some(consts::RECT_SIZE),
             ..default()
         },
         Transform::from_xyz(140.0, 0.0, 0.0)
@@ -39,33 +37,18 @@ pub fn spawn_jitter_rect(commands: &mut Commands, asset_server: Res<AssetServer>
     ));
 }
 
-pub fn pan_camera(
-    time: Res<Time>, keys: Res<ButtonInput<KeyCode>>, focus: Res<InputFocus>,
-    mut camera: Query<&mut Transform, With<Camera2d>>,
+#[allow(clippy::type_complexity)]
+pub fn set_camera_position(
+    mut camera: Query<&mut Transform, With<Camera2d>>, windows: Query<&Window, With<PrimaryWindow>>,
 ) {
-    if focus.get().is_some() {
+    let Some(window_size) = windows.single().ok().map(|w| w.size()) else {
         return;
-    }
+    };
 
     let Ok(mut tf) = camera.single_mut() else {
         return;
     };
 
-    let mut dir = Vec2::ZERO;
-    if keys.pressed(KeyCode::KeyW) {
-        dir.y += 1.0;
-    }
-    if keys.pressed(KeyCode::KeyS) {
-        dir.y -= 1.0;
-    }
-    if keys.pressed(KeyCode::KeyA) {
-        dir.x -= 1.0;
-    }
-    if keys.pressed(KeyCode::KeyD) {
-        dir.x += 1.0;
-    }
-
-    if let Some(dir) = dir.try_normalize() {
-        tf.translation += (dir * 400.0 * time.delta_secs()).extend(0.0);
-    }
+    tf.translation = Vec3::new(MAP_SIZE_TILES[0] as f32 / 2.0, MAP_SIZE_TILES[1] as f32 / 2.0, 0.0);
+    tf.scale = Vec3::splat((Vec2::from(MAP_SIZE_TILES.map(f32::from)) / window_size).max_element());
 }
