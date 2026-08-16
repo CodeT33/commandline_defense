@@ -1,3 +1,4 @@
+use crate::consts;
 use bevy::input_focus::InputFocus;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
@@ -28,7 +29,7 @@ pub fn spawn_jitter_rect(commands: &mut Commands, asset_server: Res<AssetServer>
     commands.spawn((
         Jitter,
         Sprite {
-            image: asset_server.load("sprites/uzsg4bc3e2mg1.png"),
+            image: asset_server.load(consts::sprite_paths::ANGRY_BIRB),
             custom_size: Some(RECT_SIZE),
             ..default()
         },

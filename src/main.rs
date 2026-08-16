@@ -1,4 +1,5 @@
 mod command_line;
+pub mod consts;
 mod movement;
 
 use crate::command_line::{spawn_text_input, submit_text};
@@ -11,8 +12,8 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: "2d game".into(),
-                resolution: (800, 450).into(),
+                title: consts::WINDOW_TITLE.to_owned(),
+                resolution: consts::WINDOW_RESOLUTION.into(),
                 present_mode: PresentMode::Immediate,
                 ..default()
             }),
@@ -31,7 +32,6 @@ fn setup(
     mut materials: ResMut<Assets<ColorMaterial>>, asset_server: Res<AssetServer>,
 ) {
     commands.spawn((Camera2d, IsDefaultUiCamera));
-
     commands.spawn((
         Mesh2d(meshes.add(Circle::new(50.0))),
         MeshMaterial2d(materials.add(Color::srgb(0.85, 0.20, 0.25))),
