@@ -1,6 +1,6 @@
 use bevy::input_focus::{
-	AutoFocus, InputFocus,
-	tab_navigation::{TabGroup, TabIndex, TabNavigationPlugin},
+    AutoFocus, InputFocus,
+    tab_navigation::{TabGroup, TabIndex, TabNavigationPlugin},
 };
 use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle};
@@ -18,7 +18,7 @@ fn main() {
             primary_window: Some(Window {
                 title: "2d game".into(),
                 resolution: (800, 450).into(),
-				present_mode:PresentMode::Immediate,
+                present_mode: PresentMode::Immediate,
                 ..default()
             }),
             ..default()
@@ -76,7 +76,7 @@ fn spawn_text_input(commands: &mut Commands) {
         TextFont { font_size: FontSize::Px(24.0), ..default() },
         TextColor(Color::WHITE),
         TextCursorStyle::default(),
-		BackgroundColor::default(),
+        BackgroundColor::default(),
         TabGroup::new(0),
         TabIndex(0),
         AutoFocus,
