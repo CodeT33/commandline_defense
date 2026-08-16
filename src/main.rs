@@ -1,11 +1,13 @@
+mod bullets;
+mod camera;
 mod command_line;
 pub mod consts;
 pub mod map;
-mod movement;
 
+use crate::bullets::{bullet_movement, bullet_spawning};
+use crate::camera::set_camera_position;
 use crate::command_line::{spawn_text_input, submit_text};
 use crate::map::spawn_map;
-use crate::movement::{bullet_movement, bullet_spawning, set_camera_position};
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;

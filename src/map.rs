@@ -1,3 +1,4 @@
+use crate::bullets::BulletEmissionData;
 use crate::consts;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
@@ -22,46 +23,6 @@ pub struct Enemy;
 #[derive(Component)]
 pub struct Tower;
 
-#[derive(Component)]
-pub struct Bullet;
-
-#[derive(Component)]
-pub struct BulletSpawnData {
-    last_spawn_time_ms: Option<u64>,
-    pub direction: Rot2,
-    pub bullet_speed: f32,
-    pub spawn_cooldown_ms: u32,
-}
-
-impl Default for BulletSpawnData {
-    fn default() -> Self {
-        Self {
-            last_spawn_time_ms: None,
-            direction: Rot2::degrees(0.0),
-            bullet_speed: 10.0,
-            spawn_cooldown_ms: 1000,
-        }
-    }
-}
-
-impl BulletSpawnData {
-    /// Call this function in a loop until it returns None to ensure no bullets are dropped.\
-    /// When a shot is available, the function returns the time at which the shot was fired. Otherwise, it returns None.
-    pub fn shoot_if_ready(&mut self, current_time_ms: u64) -> Option<u64> {
-        if let Some(last_spawn_time_ms) = &mut self.last_spawn_time_ms {
-            if *last_spawn_time_ms + self.spawn_cooldown_ms as u64 <= current_time_ms {
-                *last_spawn_time_ms += self.spawn_cooldown_ms as u64;
-                Some(*last_spawn_time_ms)
-            } else {
-                None
-            }
-        } else {
-            self.last_spawn_time_ms = Some(current_time_ms);
-            Some(current_time_ms)
-        }
-    }
-}
-
 pub fn spawn_map(commands: &mut Commands, asset_server: Res<AssetServer>) {
     let map = Map::default();
     for &enemy_pos in &map.enemies {
@@ -84,7 +45,7 @@ pub fn spawn_map(commands: &mut Commands, asset_server: Res<AssetServer>) {
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()
             },
-            BulletSpawnData::default(),
+            BulletEmissionData::default(),
             Transform::from_xyz(tower_pos[0] as f32 + 0.5, tower_pos[1] as f32 + 0.5, 0.0),
         ));
     }
