@@ -3,6 +3,7 @@ use bevy::input_focus::{AutoFocus, InputFocus};
 use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle};
 
+#[allow(unused)]
 pub fn spawn_text_input(commands: &mut Commands) {
     commands.spawn((
         Text::new("click the box, type, Enter to print"),

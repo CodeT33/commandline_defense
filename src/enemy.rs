@@ -1,9 +1,11 @@
+use std::f32;
+
 use crate::consts;
 use crate::map::{Enemy, MapResource};
 use bevy::prelude::*;
 use map_parsing::EnemyPath;
 
-pub fn get_enemy_pos(progress: f32, path: &EnemyPath) -> Vec2 {
+pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
     let progress = progress.clamp(0.0, 1.0);
     let len = path.get_length();
     let target_pos = len as f32 * progress;
@@ -21,10 +23,15 @@ pub fn get_enemy_pos(progress: f32, path: &EnemyPath) -> Vec2 {
             continue;
         }
 
-        return a.as_vec2()
-            + ((b.as_vec2() - a.as_vec2()).normalize() * (target_pos - current_len as f32));
+        let normalized_diff = (b.as_vec2() - a.as_vec2()).normalize();
+        let pos =
+            a.as_vec2() + (normalized_diff * (target_pos - current_len as f32)) + Vec2::splat(0.5);
+        return Transform::from_translation(pos.extend(0.0)).with_rotation(Quat::from_rotation_z(
+            normalized_diff.to_angle() - f32::consts::FRAC_PI_2,
+        ));
     }
-    path.corners().last().unwrap().as_vec2()
+    let pos = path.corners().last().unwrap().as_vec2() + Vec2::splat(0.5);
+    Transform::from_translation(pos.extend(0.0))
 }
 
 pub fn move_enemies(
@@ -34,8 +41,7 @@ pub fn move_enemies(
         / consts::ENEMY_PATH_DURATION_MS as f32;
     for (mut transform, enemy) in &mut enemy {
         let progress = (base_progress + enemy.path_offset) % 1.0;
-        let pos = get_enemy_pos(progress, map_resource.0.enemy_path()) + vec2(0.5, 0.5);
-        transform.translation.x = pos.x;
-        transform.translation.y = pos.y;
+        *transform =
+            get_enemy_transform(progress, map_resource.0.enemy_path()).with_scale(transform.scale);
     }
 }
