@@ -48,6 +48,60 @@ pub struct EnemyPath {
 }
 
 impl EnemyPath {
+    pub fn parse_from_map_tiles(map_tiles: &MapTiles) -> Option<EnemyPath> {
+        let mut temp_position = map_tiles.find_path_start()?;
+        let mut temp_direction = Direction::Right;
+
+        let mut enemy_path = EnemyPath { path_corners: vec![temp_position], path_length: 0 };
+
+        println!("The path starts at: {:?}", temp_position);
+        println!("Start to follow path\n");
+
+        loop {
+            while map_tiles.is_path_in_direction(temp_position, temp_direction) {
+                temp_position = map_tiles.move_in_direction(temp_position, temp_direction);
+                enemy_path.path_length += 1;
+                println!(
+                    "Moved to {:?}, {:?}, {:?}",
+                    temp_position, temp_direction, enemy_path.path_length
+                );
+            }
+            println!("No path in front of: {:?}. Checking for corners.", temp_position);
+            enemy_path.path_corners.push(temp_position);
+
+            let right_direction = rotate_right(temp_direction);
+
+            if map_tiles.is_path_in_direction(temp_position, right_direction) {
+                println!(
+                    "Found path to the RIGHT. Turning from {:?} to {:?}.",
+                    temp_direction, right_direction
+                );
+
+                temp_direction = right_direction;
+                continue;
+            }
+
+            let left_direction = rotate_left(temp_direction);
+
+            if map_tiles.is_path_in_direction(temp_position, left_direction) {
+                println!(
+                    "Found path to the LEFT. Turning from {:?} to {:?}.",
+                    temp_direction, left_direction
+                );
+
+                temp_direction = left_direction;
+                continue;
+            }
+
+            println!("Found end at: {:?}", temp_position);
+            break;
+        }
+
+        println!("Path is {} tiles long", enemy_path.path_length);
+
+        Some(enemy_path)
+    }
+
     pub fn get_length(&self) -> u32 {
         self.path_length
     }
@@ -58,13 +112,30 @@ impl EnemyPath {
 }
 
 pub struct MapTiles {
-    pub map_size: U16Vec2,
-    pub tiles: Vec<TileType>,
+    map_size: U16Vec2,
+    tiles: Vec<TileType>,
 }
 
 pub struct GameMap {
-    pub map_tiles: MapTiles,
-    pub enemy_path: EnemyPath,
+    map_tiles: MapTiles,
+    enemy_path: EnemyPath,
+}
+
+impl GameMap {
+    pub fn load(path: &str, map_size: U16Vec2) -> Option<GameMap> {
+        let map_tiles = MapTiles::load(path, map_size)?;
+        let enemy_path = EnemyPath::parse_from_map_tiles(&map_tiles)?;
+
+        Some(GameMap { map_tiles, enemy_path })
+    }
+
+    pub fn map_tiles(&self) -> &MapTiles {
+        &self.map_tiles
+    }
+
+    pub fn enemy_path(&self) -> &EnemyPath {
+        &self.enemy_path
+    }
 }
 
 pub fn get_index_from_map_position(map_position: U16Vec2, map_size: U16Vec2) -> usize {
@@ -118,30 +189,42 @@ fn interpret_tile_from_rgb(color: u32) -> Option<TileType> {
     })
 }
 
-pub fn print_pixels(pixels: &[TileType], map_size: U16Vec2) {
-    for y in 0..map_size.y {
-        for x in 0..map_size.x {
-            let index = (y * map_size.x + x) as usize;
-
-            let symbol = match pixels[index] {
-                TileType::PathStart => 'S',
-                TileType::Path => '#',
-                TileType::Restricted => 'X',
-                TileType::Placeable => '_',
-                TileType::Water => '~',
-            };
-
-            print!("{symbol}");
-        }
-        println!();
-    }
-}
-
 fn is_path_tile(tile: &TileType) -> bool {
     matches!(tile, TileType::Path | TileType::PathStart)
 }
 
 impl MapTiles {
+    pub fn print_pixels(&self) {
+        for y in 0..self.map_size.y {
+            for x in 0..self.map_size.x {
+                let index = (y * self.map_size.x + x) as usize;
+
+                let symbol = match self.tiles[index] {
+                    TileType::PathStart => 'S',
+                    TileType::Path => '#',
+                    TileType::Restricted => 'X',
+                    TileType::Placeable => '_',
+                    TileType::Water => '~',
+                };
+
+                print!("{symbol}");
+            }
+            println!();
+        }
+    }
+
+    pub fn load(path: &str, map_size: U16Vec2) -> Option<MapTiles> {
+        Some(MapTiles { map_size, tiles: load_map_logic(path)? })
+    }
+
+    pub fn map_size(&self) -> U16Vec2 {
+        self.map_size
+    }
+
+    pub fn tiles(&self) -> &[TileType] {
+        &self.tiles
+    }
+
     fn is_path_in_direction(&self, position: U16Vec2, direction: Direction) -> bool {
         let directed_position = match direction {
             Direction::Right => {
@@ -192,74 +275,6 @@ impl MapTiles {
 
             Direction::Up => U16Vec2::new(position.x, position.y - 1),
         }
-    }
-
-    pub fn parse_enemy_path(&self) -> Option<EnemyPath> {
-        let mut temp_position = self.find_path_start()?;
-        let mut temp_direction = Direction::Right;
-
-        let mut enemy_path = EnemyPath { path_corners: vec![temp_position], path_length: 0 };
-
-        println!("The path starts at: {:?}", temp_position);
-        println!("Start to follow path\n");
-
-        loop {
-            while self.is_path_in_direction(temp_position, temp_direction) {
-                temp_position = self.move_in_direction(temp_position, temp_direction);
-                enemy_path.path_length += 1;
-                println!(
-                    "Moved to {:?}, {:?}, {:?}",
-                    temp_position, temp_direction, enemy_path.path_length
-                );
-            }
-            println!("No path in front of: {:?}. Checking for corners.", temp_position);
-            enemy_path.path_corners.push(temp_position);
-
-            let right_direction = rotate_right(temp_direction);
-
-            if self.is_path_in_direction(temp_position, right_direction) {
-                println!(
-                    "Found path to the RIGHT. Turning from {:?} to {:?}.",
-                    temp_direction, right_direction
-                );
-
-                temp_direction = right_direction;
-                continue;
-            }
-
-            let left_direction = rotate_left(temp_direction);
-
-            if self.is_path_in_direction(temp_position, left_direction) {
-                println!(
-                    "Found path to the LEFT. Turning from {:?} to {:?}.",
-                    temp_direction, left_direction
-                );
-
-                temp_direction = left_direction;
-                continue;
-            }
-
-            println!("Found end at: {:?}", temp_position);
-            break;
-        }
-
-        println!("Path is {} tiles long", enemy_path.path_length);
-
-        Some(enemy_path)
-
-        /*
-        while path in front
-            move
-            length += 1
-        save position of corner
-        rotate right
-            test for path
-                -> start again in while with the actual direction
-        rotate behind
-            test for path
-                -> start again in while with the actual direction
-        if nothing except the direction we came from can be found, the end is reached
-        */
     }
 
     fn find_path_start(&self) -> Option<U16Vec2> {
