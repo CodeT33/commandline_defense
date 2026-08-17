@@ -1,4 +1,4 @@
-use bevy_math::U16Vec2;
+use bevy_math::{I16Vec2, U16Vec2};
 use image::RgbImage;
 
 const PATH_START: u32 = 0xff00ff;
@@ -59,7 +59,8 @@ impl EnemyPath {
 
         loop {
             while map_tiles.is_path_in_direction(temp_position, temp_direction) {
-                temp_position = map_tiles.move_in_direction(temp_position, temp_direction);
+                temp_position =
+                    map_tiles.get_position_in_direction(temp_position, temp_direction).unwrap();
                 enemy_path.path_length += 1;
                 println!(
                     "Moved to {:?}, {:?}, {:?}",
@@ -139,11 +140,11 @@ impl GameMap {
 }
 
 pub fn get_index_from_map_position(map_position: U16Vec2, map_size: U16Vec2) -> usize {
-    (map_position.y * map_size.x + map_position.x) as usize
+    ((map_size.y - 1 - map_position.y) * map_size.x + map_position.x) as usize
 }
 
 pub fn get_map_position_from_index(index: usize, map_size: U16Vec2) -> U16Vec2 {
-    U16Vec2::new(index as u16 % map_size.x, index as u16 / map_size.x)
+    U16Vec2::new(index as u16 % map_size.x, map_size.y - 1 - (index as u16 / map_size.x))
 }
 
 pub fn load_map_logic(path: &str) -> Option<Vec<TileType>> {
@@ -225,56 +226,27 @@ impl MapTiles {
         &self.tiles
     }
 
-    fn is_path_in_direction(&self, position: U16Vec2, direction: Direction) -> bool {
-        let directed_position = match direction {
-            Direction::Right => {
-                if position.x + 1 >= self.map_size.x {
-                    return false;
-                }
-
-                U16Vec2::new(position.x + 1, position.y)
-            },
-
-            Direction::Down => {
-                if position.y + 1 >= self.map_size.y {
-                    return false;
-                }
-
-                U16Vec2::new(position.x, position.y + 1)
-            },
-
-            Direction::Left => {
-                if position.x == 0 {
-                    return false;
-                }
-
-                U16Vec2::new(position.x - 1, position.y)
-            },
-
-            Direction::Up => {
-                if position.y == 0 {
-                    return false;
-                }
-
-                U16Vec2::new(position.x, position.y - 1)
-            },
+    fn get_position_in_direction(
+        &self, position: U16Vec2, direction: Direction,
+    ) -> Option<U16Vec2> {
+        let change = match direction {
+            Direction::Right => I16Vec2::X,
+            Direction::Left => I16Vec2::NEG_X,
+            Direction::Up => I16Vec2::Y,
+            Direction::Down => I16Vec2::NEG_Y,
         };
 
-        let index = get_index_from_map_position(directed_position, self.map_size);
-
-        is_path_tile(&self.tiles[index])
+        let new_position = position.checked_add_signed(change)?;
+        new_position.cmplt(self.map_size).all().then_some(new_position)
     }
 
-    fn move_in_direction(&self, position: U16Vec2, direction: Direction) -> U16Vec2 {
-        match direction {
-            Direction::Right => U16Vec2::new(position.x + 1, position.y),
+    fn is_path_in_direction(&self, position: U16Vec2, direction: Direction) -> bool {
+        let Some(new_position) = self.get_position_in_direction(position, direction) else {
+            return false;
+        };
+        let index = get_index_from_map_position(new_position, self.map_size);
 
-            Direction::Down => U16Vec2::new(position.x, position.y + 1),
-
-            Direction::Left => U16Vec2::new(position.x - 1, position.y),
-
-            Direction::Up => U16Vec2::new(position.x, position.y - 1),
-        }
+        is_path_tile(&self.tiles[index])
     }
 
     fn find_path_start(&self) -> Option<U16Vec2> {

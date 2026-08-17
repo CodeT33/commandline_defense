@@ -34,9 +34,7 @@ pub fn move_enemies(
         / consts::ENEMY_PATH_DURATION_MS as f32;
     for (mut transform, enemy) in &mut enemy {
         let progress = (base_progress + enemy.path_offset) % 1.0;
-        let mut pos = get_enemy_pos(progress, map_resource.0.enemy_path());
-        pos.y = (map_resource.0.map_tiles().map_size().y - 1) as f32 - pos.y;
-        pos += vec2(0.5, 0.5);
+        let pos = get_enemy_pos(progress, map_resource.0.enemy_path()) + vec2(0.5, 0.5);
         transform.translation.x = pos.x;
         transform.translation.y = pos.y;
     }
