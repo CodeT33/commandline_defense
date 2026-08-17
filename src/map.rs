@@ -1,5 +1,6 @@
 use crate::bullets::BulletEmissionData;
 use crate::consts;
+use avian2d::prelude::*;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 
@@ -11,7 +12,18 @@ pub struct Map {
 impl Default for Map {
     fn default() -> Self {
         Self {
-            enemies: vec![[0, 0], [1, 2], [5, 5], [5, 0]],
+            enemies: vec![
+                [0, 0],
+                [1, 2],
+                [5, 5],
+                [5, 0],
+                [0, 15],
+                [1, 15],
+                [2, 15],
+                [3, 15],
+                [4, 15],
+                [5, 15],
+            ],
             towers: vec![[7, 2], [6, 5], [5, 3], [31, 15]],
         }
     }
@@ -28,6 +40,7 @@ pub fn spawn_map(commands: &mut Commands, asset_server: Res<AssetServer>) {
     for &enemy_pos in &map.enemies {
         commands.spawn((
             Enemy,
+            Collider::circle(consts::ENEMY_RADIUS),
             Sprite {
                 image: asset_server.load(consts::paths::sprite::ENEMY),
                 custom_size: consts::ENEMY_SIZE_TILES.into(),
@@ -37,6 +50,8 @@ pub fn spawn_map(commands: &mut Commands, asset_server: Res<AssetServer>) {
         ));
     }
     for &tower_pos in &map.towers {
+        let mut data = BulletEmissionData::default();
+        data.direction = Rot2::degrees(180.0);
         commands.spawn((
             Tower,
             Sprite {
@@ -45,7 +60,7 @@ pub fn spawn_map(commands: &mut Commands, asset_server: Res<AssetServer>) {
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()
             },
-            BulletEmissionData::default(),
+            data,
             Transform::from_xyz(tower_pos[0] as f32 + 0.5, tower_pos[1] as f32 + 0.5, 0.0),
         ));
     }

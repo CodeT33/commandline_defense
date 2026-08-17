@@ -10,6 +10,9 @@ pub const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(0.3);
 pub const ENEMY_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 pub const TOWER_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 
+pub const PROJECTILE_RADIUS: f32 = PROJECTILE_SIZE_TILES.x / 2.0;
+pub const ENEMY_RADIUS: f32 = ENEMY_SIZE_TILES.x / 2.0;
+
 pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
 
 pub mod paths {
