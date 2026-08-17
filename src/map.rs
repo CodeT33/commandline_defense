@@ -107,7 +107,7 @@ impl TowerRangeMap {
         let center = U16Vec2::from_array(pos_tiles);
         let range = U16Vec2::from_array([range_tiles; 2]);
         let min = center.saturating_sub(range);
-        let max = center.saturating_add(range).max(self.size.into());
+        let max = center.saturating_add(range).min(self.size.map(|s| s.saturating_sub(1)).into());
         for y in min.y..=max.y {
             for x in min.x..=max.x {
                 self.towers_in_range[(y * self.size[0] + x) as usize].push(entity);
