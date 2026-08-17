@@ -14,6 +14,8 @@ pub const TOWER_RANGE_TILES: u16 = 5;
 pub const PROJECTILE_RADIUS: f32 = PROJECTILE_SIZE_TILES.x / 2.0;
 pub const ENEMY_RADIUS: f32 = ENEMY_SIZE_TILES.x / 2.0;
 
+pub const ENEMY_PATH_DURATION_MS: u64 = 4000;
+
 pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
 
 pub mod paths {

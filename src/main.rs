@@ -8,6 +8,7 @@ pub mod map;
 use crate::bullets::{bullet_collisions, bullet_movement, bullet_spawning};
 use crate::camera::set_camera_position;
 use crate::command_line::{spawn_text_input, submit_text};
+use crate::enemy::move_enemies;
 use crate::map::{TowerRangeMap, spawn_map};
 use avian2d::prelude::{PhysicsPlugins, PhysicsSystems};
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
@@ -30,7 +31,7 @@ fn main() {
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
         .insert_resource(TowerRangeMap::default())
         .add_systems(Startup, (setup, set_camera_position).chain())
-        .add_systems(FixedUpdate, (bullet_spawning, bullet_movement).chain())
+        .add_systems(FixedUpdate, (move_enemies, bullet_spawning, bullet_movement).chain())
         .add_systems(FixedPostUpdate, bullet_collisions.after(PhysicsSystems::StepSimulation))
         .add_systems(Update, (submit_text, set_camera_position))
         .run();

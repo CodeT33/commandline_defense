@@ -4,6 +4,7 @@ use avian2d::prelude::*;
 use bevy::asset::AssetServer;
 use bevy::math::U16Vec2;
 use bevy::prelude::*;
+use map_parsing::GameMap;
 
 pub struct Map {
     enemies: Vec<[u16; 2]>,
@@ -25,7 +26,7 @@ impl Default for Map {
                 [4, 15],
                 [5, 15],
             ],
-            towers: vec![[7, 2], [6, 5], [5, 3], [31, 15]],
+            towers: vec![[5, 3], [31, 15]],
         }
     }
 }
@@ -49,10 +50,19 @@ impl Default for TowerRangeMap {
     }
 }
 
+#[derive(Resource)]
+pub struct MapResource(pub GameMap);
+
 pub fn spawn_map(
     commands: &mut Commands, asset_server: Res<AssetServer>,
     mut tower_range_map: ResMut<TowerRangeMap>,
 ) {
+    let game_map =
+        GameMap::load(r"assets\maps\backrooms\logic_layer.png", consts::MAP_SIZE_TILES.into())
+            .expect("Could not load game map");
+
+    commands.insert_resource(MapResource(game_map));
+
     let map = Map::default();
     for &enemy_pos in &map.enemies {
         commands.spawn((
