@@ -1,8 +1,9 @@
 mod command_line;
 pub mod consts;
 pub mod map;
-mod movement;
 pub mod grid;
+mod bullets;
+mod camera;
 
 use crate::bullets::{bullet_collisions, bullet_movement, bullet_spawning};
 use crate::camera::set_camera_position;
