@@ -1,4 +1,5 @@
-use image::{RgbImage};
+use bevy_math::U16Vec2;
+use image::RgbImage;
 
 const PATH_START: u32 = 0xff00ff;
 const PATH: u32 = 0xffff00;
@@ -23,39 +24,31 @@ enum Direction {
     Up,
 }
 
-    fn rotate_right(current_direction: Direction) -> Direction {
-        match current_direction {
-            Direction::Right => Direction::Down,
-            Direction::Down => Direction::Left,
-            Direction::Left => Direction::Up,
-            Direction::Up => Direction::Right,
-        }
+fn rotate_right(current_direction: Direction) -> Direction {
+    match current_direction {
+        Direction::Right => Direction::Down,
+        Direction::Down => Direction::Left,
+        Direction::Left => Direction::Up,
+        Direction::Up => Direction::Right,
     }
+}
 
-    fn rotate_left(current_direction: Direction) -> Direction {
-        match current_direction {
-            Direction::Right => Direction::Up,
-            Direction::Down => Direction::Right,
-            Direction::Left => Direction::Down,
-            Direction::Up => Direction::Left,
-        }
+fn rotate_left(current_direction: Direction) -> Direction {
+    match current_direction {
+        Direction::Right => Direction::Up,
+        Direction::Down => Direction::Right,
+        Direction::Left => Direction::Down,
+        Direction::Up => Direction::Left,
     }
-
-
-
-#[derive(Clone, Copy, Debug)]
-pub struct Vector2D {
-    pub x: u16,
-    pub y: u16,
 }
 
 pub struct EnemyPath {
-    path_corners: Vec<Vector2D>,
+    path_corners: Vec<U16Vec2>,
     path_length: u32,
 }
 
 pub struct MapTiles {
-    pub map_size: Vector2D,
+    pub map_size: U16Vec2,
     pub tiles: Vec<TileType>,
 }
 
@@ -64,15 +57,15 @@ pub struct GameMap {
     pub enemy_path: EnemyPath,
 }
 
-pub fn get_index_from_map_position(map_position: Vector2D, map_size: Vector2D) -> usize {
+pub fn get_index_from_map_position(map_position: U16Vec2, map_size: U16Vec2) -> usize {
     (map_position.y * map_size.x + map_position.x) as usize
 }
 
-pub fn get_map_position_from_index(index: usize, map_size: Vector2D) -> Vector2D {
-    Vector2D{x: index as u16 % map_size.x, y: index as u16 / map_size.x}
+pub fn get_map_position_from_index(index: usize, map_size: U16Vec2) -> U16Vec2 {
+    U16Vec2::new(index as u16 % map_size.x, index as u16 / map_size.x)
 }
 
-pub fn load_map_logic(path: &str) -> Option<Vec<TileType>>{
+pub fn load_map_logic(path: &str) -> Option<Vec<TileType>> {
     let image: RgbImage = image::open(path).ok()?.to_rgb8();
 
     let tiles = image
@@ -80,9 +73,7 @@ pub fn load_map_logic(path: &str) -> Option<Vec<TileType>>{
         .map(|pixel| {
             let [r, g, b] = pixel.0;
 
-            let color = ((r as u32) << 16)
-                | ((g as u32) << 8)
-                | (b as u32);
+            let color = ((r as u32) << 16) | ((g as u32) << 8) | (b as u32);
 
             interpret_tile_from_rgb(color)
         })
@@ -94,13 +85,14 @@ pub fn load_map_logic(path: &str) -> Option<Vec<TileType>>{
 pub fn load_map_raw(path: &str) -> Option<Vec<u32>> {
     let image = image::open(path).ok()?.to_rgb8();
 
-    let pixels: Vec<u32> = image.pixels().map(
-        |pixel| {
+    let pixels: Vec<u32> = image
+        .pixels()
+        .map(|pixel| {
             let [r, g, b] = pixel.0;
 
             ((r as u32) << 16) | ((g as u32) << 8) | (b as u32)
-        }
-    ).collect();
+        })
+        .collect();
 
     Some(pixels)
 }
@@ -116,7 +108,7 @@ fn interpret_tile_from_rgb(color: u32) -> Option<TileType> {
     })
 }
 
-pub fn print_pixels(pixels: &[TileType], map_size: Vector2D) {
+pub fn print_pixels(pixels: &[TileType], map_size: U16Vec2) {
     for y in 0..map_size.y {
         for x in 0..map_size.x {
             let index = (y * map_size.x + x) as usize;
@@ -140,116 +132,86 @@ fn is_path_tile(tile: &TileType) -> bool {
 }
 
 impl MapTiles {
-    fn is_path_in_direction(
-        &self,
-        position: Vector2D,
-        direction: Direction,
-    ) -> bool {
+    fn is_path_in_direction(&self, position: U16Vec2, direction: Direction) -> bool {
         let directed_position = match direction {
             Direction::Right => {
                 if position.x + 1 >= self.map_size.x {
                     return false;
                 }
 
-                Vector2D {
-                    x: position.x + 1,
-                    y: position.y,
-                }
-            }
+                U16Vec2::new(position.x + 1, position.y)
+            },
 
             Direction::Down => {
                 if position.y + 1 >= self.map_size.y {
                     return false;
                 }
 
-                Vector2D {
-                    x: position.x,
-                    y: position.y + 1,
-                }
-            }
+                U16Vec2::new(position.x, position.y + 1)
+            },
 
             Direction::Left => {
                 if position.x == 0 {
                     return false;
                 }
 
-                Vector2D {
-                    x: position.x - 1,
-                    y: position.y,
-                }
-            }
+                U16Vec2::new(position.x - 1, position.y)
+            },
 
             Direction::Up => {
                 if position.y == 0 {
                     return false;
                 }
 
-                Vector2D {
-                    x: position.x,
-                    y: position.y - 1,
-                }
-            }
+                U16Vec2::new(position.x, position.y - 1)
+            },
         };
 
-        let index = get_index_from_map_position(
-            directed_position,
-            self.map_size,
-        );
+        let index = get_index_from_map_position(directed_position, self.map_size);
 
         is_path_tile(&self.tiles[index])
     }
 
-    fn move_in_direction(
-        &self,
-        position: Vector2D,
-        direction: Direction,
-    ) -> Vector2D {
+    fn move_in_direction(&self, position: U16Vec2, direction: Direction) -> U16Vec2 {
         match direction {
-            Direction::Right => Vector2D {
-                x: position.x + 1,
-                y: position.y,
-            },
+            Direction::Right => U16Vec2::new(position.x + 1, position.y),
 
-            Direction::Down => Vector2D {
-                x: position.x,
-                y: position.y + 1,
-            },
+            Direction::Down => U16Vec2::new(position.x, position.y + 1),
 
-            Direction::Left => Vector2D {
-                x: position.x - 1,
-                y: position.y,
-            },
+            Direction::Left => U16Vec2::new(position.x - 1, position.y),
 
-            Direction::Up => Vector2D {
-                x: position.x,
-                y: position.y - 1,
-            },
+            Direction::Up => U16Vec2::new(position.x, position.y - 1),
         }
     }
-
 
     pub fn parse_enemy_path(&self) -> Option<EnemyPath> {
         let mut temp_position = self.find_path_start()?;
         let mut temp_direction = Direction::Right;
 
-        let mut enemy_path = EnemyPath{path_corners: Vec::new(), path_length: 0};
+        let mut enemy_path = EnemyPath { path_corners: Vec::new(), path_length: 0 };
 
         println!("The path starts at: {:?}", temp_position);
         println!("Start to follow path\n");
 
         loop {
-            while (self.is_path_in_direction(temp_position, temp_direction)) {
+            while self.is_path_in_direction(temp_position, temp_direction) {
                 temp_position = self.move_in_direction(temp_position, temp_direction);
                 enemy_path.path_length += 1;
-                println!("Moved to {:?}, {:?}, {:?}", temp_position, temp_direction, enemy_path.path_length);
+                println!(
+                    "Moved to {:?}, {:?}, {:?}",
+                    temp_position, temp_direction, enemy_path.path_length
+                );
             }
             println!("No path in front of: {:?}. Checking for corners.", temp_position);
             enemy_path.path_corners.push(temp_position);
 
             let right_direction = rotate_right(temp_direction);
 
-            if (self.is_path_in_direction(temp_position, right_direction)) {
-                println!("Found path to the RIGHT. Turning from {:?} to {:?}.", temp_direction, right_direction);
+            if self.is_path_in_direction(temp_position, right_direction) {
+                println!(
+                    "Found path to the RIGHT. Turning from {:?} to {:?}.",
+                    temp_direction, right_direction
+                );
 
                 temp_direction = right_direction;
                 continue;
@@ -257,8 +219,11 @@ impl MapTiles {
 
             let left_direction = rotate_left(temp_direction);
 
-            if (self.is_path_in_direction(temp_position, left_direction)) {
-                println!("Found path to the LEFT. Turning from {:?} to {:?}.", temp_direction, left_direction);
+            if self.is_path_in_direction(temp_position, left_direction) {
+                println!(
+                    "Found path to the LEFT. Turning from {:?} to {:?}.",
+                    temp_direction, left_direction
+                );
 
                 temp_direction = left_direction;
                 continue;
@@ -285,10 +250,9 @@ impl MapTiles {
                 -> start again in while with the actual direction
         if nothing except the direction we came from can be found, the end is reached
         */
-
     }
 
-    fn find_path_start(&self) -> Option<Vector2D> {
+    fn find_path_start(&self) -> Option<U16Vec2> {
         for (index, tile) in self.tiles.iter().enumerate() {
             if *tile == TileType::PathStart {
                 return Some(get_map_position_from_index(index, self.map_size));
@@ -297,6 +261,3 @@ impl MapTiles {
         None
     }
 }
-
-
-
