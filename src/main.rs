@@ -4,9 +4,11 @@ pub mod map;
 mod movement;
 pub mod grid;
 
+use crate::bullets::{bullet_collisions, bullet_movement, bullet_spawning};
+use crate::camera::set_camera_position;
 use crate::command_line::{spawn_text_input, submit_text};
-use crate::map::spawn_map;
-use crate::movement::{jitter_rectangle, set_camera_position};
+use crate::map::{TowerRangeMap, spawn_map};
+use avian2d::prelude::{PhysicsPlugins, PhysicsSystems};
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
@@ -24,16 +26,21 @@ fn main() {
             ..default()
         }))
         .add_plugins(TabNavigationPlugin)
-        .insert_resource(Time::<Fixed>::from_hz(144.0))
+        .add_plugins(PhysicsPlugins::default())
+        .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
+        .insert_resource(TowerRangeMap::default())
         .add_systems(Startup, (setup, set_camera_position).chain())
-        .add_systems(FixedUpdate, jitter_rectangle)
+        .add_systems(FixedUpdate, (bullet_spawning, bullet_movement).chain())
+        .add_systems(FixedPostUpdate, bullet_collisions.after(PhysicsSystems::StepSimulation))
         .add_systems(Update, (submit_text, set_camera_position))
         .run();
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup(
+    mut commands: Commands, asset_server: Res<AssetServer>, tower_range_map: ResMut<TowerRangeMap>,
+) {
     commands.spawn((Camera2d, IsDefaultUiCamera));
-    spawn_map(&mut commands, asset_server);
+    spawn_map(&mut commands, asset_server, tower_range_map);
     spawn_grid(commands);
     //spawn_text_input(&mut commands);
 }
