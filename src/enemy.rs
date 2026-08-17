@@ -28,11 +28,12 @@ pub fn get_enemy_pos(progress: f32, path: &EnemyPath) -> Vec2 {
 }
 
 pub fn move_enemies(
-    map_resource: Res<MapResource>, time: Res<Time>, mut enemy: Query<&mut Transform, With<Enemy>>,
+    map_resource: Res<MapResource>, time: Res<Time>, mut enemy: Query<(&mut Transform, &Enemy)>,
 ) {
-    let progress = (time.elapsed().as_millis() as u64 % consts::ENEMY_PATH_DURATION_MS) as f32
+    let base_progress = (time.elapsed().as_millis() as u64 % consts::ENEMY_PATH_DURATION_MS) as f32
         / consts::ENEMY_PATH_DURATION_MS as f32;
-    for mut transform in &mut enemy {
+    for (mut transform, enemy) in &mut enemy {
+        let progress = (base_progress + enemy.path_offset) % 1.0;
         let mut pos = get_enemy_pos(progress, map_resource.0.enemy_path());
         pos.y = (map_resource.0.map_tiles().map_size().y - 1) as f32 - pos.y;
         pos += vec2(0.5, 0.5);
