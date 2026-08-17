@@ -1,9 +1,10 @@
-mod bullets;
-mod camera;
 mod command_line;
 pub mod consts;
 pub mod enemy;
 pub mod map;
+pub mod grid;
+mod bullets;
+mod camera;
 
 use crate::bullets::{bullet_collisions, bullet_movement, bullet_spawning};
 use crate::camera::set_camera_position;
@@ -14,6 +15,7 @@ use avian2d::prelude::{PhysicsPlugins, PhysicsSystems};
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
+use crate::grid::spawn_grid;
 
 fn main() {
     App::new()
@@ -42,5 +44,6 @@ fn setup(
 ) {
     commands.spawn((Camera2d, IsDefaultUiCamera));
     spawn_map(&mut commands, asset_server, tower_range_map);
-    spawn_text_input(&mut commands);
+    spawn_grid(commands);
+    //spawn_text_input(&mut commands);
 }
