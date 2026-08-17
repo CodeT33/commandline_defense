@@ -2,6 +2,7 @@ mod bullets;
 mod camera;
 mod command_line;
 pub mod consts;
+pub mod enemy;
 pub mod map;
 
 use crate::bullets::{bullet_collisions, bullet_movement, bullet_spawning};

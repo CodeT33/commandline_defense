@@ -47,6 +47,16 @@ pub struct EnemyPath {
     path_length: u32,
 }
 
+impl EnemyPath {
+    pub fn get_length(&self) -> u32 {
+        self.path_length
+    }
+
+    pub fn corners(&self) -> &[U16Vec2] {
+        &self.path_corners
+    }
+}
+
 pub struct MapTiles {
     pub map_size: U16Vec2,
     pub tiles: Vec<TileType>,
@@ -188,7 +198,7 @@ impl MapTiles {
         let mut temp_position = self.find_path_start()?;
         let mut temp_direction = Direction::Right;
 
-        let mut enemy_path = EnemyPath { path_corners: Vec::new(), path_length: 0 };
+        let mut enemy_path = EnemyPath { path_corners: vec![temp_position], path_length: 0 };
 
         println!("The path starts at: {:?}", temp_position);
         println!("Start to follow path\n");

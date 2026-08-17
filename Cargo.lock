@@ -5795,6 +5795,7 @@ version = "0.1.0"
 dependencies = [
  "avian2d",
  "bevy",
+ "map_parsing",
  "rand 0.10.2",
 ]
 
