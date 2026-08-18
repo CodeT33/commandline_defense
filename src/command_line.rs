@@ -5,6 +5,7 @@ use bevy::input_focus::{AutoFocus, InputFocus};
 use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle, TextEdit};
 use clap::Parser;
+use std::collections::HashSet;
 
 #[derive(Resource, Default)]
 pub struct DebugVisualizationState {
@@ -185,25 +186,31 @@ impl DebugVisualizationState {
             commands::ShowTowerRangeSetting::All => map.towers.clone(),
         };
 
+        let mut covered = HashSet::new();
+        let mut centers = HashSet::new();
         for tower_pos in tower_positions {
+            centers.insert((tower_pos.x, tower_pos.y));
             let (min, max) = tower_range_map.range_bounds(tower_pos, consts::TOWER_RANGE_TILES);
-
             for y in min.y..=max.y {
                 for x in min.x..=max.x {
-                    let color = if (x, y) == (tower_pos.x, tower_pos.y) {
-                        consts::TOWER_RANGE_TILE_CENTER_COLOR
-                    } else {
-                        consts::TOWER_RANGE_TILE_COLOR
-                    };
-                    let e = commands
-                        .spawn((
-                            Sprite { color, custom_size: Some(Vec2::splat(1.0)), ..default() },
-                            Transform::from_xyz(x as f32 + 0.5, y as f32 + 0.5, -1.0),
-                        ))
-                        .id();
-                    self.spawned.push(e);
+                    covered.insert((x, y));
                 }
             }
+        }
+
+        for (x, y) in covered {
+            let color = if centers.contains(&(x, y)) {
+                consts::TOWER_RANGE_TILE_CENTER_COLOR
+            } else {
+                consts::TOWER_RANGE_TILE_COLOR
+            };
+            let e = commands
+                .spawn((
+                    Sprite { color, custom_size: Some(Vec2::splat(1.0)), ..default() },
+                    Transform::from_xyz(x as f32 + 0.5, y as f32 + 0.5, -1.0),
+                ))
+                .id();
+            self.spawned.push(e);
         }
     }
 
