@@ -8,27 +8,13 @@ use bevy::prelude::*;
 use map_parsing::GameMap;
 
 pub struct Map {
-    enemies: Vec<[u16; 2]>,
+    enemies: usize,
     towers: Vec<[u16; 2]>,
 }
 
 impl Default for Map {
     fn default() -> Self {
-        Self {
-            enemies: vec![
-                [0, 0],
-                [1, 2],
-                [5, 5],
-                [5, 0],
-                [0, 15],
-                [1, 15],
-                [2, 15],
-                [3, 15],
-                [4, 15],
-                [5, 15],
-            ],
-            towers: vec![[5, 3], [31, 15]],
-        }
+        Self { enemies: 40, towers: (5..15).map(|x| [x, 3]).collect() }
     }
 }
 
@@ -70,8 +56,8 @@ pub fn spawn_map(
     commands.insert_resource(MapResource(game_map));
 
     let map = Map::default();
-    let enemy_count = map.enemies.len();
-    for (index, &enemy_pos) in map.enemies.iter().enumerate() {
+    let enemy_count = map.enemies;
+    for index in 0..enemy_count {
         commands.spawn((
             Enemy { path_offset: index as f32 / enemy_count as f32, path_progress: 0.0 },
             Collider::circle(consts::ENEMY_RADIUS),
@@ -80,7 +66,7 @@ pub fn spawn_map(
                 custom_size: consts::ENEMY_SIZE_TILES.into(),
                 ..default()
             },
-            Transform::from_xyz(enemy_pos[0] as f32 + 0.5, enemy_pos[1] as f32 + 0.5, 0.0),
+            Transform::default(),
         ));
     }
 

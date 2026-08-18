@@ -136,7 +136,7 @@ pub fn bullet_collisions(
         } else {
             continue;
         };
-        commands.entity(bullet).despawn();
-        commands.entity(enemy).despawn();
+        commands.entity(bullet).try_despawn();
+        commands.entity(enemy).try_despawn();
     }
 }
