@@ -1,87 +1,49 @@
-use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
-use bevy::input_focus::{AutoFocus, InputFocus};
-use bevy::math::U16Vec2;
-use bevy::prelude::*;
-use bevy::text::{EditableText, TextCursorStyle};
-
 use crate::consts;
 use crate::map::{Map, TowerRangeMap};
+use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
+use bevy::input_focus::{AutoFocus, InputFocus};
+use bevy::prelude::*;
+use bevy::text::{EditableText, TextCursorStyle};
+use clap::Parser;
 
 #[derive(Resource, Default)]
-pub struct HighlightState {
+pub struct DebugVisualizationState {
     spawned: Vec<Entity>,
-    last_command: Option<String>,
-    requested: Option<[u16; 2]>,
-    highlighted: Option<[u16; 2]>,
+    current_state: commands::ShowTowerRangeSetting,
 }
 
-#[derive(Component)]
-struct RangeHighlight;
+mod commands {
+    use clap::{Parser, Subcommand};
 
-fn parse_tower_index(input: &str) -> Option<usize> {
-    if !input.trim_start().starts_with("show") {
-        return None;
-    }
-    input
-        .split_whitespace()
-        .find_map(|w| w.strip_prefix('t')?.parse::<usize>().ok())
-        .map(|n| n.saturating_sub(1))
-}
-
-pub fn parse_commandline_input(
-    inputs: Query<&EditableText>, map: Res<Map>, mut state: ResMut<HighlightState>,
-) {
-    let Some(input) = inputs.iter().next() else { return };
-    let text = input.value().to_string();
-
-    if state.last_command.as_deref() == Some(text.as_str()) {
-        return;
-    }
-    state.last_command = Some(text.clone());
-
-    state.requested = parse_tower_index(&text).and_then(|x| map.towers.get(x)).copied();
-}
-
-pub fn highlight_tower_range(
-    mut commands: Commands, tower_range_map: Res<TowerRangeMap>, mut state: ResMut<HighlightState>,
-) {
-    if state.highlighted == state.requested {
-        return;
+    #[derive(Parser, Debug)]
+    #[command(no_binary_name = true)]
+    pub enum Command {
+        #[clap(subcommand)]
+        #[command(name = "set")]
+        AdjustSettings(Setting),
     }
 
-    for e in state.spawned.drain(..) {
-        commands.entity(e).despawn();
+    #[derive(Subcommand, Debug)]
+    pub enum Setting {
+        #[clap(subcommand)]
+        #[command(name = "show-tower-range")]
+        TowerRange(ShowTowerRangeSetting),
     }
 
-    let Some(tower_pos) = state.requested else {
-        state.highlighted = None;
-        return;
-    };
-    state.highlighted = Some(tower_pos);
-
-    let (min, max) = tower_range_map.range_bounds(tower_pos, consts::TOWER_RANGE_TILES);
-    let center = U16Vec2::from_array(tower_pos);
-
-    for y in min.y..=max.y {
-        for x in min.x..=max.x {
-            let color = if (x, y) == (center.x, center.y) {
-                Color::srgba(1.0, 0.2, 0.2, 0.45)
-            } else {
-                Color::srgba(1.0, 1.0, 0.2, 0.45)
-            };
-            let e = commands
-                .spawn((
-                    Sprite { color, custom_size: Some(Vec2::splat(1.0)), ..default() },
-                    Transform::from_xyz(x as f32 + 0.5, y as f32 + 0.5, -1.0),
-                    RangeHighlight,
-                ))
-                .id();
-            state.spawned.push(e);
-        }
+    #[derive(Subcommand, Debug, Default, PartialEq, Clone, Copy)]
+    pub enum ShowTowerRangeSetting {
+        #[default]
+        None,
+        Idx {
+            tower_idx: usize,
+        },
+        All,
     }
 }
 
-#[allow(unused)]
+#[derive(Message)]
+pub struct CommandSubmitted(pub String);
+
 pub fn spawn_text_input(commands: &mut Commands) {
     commands
         .spawn((
@@ -115,8 +77,9 @@ pub fn spawn_text_input(commands: &mut Commands) {
         });
 }
 
-pub fn submit_text(
+pub fn handle_text_submission(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
+    mut messages: MessageWriter<CommandSubmitted>,
 ) {
     if !keys.just_pressed(KeyCode::Enter) {
         return;
@@ -128,6 +91,85 @@ pub fn submit_text(
         return;
     };
 
-    println!("{}", input.value());
+    messages.write(CommandSubmitted(input.value().to_string()));
     input.clear();
+}
+
+pub fn parse_commandline_input(
+    mut commands: Commands, mut messages: MessageReader<CommandSubmitted>, map: Res<Map>,
+    tower_range_map: Res<TowerRangeMap>, mut state: ResMut<DebugVisualizationState>,
+) {
+    let Some(CommandSubmitted(input)) = messages.read().next() else {
+        return;
+    };
+    let command = match commands::Command::try_parse_from(input.split_whitespace()) {
+        Ok(com) => com,
+        Err(e) => {
+            eprintln!("Error parsing command: {}", e);
+            return;
+        },
+    };
+    println!("{:?}", command);
+
+    match command {
+        commands::Command::AdjustSettings(setting) => {
+            state.apply_setting(setting, &mut commands, &tower_range_map, &map);
+        },
+    }
+}
+
+impl DebugVisualizationState {
+    fn apply_tower_range_setting(
+        &mut self, commands: &mut Commands, tower_range_map: &TowerRangeMap, map: &Map,
+        setting: commands::ShowTowerRangeSetting,
+    ) {
+        if self.current_state == setting {
+            return;
+        }
+        self.current_state = setting;
+
+        for e in self.spawned.drain(..) {
+            commands.entity(e).despawn();
+        }
+
+        let tower_positions = match setting {
+            commands::ShowTowerRangeSetting::None => Vec::new(),
+            commands::ShowTowerRangeSetting::Idx { tower_idx } => {
+                map.towers.get(tower_idx).into_iter().copied().collect()
+            },
+            commands::ShowTowerRangeSetting::All => map.towers.clone(),
+        };
+
+        for tower_pos in tower_positions {
+            let (min, max) = tower_range_map.range_bounds(tower_pos, consts::TOWER_RANGE_TILES);
+
+            for y in min.y..=max.y {
+                for x in min.x..=max.x {
+                    let color = if (x, y) == (tower_pos.x, tower_pos.y) {
+                        consts::TOWER_RANGE_TILE_CENTER_COLOR
+                    } else {
+                        consts::TOWER_RANGE_TILE_COLOR
+                    };
+                    let e = commands
+                        .spawn((
+                            Sprite { color, custom_size: Some(Vec2::splat(1.0)), ..default() },
+                            Transform::from_xyz(x as f32 + 0.5, y as f32 + 0.5, -1.0),
+                        ))
+                        .id();
+                    self.spawned.push(e);
+                }
+            }
+        }
+    }
+
+    fn apply_setting(
+        &mut self, setting: commands::Setting, commands: &mut Commands,
+        tower_range_map: &TowerRangeMap, map: &Map,
+    ) {
+        match setting {
+            commands::Setting::TowerRange(setting) => {
+                self.apply_tower_range_setting(commands, tower_range_map, map, setting)
+            },
+        }
+    }
 }

@@ -10,12 +10,12 @@ use map_parsing::GameMap;
 #[derive(Resource, Clone)]
 pub struct Map {
     pub enemies: usize,
-    pub towers: Vec<[u16; 2]>,
+    pub towers: Vec<U16Vec2>,
 }
 
 impl Default for Map {
     fn default() -> Self {
-        Self { enemies: 40, towers: (5..16).map(|x| [x, 3]).collect() }
+        Self { enemies: 40, towers: (5..16).map(|x| U16Vec2::new(x, 3)).collect() }
     }
 }
 
@@ -82,7 +82,7 @@ pub fn spawn_map(
 
 impl Tower {
     fn spawn(
-        commands: &mut Commands, asset_server: &Res<AssetServer>, tower_pos: [u16; 2],
+        commands: &mut Commands, asset_server: &Res<AssetServer>, tower_pos: U16Vec2,
         data: BulletEmissionData, tower_range_map: &mut ResMut<TowerRangeMap>,
     ) {
         let entity = commands
@@ -95,7 +95,7 @@ impl Tower {
                     ..default()
                 },
                 data,
-                Transform::from_xyz(tower_pos[0] as f32 + 0.5, tower_pos[1] as f32 + 0.5, 0.0),
+                Transform::from_translation((tower_pos.as_vec2() + Vec2::splat(0.5)).extend(0.0)),
             ))
             .id();
         tower_range_map.add_range_rect(tower_pos, consts::TOWER_RANGE_TILES, entity);
@@ -109,15 +109,14 @@ impl TowerRangeMap {
         }
     }
 
-    pub fn range_bounds(&self, pos_tiles: [u16; 2], range_tiles: u16) -> (U16Vec2, U16Vec2) {
-        let center = U16Vec2::from_array(pos_tiles);
+    pub fn range_bounds(&self, center: U16Vec2, range_tiles: u16) -> (U16Vec2, U16Vec2) {
         let range = U16Vec2::from_array([range_tiles; 2]);
         let min = center.saturating_sub(range);
         let max = center.saturating_add(range).min(self.size.saturating_sub(U16Vec2::ONE));
         (min, max)
     }
 
-    pub fn add_range_rect(&mut self, pos_tiles: [u16; 2], range_tiles: u16, entity: Entity) {
+    pub fn add_range_rect(&mut self, pos_tiles: U16Vec2, range_tiles: u16, entity: Entity) {
         let (min, max) = self.range_bounds(pos_tiles, range_tiles);
         for y in min.y..=max.y {
             for x in min.x..=max.x {

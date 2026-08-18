@@ -1,4 +1,4 @@
-use bevy::math::Vec2;
+use bevy::{color::Color, math::Vec2};
 
 pub const WINDOW_TITLE: &str = "2d game";
 pub const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
@@ -11,6 +11,9 @@ pub const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(0.3);
 pub const ENEMY_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 pub const TOWER_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 pub const TOWER_RANGE_TILES: u16 = 5;
+
+pub const TOWER_RANGE_TILE_COLOR: Color = Color::srgba(1.0, 1.0, 0.2, 0.45);
+pub const TOWER_RANGE_TILE_CENTER_COLOR: Color = Color::srgba(1.0, 0.2, 0.2, 0.45);
 
 pub const PROJECTILE_RADIUS: f32 = PROJECTILE_SIZE_TILES.x / 2.0;
 pub const ENEMY_RADIUS: f32 = ENEMY_SIZE_TILES.x / 2.0;
