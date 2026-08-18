@@ -105,23 +105,28 @@ pub fn update_grid_preview(
 }
 
 pub fn update_selected_tile(
-    command_state: Res<CommandState>,
+    command_state: Res<CommandState>, selection_state: Res<SelectionState>,
     mut highlight: Query<(&mut Transform, &mut Visibility), With<TileHighlight>>,
 ) {
     let Ok((mut transform, mut visibility)) = highlight.single_mut() else {
         return;
     };
 
-    match &command_state.preview {
+    let tile = match &command_state.preview {
         PreviewCommand::HighlightTile { tile } => {
+            Some(*tile)
+        },
+        _ => selection_state.selected_tile,
+    };
+
+    match tile {
+        Some(tile) => {
             transform.translation.x = tile.x + 0.5;
             transform.translation.y = (MAP_SIZE_TILES[1] as f32) - tile.y - 0.5;
 
-            *visibility = Visibility::Visible;
+            *visibility = Visibility::Visible
         },
-        _ => {
-            *visibility = Visibility::Hidden;
-        },
+        None => *visibility = Visibility::Hidden
     }
 }
 
