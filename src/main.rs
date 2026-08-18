@@ -8,10 +8,10 @@ pub mod map;
 
 use crate::bullets::{bullet_collisions, bullet_movement, bullet_spawning};
 use crate::camera::set_camera_position;
-use crate::command_line::submit_text;
+use crate::command_line::{handle_command_line_state, spawn_command_line, CommandPreview};
 use crate::enemy::move_enemies;
-use crate::grid::spawn_grid;
-use crate::map::{TowerRangeMap, spawn_map};
+use crate::grid::draw_grid_overlay;
+use crate::map::{spawn_map, TowerRangeMap};
 use avian2d::prelude::{PhysicsPlugins, PhysicsSystems};
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
@@ -30,12 +30,13 @@ fn main() {
         }))
         .add_plugins(TabNavigationPlugin)
         .add_plugins(PhysicsPlugins::default())
+        .init_resource::<CommandPreview>()
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
         .insert_resource(TowerRangeMap::default())
         .add_systems(Startup, (setup, set_camera_position).chain())
         .add_systems(FixedUpdate, (move_enemies, bullet_spawning, bullet_movement).chain())
         .add_systems(FixedPostUpdate, bullet_collisions.after(PhysicsSystems::StepSimulation))
-        .add_systems(Update, (submit_text, set_camera_position))
+        .add_systems(Update, (handle_command_line_state, set_camera_position))
         .run();
 }
 
@@ -44,6 +45,6 @@ fn setup(
 ) {
     commands.spawn((Camera2d, IsDefaultUiCamera));
     spawn_map(&mut commands, asset_server, tower_range_map);
-    spawn_grid(commands);
-    //spawn_text_input(&mut commands);
+    draw_grid_overlay(&mut commands, true);
+    spawn_command_line(&mut commands);
 }
