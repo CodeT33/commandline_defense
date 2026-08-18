@@ -7,14 +7,15 @@ use bevy::math::U16Vec2;
 use bevy::prelude::*;
 use map_parsing::GameMap;
 
+#[derive(Resource, Clone)]
 pub struct Map {
-    enemies: usize,
-    towers: Vec<[u16; 2]>,
+    pub enemies: usize,
+    pub towers: Vec<[u16; 2]>,
 }
 
 impl Default for Map {
     fn default() -> Self {
-        Self { enemies: 40, towers: (5..15).map(|x| [x, 3]).collect() }
+        Self { enemies: 40, towers: (5..16).map(|x| [x, 3]).collect() }
     }
 }
 
@@ -56,6 +57,7 @@ pub fn spawn_map(
     commands.insert_resource(MapResource(game_map));
 
     let map = Map::default();
+    commands.insert_resource(map.clone());
     let enemy_count = map.enemies;
     for index in 0..enemy_count {
         commands.spawn((
@@ -64,6 +66,7 @@ pub fn spawn_map(
             Sprite {
                 image: asset_server.load(consts::paths::sprite::ENEMY),
                 custom_size: consts::ENEMY_SIZE_TILES.into(),
+                image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()
             },
             Transform::default(),
@@ -106,11 +109,16 @@ impl TowerRangeMap {
         }
     }
 
-    pub fn add_range_rect(&mut self, pos_tiles: [u16; 2], range_tiles: u16, entity: Entity) {
+    pub fn range_bounds(&self, pos_tiles: [u16; 2], range_tiles: u16) -> (U16Vec2, U16Vec2) {
         let center = U16Vec2::from_array(pos_tiles);
         let range = U16Vec2::from_array([range_tiles; 2]);
         let min = center.saturating_sub(range);
         let max = center.saturating_add(range).min(self.size.saturating_sub(U16Vec2::ONE));
+        (min, max)
+    }
+
+    pub fn add_range_rect(&mut self, pos_tiles: [u16; 2], range_tiles: u16, entity: Entity) {
+        let (min, max) = self.range_bounds(pos_tiles, range_tiles);
         for y in min.y..=max.y {
             for x in min.x..=max.x {
                 self.towers_in_range[(y * self.size.x + x) as usize].push(entity);
