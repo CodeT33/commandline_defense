@@ -9,8 +9,8 @@ pub mod map;
 use crate::bullets::{bullet_collisions, bullet_movement, rotate_towers, tower_shooting};
 use crate::camera::set_camera_position;
 use crate::command_line::{
-    CommandSubmitted, DebugVisualizationState, handle_text_submission, parse_commandline_input,
-    spawn_text_input,
+    CommandHistory, CommandSubmitted, DebugVisualizationState, handle_text_submission,
+    navigate_command_history, parse_commandline_input, spawn_text_input,
 };
 use crate::enemy::{move_enemies, update_towers_in_range};
 use crate::grid::spawn_grid;
@@ -36,6 +36,7 @@ fn main() {
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
         .insert_resource(TowerRangeMap::default())
         .insert_resource(DebugVisualizationState::default())
+        .insert_resource(CommandHistory::default())
         .add_message::<CommandSubmitted>()
         .add_systems(Startup, (setup, set_camera_position).chain())
         .add_systems(
@@ -46,7 +47,11 @@ fn main() {
         .add_systems(FixedPostUpdate, bullet_collisions.after(PhysicsSystems::StepSimulation))
         .add_systems(
             Update,
-            ((handle_text_submission, parse_commandline_input).chain(), set_camera_position),
+            (
+                (handle_text_submission, parse_commandline_input).chain(),
+                navigate_command_history,
+                set_camera_position,
+            ),
         )
         .run();
 }
