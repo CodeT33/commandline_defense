@@ -46,6 +46,10 @@ impl BulletEmissionData {
             Some(current_time_ms)
         }
     }
+
+    pub fn pause(&mut self) {
+        self.last_spawn_time_ms = None;
+    }
 }
 
 pub fn bullet_movement(mut q: Query<(&mut Transform, &Bullet)>, time: Res<Time>) {
@@ -63,11 +67,35 @@ pub fn bullet_movement(mut q: Query<(&mut Transform, &Bullet)>, time: Res<Time>)
     }
 }
 
-pub fn tower_shooting(
-    mut commands: Commands, mut q: Query<(&Transform, &mut BulletEmissionData), With<Tower>>,
-    time: Res<Time>, asset_server: Res<AssetServer>,
+pub fn rotate_towers(
+    tower_q: Query<(&mut Transform, &Tower, &mut BulletEmissionData)>,
+    enemies_q: Query<(&Transform, &Enemy), Without<Tower>>,
 ) {
-    for (transform, mut data) in &mut q {
+    for (mut t, tower, mut bullet_data) in tower_q {
+        let first_enemy = tower
+            .enemies_in_range
+            .iter()
+            .map(|e| enemies_q.get(*e).unwrap())
+            .max_by(|a, b| a.1.path_offset.total_cmp(&b.1.path_offset));
+        let Some((enemy_transform, _)) = first_enemy else {
+            continue;
+        };
+        let angle = (enemy_transform.translation.truncate() - t.translation.truncate()).to_angle();
+        t.rotation = Quat::from_rotation_z(angle);
+        bullet_data.direction = Rot2::radians(angle);
+    }
+}
+
+pub fn tower_shooting(
+    mut commands: Commands,
+    mut q: Query<(&Transform, &Tower, &mut BulletEmissionData), With<Tower>>, time: Res<Time>,
+    asset_server: Res<AssetServer>,
+) {
+    for (transform, tower, mut data) in &mut q {
+        if tower.enemies_in_range.is_empty() {
+            data.pause();
+            continue;
+        }
         while let Some(shoot_time) = data.shoot_if_ready(time.elapsed().as_millis() as u64) {
             commands.spawn((
                 Bullet {

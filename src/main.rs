@@ -6,7 +6,7 @@ pub mod enemy;
 pub mod grid;
 pub mod map;
 
-use crate::bullets::{bullet_collisions, bullet_movement, tower_shooting};
+use crate::bullets::{bullet_collisions, bullet_movement, rotate_towers, tower_shooting};
 use crate::camera::set_camera_position;
 use crate::command_line::submit_text;
 use crate::enemy::{move_enemies, update_towers_in_range};
@@ -35,7 +35,8 @@ fn main() {
         .add_systems(Startup, (setup, set_camera_position).chain())
         .add_systems(
             FixedUpdate,
-            (move_enemies, update_towers_in_range, tower_shooting, bullet_movement).chain(),
+            (move_enemies, update_towers_in_range, rotate_towers, tower_shooting, bullet_movement)
+                .chain(),
         )
         .add_systems(FixedPostUpdate, bullet_collisions.after(PhysicsSystems::StepSimulation))
         .add_systems(Update, (submit_text, set_camera_position))
