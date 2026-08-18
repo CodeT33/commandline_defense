@@ -2,6 +2,7 @@ use crate::bullets::BulletEmissionData;
 use crate::consts;
 use avian2d::prelude::*;
 use bevy::asset::AssetServer;
+use bevy::ecs::entity::EntityHashSet;
 use bevy::math::U16Vec2;
 use bevy::prelude::*;
 use map_parsing::GameMap;
@@ -36,19 +37,21 @@ pub struct Enemy {
     pub path_offset: f32,
 }
 
-#[derive(Component)]
-pub struct Tower;
+#[derive(Component, Default)]
+pub struct Tower {
+    pub enemies_in_range: EntityHashSet,
+}
 
 #[derive(Resource)]
 pub struct TowerRangeMap {
-    pub size: [u16; 2],
+    pub size: U16Vec2,
     towers_in_range: Vec<Vec<Entity>>,
 }
 
 impl Default for TowerRangeMap {
     fn default() -> Self {
-        let size = consts::MAP_SIZE_TILES;
-        Self { size, towers_in_range: vec![Vec::new(); (size[0] * size[1]) as usize] }
+        let size = U16Vec2::from_array(consts::MAP_SIZE_TILES);
+        Self { size, towers_in_range: vec![Vec::new(); (size.x * size.y) as usize] }
     }
 }
 
@@ -94,7 +97,7 @@ impl Tower {
     ) {
         let entity = commands
             .spawn((
-                Tower,
+                Tower::default(),
                 Sprite {
                     image: asset_server.load(consts::paths::sprite::TURRET),
                     custom_size: consts::TOWER_SIZE_TILES.into(),
@@ -120,11 +123,16 @@ impl TowerRangeMap {
         let center = U16Vec2::from_array(pos_tiles);
         let range = U16Vec2::from_array([range_tiles; 2]);
         let min = center.saturating_sub(range);
-        let max = center.saturating_add(range).min(self.size.map(|s| s.saturating_sub(1)).into());
+        let max = center.saturating_add(range).min(self.size.saturating_sub(U16Vec2::ONE));
         for y in min.y..=max.y {
             for x in min.x..=max.x {
-                self.towers_in_range[(y * self.size[0] + x) as usize].push(entity);
+                self.towers_in_range[(y * self.size.x + x) as usize].push(entity);
             }
         }
+    }
+
+    pub fn towers_in_range_at(&self, tile: U16Vec2) -> &[Entity] {
+        let index = tile.y as usize * self.size.x as usize + tile.x as usize;
+        &self.towers_in_range[index]
     }
 }
