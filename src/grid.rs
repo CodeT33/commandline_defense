@@ -2,7 +2,7 @@ use crate::consts::{MAP_SIZE_TILES, TILE_SIZE};
 use bevy::color::Color;
 use bevy::prelude::{Commands, Sprite, Transform, Vec2, default};
 
-pub fn spawn_grid(mut commands: Commands) {
+pub fn spawn_grid(commands: &mut Commands) {
     let width = MAP_SIZE_TILES[0] * TILE_SIZE;
     let height = MAP_SIZE_TILES[1] * TILE_SIZE;
 

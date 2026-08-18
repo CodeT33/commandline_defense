@@ -8,7 +8,7 @@ pub mod map;
 
 use crate::bullets::{bullet_collisions, bullet_movement, rotate_towers, tower_shooting};
 use crate::camera::set_camera_position;
-use crate::command_line::submit_text;
+use crate::command_line::{spawn_text_input, submit_text};
 use crate::enemy::{move_enemies, update_towers_in_range};
 use crate::grid::spawn_grid;
 use crate::map::{TowerRangeMap, spawn_map};
@@ -48,6 +48,6 @@ fn setup(
 ) {
     commands.spawn((Camera2d, IsDefaultUiCamera));
     spawn_map(&mut commands, asset_server, tower_range_map);
-    spawn_grid(commands);
-    //spawn_text_input(&mut commands);
+    spawn_grid(&mut commands);
+    spawn_text_input(&mut commands);
 }

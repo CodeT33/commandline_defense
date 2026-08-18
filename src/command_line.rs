@@ -5,28 +5,36 @@ use bevy::text::{EditableText, TextCursorStyle};
 
 #[allow(unused)]
 pub fn spawn_text_input(commands: &mut Commands) {
-    commands.spawn((
-        Text::new("click the box, type, Enter to print"),
-        TextFont { font_size: FontSize::Px(16.0), ..default() },
-        Node { ..default() },
-    ));
-
-    commands.spawn((
-        Node {
-            padding: px(8).all(),
-            border: px(2).all(),
-            align_items: AlignItems::Center,
-            ..default()
-        },
-        EditableText { visible_width: Some(16.0), allow_newlines: false, ..default() },
-        TextFont { font_size: FontSize::Px(24.0), ..default() },
-        TextColor(Color::WHITE),
-        TextCursorStyle::default(),
-        BackgroundColor::default(),
-        TabGroup::new(0),
-        TabIndex(0),
-        AutoFocus,
-    ));
+    commands
+        .spawn((
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                justify_content: JustifyContent::Start,
+                align_items: AlignItems::End,
+                padding: px(8).all(),
+                ..default()
+            },
+            TabGroup::new(0),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Node {
+                    width: Val::Percent(100.0),
+                    padding: px(8).all(),
+                    border: px(2).all(),
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BackgroundColor(Color::srgba(0.1, 0.1, 0.12, 0.9)),
+                EditableText { visible_width: Some(16.0), allow_newlines: false, ..default() },
+                TextFont { font_size: FontSize::Px(20.0), ..default() },
+                TextColor(Color::WHITE),
+                TextCursorStyle::default(),
+                TabIndex(0),
+                AutoFocus,
+            ));
+        });
 }
 
 pub fn submit_text(
