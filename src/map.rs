@@ -35,6 +35,7 @@ impl Default for Map {
 #[derive(Component)]
 pub struct Enemy {
     pub path_offset: f32,
+    pub path_progress: f32,
 }
 
 #[derive(Component, Default)]
@@ -72,7 +73,7 @@ pub fn spawn_map(
     let enemy_count = map.enemies.len();
     for (index, &enemy_pos) in map.enemies.iter().enumerate() {
         commands.spawn((
-            Enemy { path_offset: index as f32 / enemy_count as f32 },
+            Enemy { path_offset: index as f32 / enemy_count as f32, path_progress: 0.0 },
             Collider::circle(consts::ENEMY_RADIUS),
             Sprite {
                 image: asset_server.load(consts::paths::sprite::ENEMY),

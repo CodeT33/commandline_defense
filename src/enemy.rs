@@ -36,14 +36,14 @@ pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
 }
 
 pub fn move_enemies(
-    map_resource: Res<MapResource>, time: Res<Time>, mut enemy: Query<(&mut Transform, &Enemy)>,
+    map_resource: Res<MapResource>, time: Res<Time>, mut enemy: Query<(&mut Transform, &mut Enemy)>,
 ) {
     let base_progress = (time.elapsed().as_millis() as u64 % consts::ENEMY_PATH_DURATION_MS) as f32
         / consts::ENEMY_PATH_DURATION_MS as f32;
-    for (mut transform, enemy) in &mut enemy {
+    for (mut transform, mut enemy) in &mut enemy {
         let progress = (base_progress + enemy.path_offset) % 1.0;
-        *transform =
-            get_enemy_transform(progress, map_resource.0.enemy_path()).with_scale(transform.scale);
+        enemy.path_progress = progress;
+        *transform = get_enemy_transform(progress, map_resource.0.enemy_path());
     }
 }
 
