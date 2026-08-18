@@ -6,7 +6,10 @@ use bevy::prelude::*;
 use std::f32::consts::PI;
 
 #[derive(Component)]
-pub struct Bullet;
+pub struct Bullet {
+    pub velocity: Vec2,
+    pub spawn_time: u64,
+}
 
 #[derive(Component)]
 pub struct BulletEmissionData {
@@ -45,19 +48,13 @@ impl BulletEmissionData {
     }
 }
 
-#[derive(Component)]
-pub struct Velocity(pub Vec2);
-
-#[derive(Component)]
-pub struct SpawnTime(pub u64);
-
-pub fn bullet_movement(mut q: Query<(&mut Transform, &Velocity, &SpawnTime)>, time: Res<Time>) {
-    for (mut tf, velocity, spawn_time) in &mut q {
-        let velocity = velocity.0 * 1.0 / consts::PHYSICS_FRAME_RATE as f32;
+pub fn bullet_movement(mut q: Query<(&mut Transform, &Bullet)>, time: Res<Time>) {
+    for (mut tf, bullet) in &mut q {
+        let velocity = bullet.velocity * 1.0 / consts::PHYSICS_FRAME_RATE as f32;
         tf.translation.x += velocity.x;
         tf.translation.y += velocity.y;
         tf.rotation = Quat::from_rotation_z(
-            ((time.elapsed().as_millis() as u64 - spawn_time.0)
+            ((time.elapsed().as_millis() as u64 - bullet.spawn_time)
                 % consts::BULLET_ROTATION_DURATION_MS) as f32
                 / consts::BULLET_ROTATION_DURATION_MS as f32
                 * PI
@@ -66,26 +63,27 @@ pub fn bullet_movement(mut q: Query<(&mut Transform, &Velocity, &SpawnTime)>, ti
     }
 }
 
-pub fn bullet_spawning(
+pub fn tower_shooting(
     mut commands: Commands, mut q: Query<(&Transform, &mut BulletEmissionData), With<Tower>>,
     time: Res<Time>, asset_server: Res<AssetServer>,
 ) {
     for (transform, mut data) in &mut q {
         while let Some(shoot_time) = data.shoot_if_ready(time.elapsed().as_millis() as u64) {
             commands.spawn((
-                Bullet,
+                Bullet {
+                    velocity: data.direction * Vec2::X * data.bullet_speed,
+                    spawn_time: shoot_time,
+                },
                 RigidBody::Kinematic,
                 Collider::circle(consts::PROJECTILE_RADIUS),
                 Sensor,
                 CollisionEventsEnabled,
-                Velocity(data.direction * Vec2::X * data.bullet_speed),
                 Transform::from_xyz(transform.translation.x, transform.translation.y, 0.0),
                 Sprite {
                     image: asset_server.load(consts::paths::sprite::APPLE),
                     custom_size: consts::PROJECTILE_SIZE_TILES.into(),
                     ..default()
                 },
-                SpawnTime(shoot_time),
             ));
         }
     }
