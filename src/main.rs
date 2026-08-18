@@ -8,10 +8,10 @@ pub mod map;
 
 use crate::bullets::{bullet_collisions, bullet_movement, bullet_spawning};
 use crate::camera::set_camera_position;
-use crate::command_line::{handle_command_line_state, spawn_command_line, CommandPreview};
+use crate::command_line::{CommandState, handle_command_line_state, spawn_command_line, CommandEvent, handle_command_events};
 use crate::enemy::move_enemies;
-use crate::grid::draw_grid_overlay;
-use crate::map::{spawn_map, TowerRangeMap};
+use crate::grid::{spawn_grid, update_grid_preview, update_selected_tile, SelectionState};
+use crate::map::{TowerRangeMap, spawn_map};
 use avian2d::prelude::{PhysicsPlugins, PhysicsSystems};
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
@@ -19,6 +19,7 @@ use bevy::window::PresentMode;
 
 fn main() {
     App::new()
+        //plugins
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: consts::WINDOW_TITLE.to_owned(),
@@ -30,13 +31,18 @@ fn main() {
         }))
         .add_plugins(TabNavigationPlugin)
         .add_plugins(PhysicsPlugins::default())
-        .init_resource::<CommandPreview>()
+        //resources
+        .init_resource::<CommandState>()
+        .init_resource::<SelectionState>()
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
         .insert_resource(TowerRangeMap::default())
+        //messages
+        .add_message::<CommandEvent>()
+        //systems
         .add_systems(Startup, (setup, set_camera_position).chain())
         .add_systems(FixedUpdate, (move_enemies, bullet_spawning, bullet_movement).chain())
         .add_systems(FixedPostUpdate, bullet_collisions.after(PhysicsSystems::StepSimulation))
-        .add_systems(Update, (handle_command_line_state, set_camera_position))
+        .add_systems(Update, (update_grid_preview, update_selected_tile, handle_command_events, handle_command_line_state, set_camera_position))
         .run();
 }
 
@@ -45,6 +51,6 @@ fn setup(
 ) {
     commands.spawn((Camera2d, IsDefaultUiCamera));
     spawn_map(&mut commands, asset_server, tower_range_map);
-    draw_grid_overlay(&mut commands, true);
+    spawn_grid(&mut commands);
     spawn_command_line(&mut commands);
 }

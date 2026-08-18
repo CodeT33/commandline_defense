@@ -1,7 +1,11 @@
+use crate::command_line::{CommandState, PreviewCommand};
 use crate::consts;
 use crate::consts::ui::grid::{GRID_LINE_THICKNESS, GRID_POSITION_COLOR};
 use crate::consts::{MAP_SIZE_TILES, TILE_SIZE};
-use bevy::prelude::{Commands, Sprite, Text2d, Transform, Vec2, Vec3, default};
+use bevy::prelude::{
+    Commands, Component, Query, Res, Resource, Sprite, Text2d, Transform, Vec2, Vec3, Visibility,
+    With, default,
+};
 use bevy::text::*;
 
 pub fn get_letter_from_number(number: u16) -> char {
@@ -69,10 +73,62 @@ pub fn get_number_from_letter(letter: char) -> Option<u16> {
     }
 }
 
-fn draw_grid_positions(commands: &mut Commands) {
+#[derive(Resource, Default)]
+pub struct SelectionState {
+    pub selected_tile: Option<Vec2>,
+}
+
+#[derive(Component)]
+pub struct GridOverlay;
+
+#[derive(Component)]
+pub struct GridLine;
+
+#[derive(Component)]
+pub struct GridPositionLabel;
+
+#[derive(Component)]
+pub struct TileHighlight;
+
+pub fn update_grid_preview(
+    command_state: Res<CommandState>,
+    mut grid_overlay: Query<&mut Visibility, With<GridOverlay>>,
+) {
+    let visible = matches!(
+        command_state.preview,
+        PreviewCommand::ShowGrid
+    );
+
+    for mut visibility in &mut grid_overlay {
+        *visibility = if visible { Visibility::Visible } else { Visibility::Hidden };
+    }
+}
+
+pub fn update_selected_tile(
+    command_state: Res<CommandState>,
+    mut highlight: Query<(&mut Transform, &mut Visibility), With<TileHighlight>>,
+) {
+    let Ok((mut transform, mut visibility)) = highlight.single_mut() else {
+        return;
+    };
+
+    match &command_state.preview {
+        PreviewCommand::HighlightTile { tile } => {
+            transform.translation.x = tile.x + 0.5;
+            transform.translation.y = (MAP_SIZE_TILES[1] as f32) - tile.y - 0.5;
+
+            *visibility = Visibility::Visible;
+        },
+        _ => {
+            *visibility = Visibility::Hidden;
+        },
+    }
+}
+
+fn spawn_grid_positions(commands: &mut Commands) {
     for x in 0..MAP_SIZE_TILES[0] {
         for y in 0..MAP_SIZE_TILES[1] {
-            let position = format!("{};{}", x, get_letter_from_number(y));
+            let position = format!("{}{}", x, get_letter_from_number(y));
 
             commands.spawn((
                 Text2d::new(position),
@@ -83,12 +139,14 @@ fn draw_grid_positions(commands: &mut Commands) {
                 TextColor(GRID_POSITION_COLOR),
                 Transform::from_xyz(x as f32 + 0.5, (MAP_SIZE_TILES[1] - y) as f32 - 0.5, 11.0)
                     .with_scale(Vec3::splat(0.025)),
+                GridPositionLabel,
+                GridOverlay,
             ));
         }
     }
 }
 
-pub fn draw_grid_overlay(commands: &mut Commands, show_grid_positions: bool) {
+pub fn spawn_grid(commands: &mut Commands) {
     let width = MAP_SIZE_TILES[0] * TILE_SIZE;
     let height = MAP_SIZE_TILES[1] * TILE_SIZE;
 
@@ -101,6 +159,8 @@ pub fn draw_grid_overlay(commands: &mut Commands, show_grid_positions: bool) {
                 ..default()
             },
             Transform::from_xyz(x as f32, 0.0, 10.0),
+            GridLine,
+            GridOverlay,
         ));
     }
 
@@ -113,10 +173,23 @@ pub fn draw_grid_overlay(commands: &mut Commands, show_grid_positions: bool) {
                 ..default()
             },
             Transform::from_xyz(0.0, y as f32, 10.0),
+            GridLine,
+            GridOverlay,
         ));
     }
 
-    if show_grid_positions {
-        draw_grid_positions(commands);
-    }
+    spawn_grid_positions(commands);
+    spawn_tile_highlight(commands);
+}
+
+fn spawn_tile_highlight(commands: &mut Commands) {
+    commands.spawn((
+        Sprite {
+            color: consts::ui::grid::TILE_HIGHLIGHT_COLOR,
+            custom_size: Some(Vec2::new(TILE_SIZE as f32, TILE_SIZE as f32)),
+            ..default()
+        },
+        Transform::from_xyz(8.0, 8.0, 20.0).with_scale(Vec3::splat(0.08)),
+        TileHighlight,
+    ));
 }

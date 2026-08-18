@@ -1,19 +1,20 @@
-use crate::grid::get_number_from_letter;
-use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
+use crate::grid::{get_number_from_letter, SelectionState};
 use bevy::input_focus::{AutoFocus, InputFocus};
 use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle};
 
 #[derive(Resource, Default)]
-pub struct CommandPreview {
-    pub command: PreviewCommand,
-}
-
-#[derive(Resource, Default)]
 pub struct CommandState {
     pub preview: PreviewCommand,
     pub last_input: String,
-    pub selected_tile: Option<Vec2>,
+}
+
+#[derive(Message, Debug)]
+pub enum CommandEvent {
+    Select {tile: Vec2},
+    Deselect,
+    Path,
+    ExitGame,
 }
 
 #[derive(Default)]
@@ -25,6 +26,13 @@ pub enum PreviewCommand {
         tile: Vec2,
     },
     HighlightPath,
+}
+
+pub enum Command {
+    Select(Vec2),
+    Deselect,
+    Path,
+    ExitGame
 }
 
 pub fn spawn_command_line(commands: &mut Commands) {
@@ -46,7 +54,6 @@ pub fn spawn_command_line(commands: &mut Commands) {
         BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.5)),
         EditableText {
             cursor_width: 0.25,
-            //visible_width: Some(16.0),
             allow_newlines: false,
             ..default()
         },
@@ -56,7 +63,7 @@ pub fn spawn_command_line(commands: &mut Commands) {
 }
 
 pub fn handle_command_line_state(
-    focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>, mut preview: ResMut<CommandPreview>,
+    focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>, mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
 ) {
     let Some(entity) = focus.get() else {
         return;
@@ -65,13 +72,123 @@ pub fn handle_command_line_state(
         return;
     };
 
-    let command_text = input.value().to_string();
+    let current_input = input.value().to_string();
 
-    preview.command = parse_command_preview(&command_text);
+    if current_input != &*command_state.last_input {
+        command_state.last_input = current_input.to_string();
+        command_state.preview = parse_command_preview(&current_input);
+        println!("Preview changed: {:?}", current_input)
+    }
 
     if keys.just_pressed(KeyCode::Enter) {
-        parse_command_submissions(&command_text);
+        if let Some(command) = parse_command(&*current_input) {
+            send_command_event(
+                command,
+                &mut command_events,
+            );
+        }
+
         input.clear();
+
+        command_state.last_input.clear();
+        command_state.preview = PreviewCommand::None;
+    }
+}
+
+fn send_command_event(command: Command, events: &mut MessageWriter<CommandEvent>,) {
+    match command {
+        Command::Select {..} => {
+
+        },
+        Command::Deselect => {
+            events.write(CommandEvent::Deselect);
+        },
+        Command::Path => {
+            events.write(CommandEvent::Path);
+        }
+        Command::ExitGame => {
+            events.write(CommandEvent::ExitGame);
+        }
+    }
+}
+
+fn send_select_event(tile: Vec2, events: &mut MessageWriter<CommandEvent>,) {
+    events.write(CommandEvent::Select {tile});
+}
+
+pub fn handle_command_events(mut events: MessageReader<CommandEvent>, mut selection_state: ResMut<SelectionState>) {
+    for event in events.read() {
+        match event {
+            CommandEvent::Select {tile} => {
+                selection_state.selected_tile = Some(*tile);
+
+                println!("Selected tile: {:?}", tile);
+            },
+            CommandEvent::Deselect => {
+                selection_state.selected_tile = None;
+
+                println!("Deselected tiles");
+            }
+            CommandEvent::Path => {
+                println!("Show path");
+            }
+            CommandEvent::ExitGame => {
+                println!("ExitGame");
+            }
+        }
+    }
+}
+
+fn parse_command_preview(input: &str,) -> PreviewCommand {
+    let tokens: Vec<&str> = input.split_whitespace().collect();
+
+    match tokens.as_slice() {
+        ["select"] => {
+            PreviewCommand::ShowGrid
+        }
+        ["select", position] => {
+            match parse_tile_position(position) {
+                Some(tile) => {
+                    PreviewCommand::HighlightTile {
+                        tile,
+                    }
+                }
+                None => {
+                    PreviewCommand::ShowGrid
+                }
+            }
+        }
+        _ => {
+            PreviewCommand::None
+        }
+    }
+}
+
+fn parse_command(input: &str) -> Option<Command> {
+    let tokens: Vec<&str> = input.split_whitespace().collect();
+
+    match tokens.as_slice() {
+        ["select", position] => {
+            let tile = parse_tile_position(position)?;
+            println!("Selected tile: {:?}", tile);
+            Some(Command::Select(tile))
+        }
+        ["deselect"] => {
+            println!("Deselected");
+            Some(Command::Deselect)
+        }
+        ["path"] => {
+            println!("Show path");
+            Some(Command::Path)
+        }
+        ["exit", "game"] => {
+            println!("Exit game");
+            Some(Command::ExitGame)
+        }
+        _ => {
+            println!("Unknown command: {:?}", input);
+            None
+        }
     }
 }
 
@@ -89,29 +206,6 @@ exit game (exit game)
 
  */
 
-fn parse_command_preview(input: &str) -> PreviewCommand {
-    let tokens: Vec<&str> = input.split_whitespace().collect();
-
-    match tokens.as_slice() {
-        ["select"] => {
-            println!("Showing grid");
-            PreviewCommand::ShowGrid
-        },
-        ["select", position] => {
-            println!("Highlighting tile: {:?}", position);
-            match parse_tile_position(position) {
-                Some(tile) => PreviewCommand::HighlightTile { tile },
-                None => PreviewCommand::ShowGrid,
-            }
-        },
-        ["path"] => {
-            println!("Highlighting path");
-            PreviewCommand::HighlightPath
-        },
-        _ => PreviewCommand::None,
-    }
-}
-
 fn parse_tile_position(position: &str) -> Option<Vec2> {
     let position = position.to_ascii_uppercase();
 
@@ -122,6 +216,11 @@ fn parse_tile_position(position: &str) -> Option<Vec2> {
         if character.is_ascii_digit() {
             number.push(character);
         } else if character.is_ascii_alphabetic() {
+            //Only one letter
+            if letter.is_some() {
+                return None;
+            }
+
             letter = Some(character);
         } else {
             return None;
@@ -134,26 +233,4 @@ fn parse_tile_position(position: &str) -> Option<Vec2> {
     Some(Vec2::new(x as f32, y as f32))
 }
 
-fn parse_command_submissions(command_submission: &str) {
-    let tokens: Vec<&str> = command_submission.split_whitespace().collect();
 
-    match tokens.as_slice() {
-        ["select", position] => {
-            if let Some(tile) = parse_tile_position(position) {
-                println!("Selected tile: {:?}", tile);
-            }
-        },
-        ["deselect"] => {
-            println!("Deselected");
-        },
-        ["path"] => {
-            println!("Show path");
-        },
-        ["exit", "game"] => {
-            println!("Exit game");
-        },
-        _ => {
-            println!("Unknown command: {:?}", command_submission);
-        },
-    }
-}

@@ -27,6 +27,7 @@ pub mod ui {
         pub const GRID_LINE_COLOR: Color = Color::srgba(0.5, 1.0, 0.5, 0.5);
         pub const GRID_POSITION_FONT_SIZE: f32 = 10.0;
         pub const GRID_POSITION_COLOR: Color = Color::srgba(0.5, 1.0, 0.5, 0.5);
+        pub const TILE_HIGHLIGHT_COLOR: Color = Color::srgba(0.5, 1.0, 0.5, 0.3);
     }
 }
 
