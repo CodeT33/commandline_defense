@@ -1,4 +1,4 @@
-use bevy_math::{I16Vec2, U16Vec2};
+use bevy_math::{I16Vec2, U16Vec2, Vec2};
 use image::RgbImage;
 
 const PATH_START: u32 = 0xff00ff;
@@ -7,7 +7,9 @@ const RESTRICTED: u32 = 0xff0000;
 const PLACEABLE: u32 = 0x00ff00;
 const WATER: u32 = 0x0000ff;
 
-#[derive(PartialEq)]
+pub const MAP_SIZE_TILES: [u16; 2] = [32, 16];
+
+#[derive(PartialEq, Clone, Copy)]
 pub enum TileType {
     PathStart,
     Path,
@@ -256,5 +258,25 @@ impl MapTiles {
             }
         }
         None
+    }
+}
+
+impl GameMap {
+    /// Tests if a certain Vec2-position has a specific TileType
+    pub fn test_for_tile_type(&self, tile: Vec2, tile_type: TileType) -> bool {
+        let index = get_index_from_map_position(
+            U16Vec2 { x: tile.x as u16, y: tile.y as u16 },
+            U16Vec2 { x: MAP_SIZE_TILES[0], y: MAP_SIZE_TILES[1] },
+        );
+        self.map_tiles.tiles[index] == tile_type
+    }
+
+    /// Returns the TileType of a Vec2-position on a GameMap
+    pub fn return_tile_type(&self, tile: Vec2) -> TileType {
+        let index = get_index_from_map_position(
+            U16Vec2 { x: tile.x as u16, y: tile.y as u16 },
+            U16Vec2 { x: MAP_SIZE_TILES[0], y: MAP_SIZE_TILES[1] },
+        );
+        self.map_tiles.tiles[index]
     }
 }
