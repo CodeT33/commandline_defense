@@ -1,17 +1,22 @@
 mod bullets;
 mod camera;
-mod command_line;
 pub mod consts;
 pub mod enemy;
-pub mod grid;
+pub mod game_cli;
 pub mod map;
+mod ui_overlay;
 
 use crate::bullets::{bullet_collisions, bullet_movement, bullet_spawning};
 use crate::camera::set_camera_position;
-use crate::command_line::{CommandState, handle_command_line_state, spawn_command_line, CommandEvent, handle_command_events, navigate_command_history, CommandHistory};
 use crate::enemy::move_enemies;
-use crate::grid::{spawn_grid, update_grid_preview, update_selected_tile, SelectionState};
+use crate::game_cli::command_event_handling::handle_command_events;
+use crate::game_cli::command_line::{CommandHistory, navigate_command_history, spawn_command_line};
+use crate::game_cli::command_line_state_management::{
+    CommandEvent, CommandState, handle_command_line_state,
+};
 use crate::map::{TowerRangeMap, spawn_map};
+use crate::ui_overlay::grid::{spawn_grid, update_grid_preview};
+use crate::ui_overlay::selection::{SelectionState, update_selected_tile};
 use avian2d::prelude::{PhysicsPlugins, PhysicsSystems};
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
@@ -43,7 +48,17 @@ fn main() {
         .add_systems(Startup, (setup, set_camera_position).chain())
         .add_systems(FixedUpdate, (move_enemies, bullet_spawning, bullet_movement).chain())
         .add_systems(FixedPostUpdate, bullet_collisions.after(PhysicsSystems::StepSimulation))
-        .add_systems(Update, (update_grid_preview, update_selected_tile, handle_command_events, handle_command_line_state, set_camera_position, navigate_command_history))
+        .add_systems(
+            Update,
+            (
+                update_grid_preview,
+                update_selected_tile,
+                handle_command_events,
+                handle_command_line_state,
+                set_camera_position,
+                navigate_command_history,
+            ),
+        )
         .run();
 }
 
