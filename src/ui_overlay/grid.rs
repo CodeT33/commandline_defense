@@ -106,32 +106,32 @@ pub fn spawn_grid_positions(commands: &mut Commands) {
 }
 
 pub fn spawn_grid(commands: &mut Commands) {
-    let width = MAP_SIZE_TILES[0] * TILE_SIZE;
-    let height = MAP_SIZE_TILES[1] * TILE_SIZE;
+    let width = MAP_SIZE_TILES[0];
+    let height = MAP_SIZE_TILES[1];
 
     // Vertical lines
-    for x in 0..=MAP_SIZE_TILES[0] {
+    for x in 0..=width {
         commands.spawn((
             Sprite {
                 color: consts::ui::grid::GRID_LINE_COLOR,
                 custom_size: Some(Vec2::new(GRID_LINE_THICKNESS, height as f32)),
                 ..default()
             },
-            Transform::from_xyz(x as f32, 0.0, 10.0),
+            Transform::from_xyz(x as f32, (height / 2) as f32, 10.0),
             GridLine,
             GridOverlay,
         ));
     }
 
     // Horizontal lines
-    for y in 0..=MAP_SIZE_TILES[1] {
+    for y in 0..=height {
         commands.spawn((
             Sprite {
                 color: consts::ui::grid::GRID_LINE_COLOR,
                 custom_size: Some(Vec2::new(width as f32, GRID_LINE_THICKNESS)),
                 ..default()
             },
-            Transform::from_xyz(0.0, y as f32, 10.0),
+            Transform::from_xyz((width / 2) as f32, y as f32, 10.0),
             GridLine,
             GridOverlay,
         ));
