@@ -83,17 +83,8 @@ pub struct GridLine;
 #[derive(Component)]
 pub struct GridPositionLabel;
 
-pub fn update_grid_preview(
-    command_state: Res<CommandState>, mut grid_overlay: Query<&mut Visibility, With<GridOverlay>>,
-) {
-    let visible = matches!(command_state.preview, PreviewCommand::ShowGrid);
 
-    for mut visibility in &mut grid_overlay {
-        *visibility = if visible { Visibility::Visible } else { Visibility::Hidden };
-    }
-}
-
-fn spawn_grid_positions(commands: &mut Commands) {
+pub fn spawn_grid_positions(commands: &mut Commands) {
     for x in 0..MAP_SIZE_TILES[0] {
         for y in 0..MAP_SIZE_TILES[1] {
             let position = format!("{}{}", get_letter_from_number(y), x);
@@ -145,7 +136,15 @@ pub fn spawn_grid(commands: &mut Commands) {
             GridOverlay,
         ));
     }
+}
 
-    spawn_grid_positions(commands);
-    spawn_tile_highlight(commands);
+
+pub fn update_grid_preview(
+    command_state: Res<CommandState>, mut grid_overlay: Query<&mut Visibility, With<GridOverlay>>,
+) {
+    let visible = matches!(command_state.preview, PreviewCommand::ShowGrid);
+
+    for mut visibility in &mut grid_overlay {
+        *visibility = if visible { Visibility::Visible } else { Visibility::Hidden };
+    }
 }

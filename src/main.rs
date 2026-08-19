@@ -14,9 +14,11 @@ use crate::game_cli::command_line::{CommandHistory, navigate_command_history, sp
 use crate::game_cli::command_line_state_management::{
     CommandEvent, CommandState, handle_command_line_state,
 };
+use crate::game_cli::spawn_game_cli;
 use crate::map::{TowerRangeMap, spawn_map};
 use crate::ui_overlay::grid::{spawn_grid, update_grid_preview};
 use crate::ui_overlay::selection::{SelectionState, update_selected_tile};
+use crate::ui_overlay::spawn_ui_overlay;
 use avian2d::prelude::{PhysicsPlugins, PhysicsSystems};
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
@@ -59,8 +61,8 @@ fn main() {
                 update_selected_tile,
                 handle_command_events,
                 handle_command_line_state,
-                set_camera_position,
                 navigate_command_history,
+                set_camera_position,
             ),
         )
         .run();
@@ -69,8 +71,8 @@ fn main() {
 fn setup(
     mut commands: Commands, asset_server: Res<AssetServer>, tower_range_map: ResMut<TowerRangeMap>,
 ) {
-    commands.spawn((Camera2d, IsDefaultUiCamera));
     spawn_map(&mut commands, asset_server, tower_range_map);
-    spawn_grid(&mut commands);
-    spawn_command_line(&mut commands);
+    spawn_ui_overlay(&mut commands);
+    spawn_game_cli(&mut commands);
+    commands.spawn((Camera2d, IsDefaultUiCamera));
 }
