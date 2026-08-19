@@ -166,7 +166,6 @@ fn parse_command(input: &str) -> Option<Command> {
             Some(Command::Path)
         },
         ["exit", "game"] => {
-            println!("Ich sollte nicht hier sein");
             Some(Command::ExitGame)
         },
         _ => {
