@@ -1,7 +1,13 @@
 use crate::grid::{SelectionState, get_number_from_letter};
 use bevy::input_focus::{AutoFocus, InputFocus};
 use bevy::prelude::*;
-use bevy::text::{EditableText, TextCursorStyle};
+use bevy::text::{EditableText, TextCursorStyle, TextEdit};
+
+#[derive(Resource, Default)]
+pub struct CommandHistory {
+    entries: Vec<String>,
+    idx: usize,
+}
 
 #[derive(Resource, Default)]
 pub struct CommandState {
@@ -60,7 +66,7 @@ pub fn spawn_command_line(commands: &mut Commands) {
 
 pub fn handle_command_line_state(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
-    mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
+    mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>, mut history: ResMut<CommandHistory>,
 ) {
     let Some(entity) = focus.get() else {
         return;
@@ -85,6 +91,8 @@ pub fn handle_command_line_state(
             );
         }
 
+        history.entries.push(current_input.clone());
+        history.idx = history.entries.len();
         input.clear();
 
         command_state.last_input.clear();
@@ -109,8 +117,36 @@ fn send_command_event(command: Command, events: &mut MessageWriter<CommandEvent>
     }
 }
 
+fn set_input_text(input: &mut EditableText, text: &str) {
+    input.editor_mut().set_text(text);
+    input.queue_edit(TextEdit::TextEnd(false));
+}
+
 fn send_select_event(tile: Vec2, events: &mut MessageWriter<CommandEvent>) {
     events.write(CommandEvent::Select { tile });
+}
+
+pub fn navigate_command_history(focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>, mut history: ResMut<CommandHistory>) {
+    let direction = match keys.just_pressed(KeyCode::ArrowUp) {
+        true => -1,
+        false if keys.just_pressed(KeyCode::ArrowDown) => 1,
+        _ => return,
+    };
+    if history.entries.is_empty() {
+        return;
+    }
+    let Some(entity) = focus.get() else {
+        return;
+    };
+    let Ok(mut input) = inputs.get_mut(entity) else {
+        return;
+    };
+
+    history.idx = (history.idx as isize + direction).clamp(0, history.entries.len() as isize) as usize;
+    match history.entries.get(history.idx) {
+        Some(command) => set_input_text(&mut input, command),
+        None => input.clear(),
+    }
 }
 
 pub fn handle_command_events(

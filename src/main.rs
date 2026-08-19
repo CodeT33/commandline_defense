@@ -8,7 +8,7 @@ pub mod map;
 
 use crate::bullets::{bullet_collisions, bullet_movement, bullet_spawning};
 use crate::camera::set_camera_position;
-use crate::command_line::{CommandState, handle_command_line_state, spawn_command_line, CommandEvent, handle_command_events};
+use crate::command_line::{CommandState, handle_command_line_state, spawn_command_line, CommandEvent, handle_command_events, navigate_command_history, CommandHistory};
 use crate::enemy::move_enemies;
 use crate::grid::{spawn_grid, update_grid_preview, update_selected_tile, SelectionState};
 use crate::map::{TowerRangeMap, spawn_map};
@@ -36,13 +36,14 @@ fn main() {
         .init_resource::<SelectionState>()
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
         .insert_resource(TowerRangeMap::default())
+        .insert_resource(CommandHistory::default())
         //messages
         .add_message::<CommandEvent>()
         //systems
         .add_systems(Startup, (setup, set_camera_position).chain())
         .add_systems(FixedUpdate, (move_enemies, bullet_spawning, bullet_movement).chain())
         .add_systems(FixedPostUpdate, bullet_collisions.after(PhysicsSystems::StepSimulation))
-        .add_systems(Update, (update_grid_preview, update_selected_tile, handle_command_events, handle_command_line_state, set_camera_position))
+        .add_systems(Update, (update_grid_preview, update_selected_tile, handle_command_events, handle_command_line_state, set_camera_position, navigate_command_history))
         .run();
 }
 
