@@ -3,6 +3,7 @@ mod camera;
 pub mod consts;
 pub mod enemy;
 pub mod game_cli;
+pub mod game_map;
 pub mod map;
 mod ui_overlay;
 
@@ -10,13 +11,14 @@ use crate::bullets::{bullet_collisions, bullet_movement, rotate_towers, tower_sh
 use crate::camera::set_camera_position;
 use crate::enemy::{move_enemies, update_towers_in_range};
 use crate::game_cli::command_event_handling::handle_command_events;
-use crate::game_cli::command_line::{CommandHistory, navigate_command_history, spawn_command_line};
+use crate::game_cli::command_line::{CommandHistory, navigate_command_history};
 use crate::game_cli::command_line_state_management::{
     CommandEvent, CommandState, handle_command_line_state,
 };
 use crate::game_cli::spawn_game_cli;
+use crate::game_map::map_rendering::spawn_map_visual_layer;
 use crate::map::{TowerRangeMap, spawn_map};
-use crate::ui_overlay::grid::{spawn_grid, update_grid_preview};
+use crate::ui_overlay::grid::update_grid_preview;
 use crate::ui_overlay::selection::{SelectionState, update_selected_tile};
 use crate::ui_overlay::spawn_ui_overlay;
 use avian2d::prelude::{PhysicsPlugins, PhysicsSystems};
@@ -27,15 +29,19 @@ use bevy::window::PresentMode;
 fn main() {
     App::new()
         //plugins
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: consts::WINDOW_TITLE.to_owned(),
-                resolution: consts::WINDOW_RESOLUTION.into(),
-                present_mode: PresentMode::Immediate,
-                ..default()
-            }),
-            ..default()
-        }))
+        .add_plugins(
+            DefaultPlugins
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: consts::WINDOW_TITLE.to_owned(),
+                        resolution: consts::WINDOW_RESOLUTION.into(),
+                        present_mode: PresentMode::Immediate,
+                        ..default()
+                    }),
+                    ..default()
+                })
+                .set(ImagePlugin::default_nearest()),
+        )
         .add_plugins(TabNavigationPlugin)
         .add_plugins(PhysicsPlugins::default())
         //resources
@@ -71,8 +77,9 @@ fn main() {
 fn setup(
     mut commands: Commands, asset_server: Res<AssetServer>, tower_range_map: ResMut<TowerRangeMap>,
 ) {
-    spawn_map(&mut commands, asset_server, tower_range_map);
-    spawn_ui_overlay(&mut commands);
+    spawn_map(&mut commands, &asset_server, tower_range_map);
+    spawn_ui_overlay(&mut commands, &asset_server);
     spawn_game_cli(&mut commands);
+    spawn_map_visual_layer(&mut commands, &asset_server);
     commands.spawn((Camera2d, IsDefaultUiCamera));
 }

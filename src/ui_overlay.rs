@@ -1,12 +1,28 @@
-use bevy::prelude::Commands;
+use avian2d::parry::glamx::Vec2;
+use bevy::asset::AssetServer;
+use bevy::prelude::{default, Commands, Res, Sprite, SpriteImageMode, SpriteScalingMode, Transform};
+use crate::consts;
 use crate::ui_overlay::grid::{spawn_grid, spawn_grid_positions};
 use crate::ui_overlay::selection::spawn_tile_highlight;
 
 pub mod grid;
 pub mod selection;
 
-pub fn spawn_ui_overlay(commands: &mut Commands) {
+pub fn spawn_ui_overlay(commands: &mut Commands, asset_server: &AssetServer) {
     spawn_grid(commands);
     spawn_grid_positions(commands);
-    spawn_tile_highlight(commands);
+    spawn_tile_highlight(commands, &asset_server);
+    spawn_map_border(commands, asset_server)
+}
+
+pub fn spawn_map_border(commands: &mut Commands, asset_server: &AssetServer) {
+    commands.spawn((
+        Sprite {
+            image: asset_server.load(consts::paths::map::MAP_BORDER),
+            custom_size: Option::from(Vec2::splat((consts::TILE_SIZE*2+2) as f32)),
+            image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
+            ..default()
+        },
+        Transform::from_xyz(consts::MAP_SIZE_TILES[0] as f32 / 2.0, consts::MAP_SIZE_TILES[1] as f32 / 2.0, 0.0),
+    ));
 }

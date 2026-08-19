@@ -47,11 +47,11 @@ impl Default for TowerRangeMap {
 pub struct MapResource(pub GameMap);
 
 pub fn spawn_map(
-    commands: &mut Commands, asset_server: Res<AssetServer>,
+    commands: &mut Commands, asset_server: &Res<AssetServer>,
     mut tower_range_map: ResMut<TowerRangeMap>,
 ) {
     let game_map =
-        GameMap::load(r"assets\maps\backrooms\logic_layer.png", consts::MAP_SIZE_TILES.into())
+        GameMap::load((consts::paths::map::MAP_LOGIC_LAYER), consts::MAP_SIZE_TILES.into())
             .expect("Could not load game map");
 
     commands.insert_resource(MapResource(game_map));

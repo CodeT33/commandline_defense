@@ -22,11 +22,16 @@ pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
 pub mod ui {
     pub mod grid {
         use bevy::color::Color;
+        use bevy::prelude::FontWeight;
 
         pub const GRID_LINE_THICKNESS: f32 = 0.025;
-        pub const GRID_LINE_COLOR: Color = Color::srgba(0.5, 1.0, 0.5, 0.5);
-        pub const GRID_POSITION_FONT_SIZE: f32 = 10.0;
+        pub const GRID_LINE_COLOR: Color = Color::srgba(0.5, 1.0, 0.5, 0.3);
+        pub const GRID_POSITION_FONT_SIZE: f32 = 12.0;
+        pub const GRID_POSITION_FONT_WEIGHT: FontWeight = FontWeight(160);
         pub const GRID_POSITION_COLOR: Color = Color::srgba(0.5, 1.0, 0.5, 0.5);
+        pub const GRID_META_POSITION_FONT_SIZE: f32 = 18.0;
+        pub const GRID_META_POSITION_FONT_WEIGHT: FontWeight = FontWeight(240);
+        pub const GRID_META_POSITION_COLOR: Color = Color::srgba(1.0, 1.0, 1.0, 1.0);
         pub const TILE_HIGHLIGHT_COLOR: Color = Color::srgba(0.5, 1.0, 0.5, 0.3);
     }
 }
@@ -39,8 +44,14 @@ pub mod paths {
         pub const MAUS_MEISTER: &str = "sprites/maus_meister.jpg";
         pub const TURRET: &str = "sprites/turret.png";
     }
+    pub mod ui {
+        pub const SELECTION_SQUARE: &str = "sprites/selection_square_arrow_top.png";
+    }
     pub mod map {
-        pub const MAP_VISUAL_LAYER: &str = "maps/backrooms/visual_layer.png";
+        pub const MAP_BORDER: &str = "sprites/border_test.png";
+        pub const MAP_PACKAGE_FOLDER: &str = "assets/maps/backrooms/";
+        pub const MAP_VISUAL_LAYER: &str = "maps/one_bit_castle/visual_layer.png";
+        pub const MAP_LOGIC_LAYER: &str = "assets/maps/one_bit_castle/logic_layer.png";
     }
     pub mod resources {
         pub mod enemies {

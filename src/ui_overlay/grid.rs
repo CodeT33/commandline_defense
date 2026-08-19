@@ -1,11 +1,10 @@
 use crate::consts;
-use crate::consts::ui::grid::{GRID_LINE_THICKNESS, GRID_POSITION_COLOR};
-use crate::consts::{MAP_SIZE_TILES, TILE_SIZE};
+use crate::consts::MAP_SIZE_TILES;
+use crate::consts::ui::grid::{GRID_LINE_THICKNESS, GRID_META_POSITION_COLOR, GRID_META_POSITION_FONT_WEIGHT, GRID_POSITION_COLOR, GRID_POSITION_FONT_WEIGHT};
 use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
-use crate::ui_overlay::selection::spawn_tile_highlight;
 use bevy::prelude::{
-    Commands, Component, Query, Res, Resource, Sprite, Text2d, Transform, Vec2, Vec3, Visibility,
-    With, default,
+    Commands, Component, Query, Res, Sprite, Text2d, Transform, Vec2, Vec3, Visibility, With,
+    default,
 };
 use bevy::text::*;
 
@@ -83,8 +82,39 @@ pub struct GridLine;
 #[derive(Component)]
 pub struct GridPositionLabel;
 
-
 pub fn spawn_grid_positions(commands: &mut Commands) {
+    for x in 0..MAP_SIZE_TILES[0] {
+        commands.spawn((
+            Text2d::new(x.to_string()),
+            TextFont {
+                font_size: FontSize::Px(consts::ui::grid::GRID_META_POSITION_FONT_SIZE),
+                weight: GRID_META_POSITION_FONT_WEIGHT,
+                ..default()
+            },
+            TextColor(GRID_META_POSITION_COLOR),
+            Transform::from_xyz(x as f32 + 0.5, MAP_SIZE_TILES[1] as f32 + 0.5, 11.0)
+                .with_scale(Vec3::splat(0.025)),
+            GridPositionLabel,
+            GridOverlay,
+        ));
+    }
+
+    for y in 0..MAP_SIZE_TILES[1] {
+        commands.spawn((
+            Text2d::new(get_letter_from_number(y)),
+            TextFont {
+                font_size: FontSize::Px(consts::ui::grid::GRID_META_POSITION_FONT_SIZE),
+                weight: GRID_META_POSITION_FONT_WEIGHT,
+                ..default()
+            },
+            TextColor(GRID_META_POSITION_COLOR),
+            Transform::from_xyz(- 0.5, MAP_SIZE_TILES[1] as f32 - (y as f32) - 0.5, 11.0)
+                .with_scale(Vec3::splat(0.025)),
+            GridPositionLabel,
+            GridOverlay,
+        ));
+    }
+
     for x in 0..MAP_SIZE_TILES[0] {
         for y in 0..MAP_SIZE_TILES[1] {
             let position = format!("{}{}", get_letter_from_number(y), x);
@@ -93,6 +123,7 @@ pub fn spawn_grid_positions(commands: &mut Commands) {
                 Text2d::new(position),
                 TextFont {
                     font_size: FontSize::Px(consts::ui::grid::GRID_POSITION_FONT_SIZE),
+                    weight: GRID_POSITION_FONT_WEIGHT,
                     ..default()
                 },
                 TextColor(GRID_POSITION_COLOR),
@@ -138,11 +169,11 @@ pub fn spawn_grid(commands: &mut Commands) {
     }
 }
 
-
 pub fn update_grid_preview(
     command_state: Res<CommandState>, mut grid_overlay: Query<&mut Visibility, With<GridOverlay>>,
 ) {
-    let visible = matches!(command_state.preview, PreviewCommand::ShowGrid) || matches!(command_state.preview, PreviewCommand::HighlightTile {..});
+    let visible = matches!(command_state.preview, PreviewCommand::ShowGrid)
+        || matches!(command_state.preview, PreviewCommand::HighlightTile { .. });
 
     for mut visibility in &mut grid_overlay {
         *visibility = if visible { Visibility::Visible } else { Visibility::Hidden };

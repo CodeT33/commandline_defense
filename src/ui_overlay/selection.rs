@@ -2,9 +2,8 @@ use crate::consts;
 use crate::consts::{MAP_SIZE_TILES, TILE_SIZE};
 use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
 use avian2d::parry::glamx::{Vec2, Vec3};
-use bevy::prelude::{
-    Commands, Component, Query, Res, Resource, Sprite, Transform, Visibility, With, default,
-};
+use bevy::asset::AssetServer;
+use bevy::prelude::{Commands, Component, Query, Res, Resource, Sprite, Transform, Visibility, With, default, SpriteImageMode, SpriteScalingMode};
 
 #[derive(Resource, Default)]
 pub struct SelectionState {
@@ -14,14 +13,22 @@ pub struct SelectionState {
 #[derive(Component)]
 pub struct TileHighlight;
 
-pub fn spawn_tile_highlight(commands: &mut Commands) {
+pub fn spawn_tile_highlight(commands: &mut Commands, asset_server: &AssetServer) {
     commands.spawn((
+        // Sprite {
+        //     color: consts::ui::grid::TILE_HIGHLIGHT_COLOR,
+        //     custom_size: Some(Vec2::new(1.0, 1.0)),
+        //     ..default()
+        // },
+        // Transform::from_xyz(1.0 / TILE_SIZE as f32, 1.0 / TILE_SIZE as f32, 10.0),
+
         Sprite {
-            color: consts::ui::grid::TILE_HIGHLIGHT_COLOR,
-            custom_size: Some(Vec2::new(TILE_SIZE as f32, TILE_SIZE as f32)),
+            image: asset_server.load(consts::paths::ui::SELECTION_SQUARE),
+            custom_size: Option::from(Vec2::splat(TILE_SIZE as f32 / 8.0)),
+            image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()
         },
-        Transform::from_xyz(8.0, 8.0, 20.0).with_scale(Vec3::splat(0.08)),
+        Transform::from_xyz(default(), default(), 20.0),
         TileHighlight,
     ));
 }
