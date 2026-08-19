@@ -8,7 +8,7 @@ mod ui_overlay;
 
 use crate::bullets::{bullet_collisions, bullet_movement, rotate_towers, tower_shooting};
 use crate::camera::set_camera_position;
-use crate::enemy::move_enemies;
+use crate::enemy::{move_enemies, update_towers_in_range};
 use crate::game_cli::command_event_handling::handle_command_events;
 use crate::game_cli::command_line::{CommandHistory, navigate_command_history, spawn_command_line};
 use crate::game_cli::command_line_state_management::{
@@ -41,7 +41,6 @@ fn main() {
         .init_resource::<SelectionState>()
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
         .insert_resource(TowerRangeMap::default())
-        .insert_resource(HighlightState::default())
         .insert_resource(CommandHistory::default())
         //messages
         .add_message::<CommandEvent>()
@@ -64,13 +63,6 @@ fn main() {
                 navigate_command_history,
             ),
         )
-        .add_systems(
-            Update,
-            (
-                (submit_text, parse_commandline_input, highlight_tower_range).chain(),
-                set_camera_position,
-            ),
-        )
         .run();
 }
 
@@ -79,8 +71,6 @@ fn setup(
 ) {
     commands.spawn((Camera2d, IsDefaultUiCamera));
     spawn_map(&mut commands, asset_server, tower_range_map);
-    spawn_grid(&mut commands);
-    spawn_text_input(&mut commands);
     spawn_grid(&mut commands);
     spawn_command_line(&mut commands);
 }
