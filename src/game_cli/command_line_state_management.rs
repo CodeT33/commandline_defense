@@ -19,16 +19,13 @@ pub enum PreviewCommand {
     None,
     ShowGrid,
     ShowPath,
+    ShowRestricted,
+    ShowWater,
     ShowTowers,
     ShowRanges,
-    ShowLogicMap,
     HighlightTile {
         tile: Vec2,
     },
-    HighlightMultipleTiles {
-        tiles: Vec<Vec2>
-    },
-    HighlightPath,
 }
 
 pub enum Command {
@@ -83,10 +80,20 @@ pub fn handle_command_line_state(
 fn parse_command_preview(input: &str) -> PreviewCommand {
     let tokens: Vec<&str> = input.split_whitespace().collect();
 
+    let trimmed_input = input.trim();
+
+    if "select".starts_with(trimmed_input) && !"se".starts_with(trimmed_input) {
+        return PreviewCommand::ShowGrid;
+    }
+
     match tokens.as_slice() {
         ["select"] => PreviewCommand::ShowGrid,
-        ["grid"] => PreviewCommand::ShowGrid,
-        ["path"] => PreviewCommand::ShowPath,
+        ["show grid"] => PreviewCommand::ShowGrid,
+        ["show path"] => PreviewCommand::ShowPath,
+        ["show restricted"] => PreviewCommand::ShowRestricted,
+        ["show water"] => PreviewCommand::ShowWater,
+        ["show towers"] => PreviewCommand::ShowTowers,
+        ["show ranges"] => PreviewCommand::ShowRanges,
         ["select", position] => match parse_tile_position(position) {
             Some(tile) => PreviewCommand::HighlightTile { tile },
             None => PreviewCommand::ShowGrid,

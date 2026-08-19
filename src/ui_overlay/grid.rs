@@ -142,7 +142,7 @@ pub fn spawn_grid(commands: &mut Commands) {
 pub fn update_grid_preview(
     command_state: Res<CommandState>, mut grid_overlay: Query<&mut Visibility, With<GridOverlay>>,
 ) {
-    let visible = matches!(command_state.preview, PreviewCommand::ShowGrid);
+    let visible = matches!(command_state.preview, PreviewCommand::ShowGrid) || matches!(command_state.preview, PreviewCommand::HighlightTile {..});
 
     for mut visibility in &mut grid_overlay {
         *visibility = if visible { Visibility::Visible } else { Visibility::Hidden };
