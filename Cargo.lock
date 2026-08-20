@@ -3723,6 +3723,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
 name = "map_parsing"
 version = "0.1.0"
 dependencies = [
@@ -5795,6 +5804,7 @@ version = "0.1.0"
 dependencies = [
  "avian2d",
  "bevy",
+ "macros",
  "map_parsing",
  "rand 0.10.2",
 ]
