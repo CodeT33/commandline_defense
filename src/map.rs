@@ -1,8 +1,8 @@
 use crate::bullets::BulletEmissionData;
 use crate::consts;
+pub(crate) use crate::tower::{Tower, TowerRangeMap};
 use avian2d::prelude::*;
 use bevy::asset::AssetServer;
-use bevy::ecs::entity::EntityHashSet;
 use bevy::math::U16Vec2;
 use bevy::prelude::*;
 use map_parsing::GameMap;
@@ -10,12 +10,12 @@ use map_parsing::GameMap;
 #[derive(Resource, Clone)]
 pub struct Map {
     pub enemies: usize,
-    pub towers: Vec<[u16; 2]>,
+    pub towers: Vec<U16Vec2>,
 }
 
 impl Default for Map {
     fn default() -> Self {
-        Self { enemies: 40, towers: (5..16).map(|x| [x, 3]).collect() }
+        Self { enemies: 40, towers: (5..16).map(|x| U16Vec2::new(x, 3)).collect() }
     }
 }
 
@@ -25,31 +25,15 @@ pub struct Enemy {
     pub path_progress: f32,
 }
 
-#[derive(Component, Default)]
-pub struct Tower {
-    pub enemies_in_range: EntityHashSet,
-}
-
-#[derive(Resource)]
-pub struct TowerRangeMap {
-    pub size: U16Vec2,
-    towers_in_range: Vec<Vec<Entity>>,
-}
-
-impl Default for TowerRangeMap {
-    fn default() -> Self {
-        let size = U16Vec2::from_array(consts::MAP_SIZE_TILES);
-        Self { size, towers_in_range: vec![Vec::new(); (size.x * size.y) as usize] }
-    }
-}
-
 #[derive(Resource)]
 pub struct MapResource(pub GameMap);
 
 impl Default for MapResource {
     fn default() -> Self {
-        MapResource(GameMap::load(consts::paths::map::MAP_LOGIC_LAYER, consts::MAP_SIZE_TILES.into())
-            .expect("Could not load game map"))
+        MapResource(
+            GameMap::load(consts::paths::map::MAP_LOGIC_LAYER, consts::MAP_SIZE_TILES.into())
+                .expect("Could not load game map"),
+        )
     }
 }
 
@@ -85,61 +69,5 @@ pub fn spawn_map(
         let mut data = BulletEmissionData::default();
         data.direction = Rot2::degrees(180.0);
         Tower::spawn(commands, asset_server, tower_pos, data, &mut tower_range_map);
-    }
-}
-
-impl Tower {
-    fn spawn(
-        commands: &mut Commands, asset_server: &Res<AssetServer>, tower_pos: [u16; 2],
-        data: BulletEmissionData, tower_range_map: &mut ResMut<TowerRangeMap>,
-    ) {
-        let entity = commands
-            .spawn((
-                Tower::default(),
-                Sprite {
-                    image: asset_server.load(consts::paths::sprite::TURRET),
-                    custom_size: consts::TOWER_SIZE_TILES.into(),
-                    image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
-                    ..default()
-                },
-                data,
-                Transform::from_xyz(
-                    tower_pos[0] as f32 + 0.5,
-                    tower_pos[1] as f32 + 0.5,
-                    consts::rendering_layers::ENTITY,
-                ),
-            ))
-            .id();
-        tower_range_map.add_range_rect(tower_pos, consts::TOWER_RANGE_TILES, entity);
-    }
-}
-
-impl TowerRangeMap {
-    pub fn clear(&mut self) {
-        for x in &mut self.towers_in_range {
-            x.clear();
-        }
-    }
-
-    pub fn range_bounds(&self, pos_tiles: [u16; 2], range_tiles: u16) -> (U16Vec2, U16Vec2) {
-        let center = U16Vec2::from_array(pos_tiles);
-        let range = U16Vec2::from_array([range_tiles; 2]);
-        let min = center.saturating_sub(range);
-        let max = center.saturating_add(range).min(self.size.saturating_sub(U16Vec2::ONE));
-        (min, max)
-    }
-
-    pub fn add_range_rect(&mut self, pos_tiles: [u16; 2], range_tiles: u16, entity: Entity) {
-        let (min, max) = self.range_bounds(pos_tiles, range_tiles);
-        for y in min.y..=max.y {
-            for x in min.x..=max.x {
-                self.towers_in_range[(y * self.size.x + x) as usize].push(entity);
-            }
-        }
-    }
-
-    pub fn towers_in_range_at(&self, tile: U16Vec2) -> &[Entity] {
-        let index = tile.y as usize * self.size.x as usize + tile.x as usize;
-        &self.towers_in_range[index]
     }
 }

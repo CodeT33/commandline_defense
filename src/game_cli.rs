@@ -15,6 +15,7 @@ pub fn send_command_event(command: Command, events: &mut MessageWriter<CommandEv
     events.write(match command {
         Command::Help => CommandEvent::Help,
         Command::Select { tile } => CommandEvent::Select { tile },
+        Command::Place { tower_type, tower_pos } => CommandEvent::Place { tower_type, tower_pos },
         Command::Deselect => CommandEvent::Deselect,
         Command::ExitGame => CommandEvent::ExitGame,
     });

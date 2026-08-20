@@ -1,9 +1,11 @@
 use crate::game_cli::command_line::CommandHistory;
 use crate::game_cli::send_command_event;
+use crate::tower::TowerType;
 use crate::ui_overlay::grid::get_number_from_letter;
 use avian2d::parry::glamx::Vec2;
 use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
+use bevy::math::U16Vec2;
 use bevy::prelude::{KeyCode, Message, MessageWriter, Query, Res, ResMut, Resource};
 use bevy::text::EditableText;
 
@@ -24,13 +26,14 @@ pub enum PreviewCommand {
     ShowTowers,
     ShowRanges,
     HighlightTile {
-        tile: Vec2,
+        tile: U16Vec2,
     },
 }
 
 pub enum Command {
     Help,
-    Select { tile: Vec2 },
+    Select { tile: U16Vec2 },
+    Place { tower_type: TowerType, tower_pos: U16Vec2 },
     Deselect,
     ExitGame,
 }
@@ -38,7 +41,8 @@ pub enum Command {
 #[derive(Message, Debug)]
 pub enum CommandEvent {
     Help,
-    Select { tile: Vec2 },
+    Select { tile: U16Vec2 },
+    Place { tower_type: TowerType, tower_pos: U16Vec2 },
     Deselect,
     ExitGame,
 }
@@ -111,6 +115,10 @@ fn parse_command_event(input: &str) -> Option<Command> {
             let tile = parse_tile_position(position)?;
             Some(Command::Select { tile })
         },
+        ["select", tower_pos, "place", tower_type] => {
+            let tower = parse_tower_type(tower_type)?;
+            Some(Command::Place { tower_type: tower, tower_pos: parse_tile_position(tower_pos)? })
+        },
         ["deselect"] => Some(Command::Deselect),
         ["exit", "game"] => Some(Command::ExitGame),
         _ => {
@@ -120,7 +128,20 @@ fn parse_command_event(input: &str) -> Option<Command> {
     }
 }
 
-fn parse_tile_position(position: &str) -> Option<Vec2> {
+fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
+    match tower_type_string {
+        "assault-tower" => Some(TowerType::AssaultTower),
+        "boom-tower" => Some(TowerType::BoomTower),
+        "gatling-tower" => Some(TowerType::GatlingTower),
+        "sniper-tower" => Some(TowerType::SniperTower),
+        _ => {
+            println!("Unknown tower type: {:?}", tower_type_string);
+            Some(TowerType::None)
+        },
+    }
+}
+
+fn parse_tile_position(position: &str) -> Option<U16Vec2> {
     let position = position.to_ascii_uppercase();
 
     let mut number = String::new();
@@ -144,5 +165,5 @@ fn parse_tile_position(position: &str) -> Option<Vec2> {
     let x: u16 = number.parse().ok()?;
     let y: u16 = get_number_from_letter(letter?)?;
 
-    Some(Vec2::new(x as f32, y as f32))
+    Some(U16Vec2::new(x, y))
 }
