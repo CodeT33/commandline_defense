@@ -7,7 +7,7 @@ use bevy::prelude::{
 pub fn spawn_map_visual_layer(commands: &mut Commands, asset_server: &Res<AssetServer>) {
     commands.spawn((
         Sprite {
-            image: asset_server.load(consts::assets::maps::backrooms::VISUAL_LAYER),
+            image: asset_server.load(consts::assets::maps::one_bit_castle::VISUAL_LAYER),
             custom_size: Option::from(Vec2::splat((consts::TILE_SIZE * 2) as f32)),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

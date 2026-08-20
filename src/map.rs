@@ -50,9 +50,11 @@ pub fn spawn_map(
     commands: &mut Commands, asset_server: &Res<AssetServer>,
     mut tower_range_map: ResMut<TowerRangeMap>,
 ) {
-    let game_map =
-        GameMap::load(consts::assets::maps::backrooms::LOGIC_LAYER, consts::MAP_SIZE_TILES.into())
-            .expect("Could not load game map");
+    let game_map = GameMap::load(
+        consts::assets::maps::one_bit_castle::LOGIC_LAYER,
+        consts::MAP_SIZE_TILES.into(),
+    )
+    .expect("Could not load game map");
 
     commands.insert_resource(MapResource(game_map));
 
