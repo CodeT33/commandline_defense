@@ -14,5 +14,7 @@ pub fn set_camera_position(
         return;
     };
     tf.translation = Vec3::new(MAP_SIZE_TILES[0] as f32 / 2.0, MAP_SIZE_TILES[1] as f32 / 2.0, 0.0);
-    tf.scale = Vec3::splat((Vec2::from(MAP_SIZE_TILES.map(f32::from)) / window_size + 0.005).max_element());
+    tf.scale = Vec3::splat(
+        (Vec2::from(MAP_SIZE_TILES.map(f32::from)) / window_size + 0.005).max_element(),
+    );
 }

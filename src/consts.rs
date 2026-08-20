@@ -83,3 +83,11 @@ pub mod paths {
         }
     }
 }
+
+pub mod rendering_layers {
+    pub const MAP: f32 = 0.0;
+    pub const ENTITY: f32 = 5.0;
+    pub const GRID: f32 = 10.0;
+    pub const GRID_LABEL: f32 = 11.0;
+    pub const HIGHLIGHT: f32 = 20.0;
+}

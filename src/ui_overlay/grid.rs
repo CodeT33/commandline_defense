@@ -1,6 +1,9 @@
 use crate::consts;
 use crate::consts::MAP_SIZE_TILES;
-use crate::consts::ui::grid::{GRID_LINE_THICKNESS, GRID_META_POSITION_COLOR, GRID_META_POSITION_FONT_WEIGHT, GRID_POSITION_COLOR, GRID_POSITION_FONT_WEIGHT};
+use crate::consts::ui::grid::{
+    GRID_LINE_THICKNESS, GRID_META_POSITION_COLOR, GRID_META_POSITION_FONT_WEIGHT,
+    GRID_POSITION_COLOR, GRID_POSITION_FONT_WEIGHT,
+};
 use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
 use bevy::prelude::{
     Commands, Component, Query, Res, Sprite, Text2d, Transform, Vec2, Vec3, Visibility, With,
@@ -92,8 +95,12 @@ pub fn spawn_grid_positions(commands: &mut Commands) {
                 ..default()
             },
             TextColor(GRID_META_POSITION_COLOR),
-            Transform::from_xyz(x as f32 + 0.5, MAP_SIZE_TILES[1] as f32 + 0.5, 11.0)
-                .with_scale(Vec3::splat(0.025)),
+            Transform::from_xyz(
+                x as f32 + 0.5,
+                MAP_SIZE_TILES[1] as f32 + 0.5,
+                consts::rendering_layers::GRID_LABEL,
+            )
+            .with_scale(Vec3::splat(0.025)),
             GridPositionLabel,
             GridOverlay,
         ));
@@ -108,8 +115,12 @@ pub fn spawn_grid_positions(commands: &mut Commands) {
                 ..default()
             },
             TextColor(GRID_META_POSITION_COLOR),
-            Transform::from_xyz(- 0.5, MAP_SIZE_TILES[1] as f32 - (y as f32) - 0.5, 11.0)
-                .with_scale(Vec3::splat(0.025)),
+            Transform::from_xyz(
+                -0.5,
+                MAP_SIZE_TILES[1] as f32 - (y as f32) - 0.5,
+                consts::rendering_layers::GRID_LABEL,
+            )
+            .with_scale(Vec3::splat(0.025)),
             GridPositionLabel,
             GridOverlay,
         ));
@@ -127,8 +138,12 @@ pub fn spawn_grid_positions(commands: &mut Commands) {
                     ..default()
                 },
                 TextColor(GRID_POSITION_COLOR),
-                Transform::from_xyz(x as f32 + 0.5, (MAP_SIZE_TILES[1] - y) as f32 - 0.5, 11.0)
-                    .with_scale(Vec3::splat(0.025)),
+                Transform::from_xyz(
+                    x as f32 + 0.5,
+                    (MAP_SIZE_TILES[1] - y) as f32 - 0.5,
+                    consts::rendering_layers::GRID_LABEL,
+                )
+                .with_scale(Vec3::splat(0.025)),
                 GridPositionLabel,
                 GridOverlay,
             ));
@@ -148,7 +163,7 @@ pub fn spawn_grid(commands: &mut Commands) {
                 custom_size: Some(Vec2::new(GRID_LINE_THICKNESS, height as f32)),
                 ..default()
             },
-            Transform::from_xyz(x as f32, (height / 2) as f32, 10.0),
+            Transform::from_xyz(x as f32, (height / 2) as f32, consts::rendering_layers::GRID),
             GridLine,
             GridOverlay,
         ));
@@ -162,7 +177,7 @@ pub fn spawn_grid(commands: &mut Commands) {
                 custom_size: Some(Vec2::new(width as f32, GRID_LINE_THICKNESS)),
                 ..default()
             },
-            Transform::from_xyz((width / 2) as f32, y as f32, 10.0),
+            Transform::from_xyz((width / 2) as f32, y as f32, consts::rendering_layers::GRID),
             GridLine,
             GridOverlay,
         ));

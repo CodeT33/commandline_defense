@@ -151,8 +151,7 @@ pub fn get_map_position_from_index(index: usize, map_size: U16Vec2) -> U16Vec2 {
 
 pub fn load_map_logic(path: &str) -> Option<Vec<TileType>> {
     let image: RgbImage = image::open(path).ok()?.to_rgb8();
-
-    let tiles = image
+    image
         .pixels()
         .map(|pixel| {
             let [r, g, b] = pixel.0;
@@ -161,9 +160,7 @@ pub fn load_map_logic(path: &str) -> Option<Vec<TileType>> {
 
             interpret_tile_from_rgb(color)
         })
-        .collect();
-
-    tiles
+        .collect()
 }
 
 pub fn load_map_raw(path: &str) -> Option<Vec<u32>> {

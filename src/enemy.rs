@@ -27,12 +27,13 @@ pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
         let normalized_diff = (b.as_vec2() - a.as_vec2()).normalize();
         let pos =
             a.as_vec2() + (normalized_diff * (target_pos - current_len as f32)) + Vec2::splat(0.5);
-        return Transform::from_translation(pos.extend(0.0)).with_rotation(Quat::from_rotation_z(
-            normalized_diff.to_angle() - f32::consts::FRAC_PI_2,
-        ));
+        return Transform::from_translation(pos.extend(consts::rendering_layers::ENTITY))
+            .with_rotation(Quat::from_rotation_z(
+                normalized_diff.to_angle() - f32::consts::FRAC_PI_2,
+            ));
     }
     let pos = path.corners().last().unwrap().as_vec2() + Vec2::splat(0.5);
-    Transform::from_translation(pos.extend(0.0))
+    Transform::from_translation(pos.extend(consts::rendering_layers::ENTITY))
 }
 
 pub fn move_enemies(

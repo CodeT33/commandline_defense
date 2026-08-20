@@ -51,7 +51,7 @@ pub fn spawn_map(
     mut tower_range_map: ResMut<TowerRangeMap>,
 ) {
     let game_map =
-        GameMap::load((consts::paths::map::MAP_LOGIC_LAYER), consts::MAP_SIZE_TILES.into())
+        GameMap::load(consts::paths::map::MAP_LOGIC_LAYER, consts::MAP_SIZE_TILES.into())
             .expect("Could not load game map");
 
     commands.insert_resource(MapResource(game_map));
@@ -69,14 +69,14 @@ pub fn spawn_map(
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()
             },
-            Transform::default(),
+            Transform::from_xyz(0.0, 0.0, consts::rendering_layers::ENTITY),
         ));
     }
 
     for &tower_pos in &map.towers {
         let mut data = BulletEmissionData::default();
         data.direction = Rot2::degrees(180.0);
-        Tower::spawn(commands, &asset_server, tower_pos, data, &mut tower_range_map);
+        Tower::spawn(commands, asset_server, tower_pos, data, &mut tower_range_map);
     }
 }
 
@@ -95,7 +95,11 @@ impl Tower {
                     ..default()
                 },
                 data,
-                Transform::from_xyz(tower_pos[0] as f32 + 0.5, tower_pos[1] as f32 + 0.5, 0.0),
+                Transform::from_xyz(
+                    tower_pos[0] as f32 + 0.5,
+                    tower_pos[1] as f32 + 0.5,
+                    consts::rendering_layers::ENTITY,
+                ),
             ))
             .id();
         tower_range_map.add_range_rect(tower_pos, consts::TOWER_RANGE_TILES, entity);

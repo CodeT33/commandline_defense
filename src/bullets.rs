@@ -106,7 +106,11 @@ pub fn tower_shooting(
                 Collider::circle(consts::PROJECTILE_RADIUS),
                 Sensor,
                 CollisionEventsEnabled,
-                Transform::from_xyz(transform.translation.x, transform.translation.y, 0.0),
+                Transform::from_xyz(
+                    transform.translation.x,
+                    transform.translation.y,
+                    consts::rendering_layers::ENTITY,
+                ),
                 Sprite {
                     image: asset_server.load(consts::paths::sprite::APPLE),
                     custom_size: consts::PROJECTILE_SIZE_TILES.into(),
