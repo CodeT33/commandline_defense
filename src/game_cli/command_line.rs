@@ -1,3 +1,4 @@
+use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
 use bevy::input_focus::{AutoFocus, InputFocus};
 use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle, TextEdit};
@@ -9,26 +10,36 @@ pub struct CommandHistory {
 }
 
 pub fn spawn_command_line(commands: &mut Commands) {
-    commands.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-
-            left: px(16.0),
-            right: px(16.0),
-            bottom: px(10.0),
-
-            height: px(32.0),
-
-            padding: UiRect { left: px(8.0), right: px(8.0), bottom: px(4.0), top: px(4.0) },
-            border: UiRect::all(px(2.0)),
-            border_radius: BorderRadius::all(px(10.0)),
-            ..default()
-        },
-        BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.5)),
-        EditableText { cursor_width: 0.25, allow_newlines: false, ..default() },
-        TextCursorStyle::default(),
-        AutoFocus,
-    ));
+    commands
+        .spawn((
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                justify_content: JustifyContent::Start,
+                align_items: AlignItems::End,
+                padding: px(8).all(),
+                ..default()
+            },
+            TabGroup::new(0),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Node {
+                    width: Val::Percent(100.0),
+                    padding: px(8).all(),
+                    border: px(2).all(),
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BackgroundColor(Color::srgba(0.1, 0.1, 0.12, 0.9)),
+                EditableText { visible_width: Some(16.0), allow_newlines: false, ..default() },
+                TextFont { font_size: FontSize::Px(20.0), ..default() },
+                TextColor(Color::WHITE),
+                TextCursorStyle::default(),
+                TabIndex(0),
+                AutoFocus,
+            ));
+        });
 }
 
 pub fn navigate_command_history(
