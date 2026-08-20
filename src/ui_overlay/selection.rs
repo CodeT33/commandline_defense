@@ -25,7 +25,7 @@ pub fn spawn_tile_highlight(commands: &mut Commands, asset_server: &AssetServer)
         // },
         // Transform::from_xyz(1.0 / TILE_SIZE as f32, 1.0 / TILE_SIZE as f32, 10.0),
         Sprite {
-            image: asset_server.load(consts::paths::ui::SELECTION_SQUARE),
+            image: asset_server.load(consts::assets::sprites::SELECTION_SQUARE_ARROW_TOP),
             custom_size: Option::from(Vec2::splat(TILE_SIZE as f32 / 8.0)),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

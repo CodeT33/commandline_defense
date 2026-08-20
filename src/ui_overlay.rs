@@ -18,7 +18,7 @@ pub fn spawn_ui_overlay(commands: &mut Commands, asset_server: &AssetServer) {
 pub fn spawn_map_border(commands: &mut Commands, asset_server: &AssetServer) {
     commands.spawn((
         Sprite {
-            image: asset_server.load(consts::paths::map::MAP_BORDER),
+            image: asset_server.load(consts::assets::sprites::BORDER_TEST),
             custom_size: Option::from(Vec2::splat((consts::TILE_SIZE * 2 + 2) as f32)),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

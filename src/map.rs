@@ -51,7 +51,7 @@ pub fn spawn_map(
     mut tower_range_map: ResMut<TowerRangeMap>,
 ) {
     let game_map =
-        GameMap::load(consts::paths::map::MAP_LOGIC_LAYER, consts::MAP_SIZE_TILES.into())
+        GameMap::load(consts::assets::maps::backrooms::LOGIC_LAYER, consts::MAP_SIZE_TILES.into())
             .expect("Could not load game map");
 
     commands.insert_resource(MapResource(game_map));
@@ -64,7 +64,7 @@ pub fn spawn_map(
             Enemy { path_offset: index as f32 / enemy_count as f32, path_progress: 0.0 },
             Collider::circle(consts::ENEMY_RADIUS),
             Sprite {
-                image: asset_server.load(consts::paths::sprite::ENEMY),
+                image: asset_server.load(consts::assets::sprites::ENEMY),
                 custom_size: consts::ENEMY_SIZE_TILES.into(),
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()
@@ -89,7 +89,7 @@ impl Tower {
             .spawn((
                 Tower::default(),
                 Sprite {
-                    image: asset_server.load(consts::paths::sprite::TURRET),
+                    image: asset_server.load(consts::assets::sprites::TURRET),
                     custom_size: consts::TOWER_SIZE_TILES.into(),
                     image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                     ..default()
