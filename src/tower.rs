@@ -85,7 +85,7 @@ impl Tower {
             .spawn((
                 Tower::default(),
                 Sprite {
-                    image: asset_server.load(consts::paths::resources::towers::assault_tower::ASSAULT_TOWER_0_0_0),
+                    image: asset_server.load(consts::assets::resource_packs::base_pack::towers::assault_tower::S0_0_0),
                     custom_size: consts::TOWER_SIZE_TILES.into(),
                     image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                     ..default()
