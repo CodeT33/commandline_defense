@@ -11,6 +11,7 @@ pub const MAP_SIZE_TILES: [u16; 2] = [32, 16];
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum TileType {
+    None,
     PathStart,
     Path,
     Restricted,
@@ -141,12 +142,48 @@ impl GameMap {
     }
 }
 
-pub fn get_index_from_map_position(map_position: U16Vec2, map_size: U16Vec2) -> usize {
-    ((map_size.y - 1 - map_position.y) * map_size.x + map_position.x) as usize
+pub fn get_index_from_map_position(
+    map_position: U16Vec2,
+    map_size: U16Vec2,
+) -> Option<usize> {
+    if map_size.x == 0 || map_size.y == 0 {
+        return None;
+    }
+
+    if map_position.x >= map_size.x
+        || map_position.y >= map_size.y
+    {
+        return None;
+    }
+
+    let index =
+        ((map_size.y - 1 - map_position.y) * map_size.x
+            + map_position.x) as usize;
+
+    Some(index)
 }
 
-pub fn get_map_position_from_index(index: usize, map_size: U16Vec2) -> U16Vec2 {
-    U16Vec2::new(index as u16 % map_size.x, map_size.y - 1 - (index as u16 / map_size.x))
+pub fn get_map_position_from_index(
+    index: usize,
+    map_size: U16Vec2,
+) -> Option<U16Vec2> {
+    if map_size.x == 0 || map_size.y == 0 {
+        return None;
+    }
+
+    let tile_count =
+        map_size.x as usize * map_size.y as usize;
+
+    if index >= tile_count {
+        return None;
+    }
+
+    let index = index as u16;
+
+    Some(U16Vec2::new(
+        index % map_size.x,
+        map_size.y - 1 - (index / map_size.x),
+    ))
 }
 
 pub fn load_map_logic(path: &str) -> Option<Vec<TileType>> {
@@ -200,6 +237,7 @@ impl MapTiles {
                 let index = (y * self.map_size.x + x) as usize;
 
                 let symbol = match self.tiles[index] {
+                    TileType::None => ' ',
                     TileType::PathStart => 'S',
                     TileType::Path => '#',
                     TileType::Restricted => 'X',
@@ -243,7 +281,9 @@ impl MapTiles {
         let Some(new_position) = self.get_position_in_direction(position, direction) else {
             return false;
         };
-        let index = get_index_from_map_position(new_position, self.map_size);
+        let Some(index) = get_index_from_map_position(new_position, self.map_size) else {
+            return false;
+        };
 
         is_path_tile(&self.tiles[index])
     }
@@ -251,7 +291,7 @@ impl MapTiles {
     fn find_path_start(&self) -> Option<U16Vec2> {
         for (index, tile) in self.tiles.iter().enumerate() {
             if *tile == TileType::PathStart {
-                return Some(get_map_position_from_index(index, self.map_size));
+                return get_map_position_from_index(index, self.map_size);
             }
         }
         None
@@ -261,19 +301,23 @@ impl MapTiles {
 impl GameMap {
     /// Tests if a certain Vec2-position has a specific TileType
     pub fn test_for_tile_type(&self, tile: Vec2, tile_type: TileType) -> bool {
-        let index = get_index_from_map_position(
+        let Some(index) = get_index_from_map_position(
             U16Vec2 { x: tile.x as u16, y: tile.y as u16 },
             U16Vec2 { x: MAP_SIZE_TILES[0], y: MAP_SIZE_TILES[1] },
-        );
+        ) else {
+            return false;
+        };
         self.map_tiles.tiles[index] == tile_type
     }
 
     /// Returns the TileType of a Vec2-position on a GameMap
     pub fn return_tile_type(&self, tile: Vec2) -> TileType {
-        let index = get_index_from_map_position(
+        let Some(index) = get_index_from_map_position(
             U16Vec2 { x: tile.x as u16, y: tile.y as u16 },
             U16Vec2 { x: MAP_SIZE_TILES[0], y: MAP_SIZE_TILES[1] },
-        );
+        ) else {
+            return TileType::None;
+        };
         self.map_tiles.tiles[index]
     }
 }

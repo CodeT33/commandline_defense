@@ -18,12 +18,6 @@ pub struct TileHighlight;
 
 pub fn spawn_tile_highlight(commands: &mut Commands, asset_server: &AssetServer) {
     commands.spawn((
-        // Sprite {
-        //     color: consts::ui::grid::TILE_HIGHLIGHT_COLOR,
-        //     custom_size: Some(Vec2::new(1.0, 1.0)),
-        //     ..default()
-        // },
-        // Transform::from_xyz(1.0 / TILE_SIZE as f32, 1.0 / TILE_SIZE as f32, 10.0),
         Sprite {
             image: asset_server.load(consts::assets::sprites::SELECTION_SQUARE_ARROW_TOP),
             custom_size: Option::from(Vec2::splat(TILE_SIZE as f32 / 8.0)),
