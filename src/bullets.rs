@@ -112,7 +112,7 @@ pub fn tower_shooting(
                     consts::rendering_layers::ENTITY,
                 ),
                 Sprite {
-                    image: asset_server.load(consts::paths::sprite::APPLE),
+                    image: asset_server.load(consts::assets::sprites::APPLE),
                     custom_size: consts::PROJECTILE_SIZE_TILES.into(),
                     ..default()
                 },

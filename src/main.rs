@@ -42,7 +42,8 @@ fn main() {
                     }),
                     ..default()
                 })
-                .set(ImagePlugin::default_nearest()),
+                .set(ImagePlugin::default_nearest())
+                .set(AssetPlugin { file_path: "./".to_owned(), ..default() }),
         )
         .add_plugins(TabNavigationPlugin)
         .add_plugins(PhysicsPlugins::default())

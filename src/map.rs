@@ -31,8 +31,11 @@ pub struct MapResource(pub GameMap);
 impl Default for MapResource {
     fn default() -> Self {
         MapResource(
-            GameMap::load(consts::paths::map::MAP_LOGIC_LAYER, consts::MAP_SIZE_TILES.into())
-                .expect("Could not load game map"),
+            GameMap::load(
+                consts::assets::maps::one_bit_castle::LOGIC_LAYER,
+                consts::MAP_SIZE_TILES.into(),
+            )
+            .expect("Could not load game map"),
         )
     }
 }
@@ -41,13 +44,6 @@ pub fn spawn_map(
     commands: &mut Commands, asset_server: &Res<AssetServer>,
     mut tower_range_map: ResMut<TowerRangeMap>,
 ) {
-    // let game_map =
-    //     GameMap::load(consts::paths::map::MAP_LOGIC_LAYER, consts::MAP_SIZE_TILES.into())
-    //         .expect("Could not load game map");
-
-    // commands.insert_resource(MapResource(GameMap::load(consts::paths::map::MAP_LOGIC_LAYER, consts::MAP_SIZE_TILES.into())
-    //                                          .expect("Could not load game map")));
-
     let map = Map::default();
     commands.insert_resource(map.clone());
     let enemy_count = map.enemies;
@@ -56,7 +52,7 @@ pub fn spawn_map(
             Enemy { path_offset: index as f32 / enemy_count as f32, path_progress: 0.0 },
             Collider::circle(consts::ENEMY_RADIUS),
             Sprite {
-                image: asset_server.load(consts::paths::sprite::ENEMY),
+                image: asset_server.load(consts::assets::sprites::ENEMY),
                 custom_size: consts::ENEMY_SIZE_TILES.into(),
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()
