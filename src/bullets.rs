@@ -81,7 +81,7 @@ pub fn rotate_towers(
             continue;
         };
         let angle = (enemy_transform.translation.truncate() - t.translation.truncate()).to_angle();
-        t.rotation = Quat::from_rotation_z(angle);
+        t.rotation = Quat::from_rotation_z(angle - PI / 2.0);
         bullet_data.direction = Rot2::radians(angle);
     }
 }
