@@ -51,7 +51,7 @@ pub mod ui {
             pub placeable: Color,
             pub water: Color,
         }
-        
+
         pub const GRID_POSITION_TILE_COLORS: GridTileColors = GridTileColors {
             none: Color::srgba(0.0, 0.0, 0.0, 0.0),
             path_start: Color::srgba(1.0, 0.5, 1.0, 0.9),

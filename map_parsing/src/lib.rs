@@ -142,37 +142,26 @@ impl GameMap {
     }
 }
 
-pub fn get_index_from_map_position(
-    map_position: U16Vec2,
-    map_size: U16Vec2,
-) -> Option<usize> {
+pub fn get_index_from_map_position(map_position: U16Vec2, map_size: U16Vec2) -> Option<usize> {
     if map_size.x == 0 || map_size.y == 0 {
         return None;
     }
 
-    if map_position.x >= map_size.x
-        || map_position.y >= map_size.y
-    {
+    if map_position.x >= map_size.x || map_position.y >= map_size.y {
         return None;
     }
 
-    let index =
-        ((map_size.y - 1 - map_position.y) * map_size.x
-            + map_position.x) as usize;
+    let index = ((map_size.y - 1 - map_position.y) * map_size.x + map_position.x) as usize;
 
     Some(index)
 }
 
-pub fn get_map_position_from_index(
-    index: usize,
-    map_size: U16Vec2,
-) -> Option<U16Vec2> {
+pub fn get_map_position_from_index(index: usize, map_size: U16Vec2) -> Option<U16Vec2> {
     if map_size.x == 0 || map_size.y == 0 {
         return None;
     }
 
-    let tile_count =
-        map_size.x as usize * map_size.y as usize;
+    let tile_count = map_size.x as usize * map_size.y as usize;
 
     if index >= tile_count {
         return None;
@@ -180,10 +169,7 @@ pub fn get_map_position_from_index(
 
     let index = index as u16;
 
-    Some(U16Vec2::new(
-        index % map_size.x,
-        map_size.y - 1 - (index / map_size.x),
-    ))
+    Some(U16Vec2::new(index % map_size.x, map_size.y - 1 - (index / map_size.x)))
 }
 
 pub fn load_map_logic(path: &str) -> Option<Vec<TileType>> {
