@@ -17,7 +17,7 @@ use crate::game_cli::command_line_state_management::{
 };
 use crate::game_cli::spawn_game_cli;
 use crate::game_map::map_rendering::spawn_map_visual_layer;
-use crate::map::{TowerRangeMap, spawn_map};
+use crate::map::{TowerRangeMap, spawn_map, MapResource};
 use crate::ui_overlay::grid::update_grid_preview;
 use crate::ui_overlay::selection::{SelectionState, update_selected_tile};
 use crate::ui_overlay::spawn_ui_overlay;
@@ -47,6 +47,7 @@ fn main() {
         //resources
         .init_resource::<CommandState>()
         .init_resource::<SelectionState>()
+        .insert_resource(MapResource::default())
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
         .insert_resource(TowerRangeMap::default())
         .insert_resource(CommandHistory::default())
@@ -75,10 +76,10 @@ fn main() {
 }
 
 fn setup(
-    mut commands: Commands, asset_server: Res<AssetServer>, tower_range_map: ResMut<TowerRangeMap>,
+    mut commands: Commands, asset_server: Res<AssetServer>, tower_range_map: ResMut<TowerRangeMap>, map_resource: Res<MapResource>,
 ) {
     spawn_map(&mut commands, &asset_server, tower_range_map);
-    spawn_ui_overlay(&mut commands, &asset_server);
+    spawn_ui_overlay(&mut commands, &asset_server, &map_resource);
     spawn_game_cli(&mut commands);
     spawn_map_visual_layer(&mut commands, &asset_server);
     commands.spawn((Camera2d, IsDefaultUiCamera));

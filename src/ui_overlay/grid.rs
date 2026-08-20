@@ -1,15 +1,15 @@
+use bevy::color::Color;
 use crate::consts;
 use crate::consts::MAP_SIZE_TILES;
-use crate::consts::ui::grid::{
-    GRID_LINE_THICKNESS, GRID_META_POSITION_COLOR, GRID_META_POSITION_FONT_WEIGHT,
-    GRID_POSITION_COLOR, GRID_POSITION_FONT_WEIGHT,
-};
+use crate::consts::ui::grid::{GRID_LINE_THICKNESS};
 use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
 use bevy::prelude::{
     Commands, Component, Query, Res, Sprite, Text2d, Transform, Vec2, Vec3, Visibility, With,
     default,
 };
 use bevy::text::*;
+use map_parsing::TileType;
+use crate::map::MapResource;
 
 fn get_letter_from_number(number: u16) -> char {
     match number {
@@ -85,16 +85,19 @@ pub struct GridLine;
 #[derive(Component)]
 pub struct GridPositionLabel;
 
-pub fn spawn_grid_positions(commands: &mut Commands) {
+pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &Res<MapResource>) {
+
+    let meta_position_text_font: TextFont = TextFont {
+        font_size: FontSize::Px(consts::ui::grid::GRID_META_POSITION.font_size),
+        weight: consts::ui::grid::GRID_META_POSITION.font_weight,
+        ..default()
+    };
+
     for x in 0..MAP_SIZE_TILES[0] {
         commands.spawn((
             Text2d::new(x.to_string()),
-            TextFont {
-                font_size: FontSize::Px(consts::ui::grid::GRID_META_POSITION_FONT_SIZE),
-                weight: GRID_META_POSITION_FONT_WEIGHT,
-                ..default()
-            },
-            TextColor(GRID_META_POSITION_COLOR),
+            meta_position_text_font.clone(),
+            TextColor(consts::ui::grid::GRID_META_POSITION.color),
             Transform::from_xyz(
                 x as f32 + 0.5,
                 MAP_SIZE_TILES[1] as f32 + 0.5,
@@ -109,12 +112,8 @@ pub fn spawn_grid_positions(commands: &mut Commands) {
     for y in 0..MAP_SIZE_TILES[1] {
         commands.spawn((
             Text2d::new(get_letter_from_number(y)),
-            TextFont {
-                font_size: FontSize::Px(consts::ui::grid::GRID_META_POSITION_FONT_SIZE),
-                weight: GRID_META_POSITION_FONT_WEIGHT,
-                ..default()
-            },
-            TextColor(GRID_META_POSITION_COLOR),
+            meta_position_text_font.clone(),
+            TextColor(consts::ui::grid::GRID_META_POSITION.color),
             Transform::from_xyz(
                 -0.5,
                 MAP_SIZE_TILES[1] as f32 - (y as f32) - 0.5,
@@ -130,14 +129,24 @@ pub fn spawn_grid_positions(commands: &mut Commands) {
         for y in 0..MAP_SIZE_TILES[1] {
             let position = format!("{}{}", get_letter_from_number(y), x);
 
+            let tile_type: TileType = map_resource.0.return_tile_type(Vec2::new(x as f32,((MAP_SIZE_TILES[1]-y-1) as f32)));
+            let text_color: Color = match tile_type {
+                TileType::None => consts::ui::grid::GRID_POSITION_TILE_COLORS.none,
+                TileType::PathStart => consts::ui::grid::GRID_POSITION_TILE_COLORS.path_start,
+                TileType::Path => consts::ui::grid::GRID_POSITION_TILE_COLORS.path,
+                TileType::Restricted => consts::ui::grid::GRID_POSITION_TILE_COLORS.restricted,
+                TileType::Placeable => consts::ui::grid::GRID_POSITION_TILE_COLORS.placeable,
+                TileType::Water => consts::ui::grid::GRID_POSITION_TILE_COLORS.water,
+            };
+
             commands.spawn((
                 Text2d::new(position),
                 TextFont {
-                    font_size: FontSize::Px(consts::ui::grid::GRID_POSITION_FONT_SIZE),
-                    weight: GRID_POSITION_FONT_WEIGHT,
+                    font_size: FontSize::Px(consts::ui::grid::GRID_POSITION.font_size),
+                    weight: consts::ui::grid::GRID_POSITION.font_weight,
                     ..default()
                 },
-                TextColor(GRID_POSITION_COLOR),
+                TextColor(text_color),
                 Transform::from_xyz(
                     x as f32 + 0.5,
                     (MAP_SIZE_TILES[1] - y) as f32 - 0.5,
