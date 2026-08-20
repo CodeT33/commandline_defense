@@ -1,4 +1,5 @@
 use bevy::math::Vec2;
+use macros::my_custom_macro;
 
 pub const WINDOW_TITLE: &str = "2d game";
 pub const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
@@ -91,3 +92,4 @@ pub mod rendering_layers {
     pub const GRID_LABEL: f32 = 11.0;
     pub const HIGHLIGHT: f32 = 20.0;
 }
+my_custom_macro!(helo);
