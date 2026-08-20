@@ -53,15 +53,16 @@ pub mod ui {
         
         pub const GRID_POSITION_TILE_COLORS: GridTileColors = GridTileColors {
             none: Color::srgba(0.0, 0.0, 0.0, 0.0),
-            path_start: Color::srgba(1.0, 0.0, 1.0, 0.7),
-            path: Color::srgba(1.0, 1.0, 0.0, 0.7),
-            restricted: Color::srgba(1.0, 0.0, 0.0, 0.7),
-            placeable: Color::srgba(0.0, 1.0, 0.0, 0.7),
-            water: Color::srgba(0.0, 0.0, 1.0, 0.7),
+            path_start: Color::srgba(1.0, 0.5, 1.0, 0.9),
+            path: Color::srgba(1.0, 1.0, 0.5, 0.9),
+            restricted: Color::srgba(1.0, 0.5, 0.5, 0.9),
+            placeable: Color::srgba(0.5, 1.0, 0.5, 0.9),
+            water: Color::srgba(0.5, 0.5, 1.0, 0.9),
         };
 
         pub const GRID_LINE_THICKNESS: f32 = 0.025;
-        pub const GRID_LINE_COLOR: Color = Color::srgba(0.0, 1.0, 0.0, 0.3);
+        pub const GRID_LINE_COLOR: Color = Color::srgba(0.5, 1.0, 0.5, 0.2);
+        pub const GRID_CONTRAST_COLOR: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
     }
 }
 
@@ -115,6 +116,7 @@ pub mod paths {
 
 pub mod rendering_layers {
     pub const MAP: f32 = 0.0;
+    pub const CONTRAST: f32 = 1.0;
     pub const ENTITY: f32 = 5.0;
     pub const GRID: f32 = 10.0;
     pub const GRID_LABEL: f32 = 11.0;

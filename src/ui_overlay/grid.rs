@@ -1,12 +1,10 @@
+use bevy::asset::AssetServer;
 use bevy::color::Color;
 use crate::consts;
 use crate::consts::MAP_SIZE_TILES;
 use crate::consts::ui::grid::{GRID_LINE_THICKNESS};
 use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
-use bevy::prelude::{
-    Commands, Component, Query, Res, Sprite, Text2d, Transform, Vec2, Vec3, Visibility, With,
-    default,
-};
+use bevy::prelude::{Commands, Component, Query, Res, Sprite, Text2d, Transform, Vec2, Vec3, Visibility, With, default, SpriteImageMode, SpriteScalingMode};
 use bevy::text::*;
 use map_parsing::TileType;
 use crate::map::MapResource;
@@ -202,4 +200,21 @@ pub fn update_grid_preview(
     for mut visibility in &mut grid_overlay {
         *visibility = if visible { Visibility::Visible } else { Visibility::Hidden };
     }
+}
+
+pub fn spawn_contrast_overlay(commands: &mut Commands) {
+    commands.spawn((
+        Sprite {
+            color: consts::ui::grid::GRID_CONTRAST_COLOR,
+            custom_size: Option::from(Vec2::new(MAP_SIZE_TILES[0] as f32, MAP_SIZE_TILES[1] as f32)),
+            ..default()
+        },
+        Transform::from_xyz(
+            (consts::MAP_SIZE_TILES[0]/2) as f32,
+            (consts::MAP_SIZE_TILES[1]/2) as f32,
+            consts::rendering_layers::CONTRAST,
+        ),
+        GridOverlay,
+        Visibility::Hidden,
+    ));
 }
