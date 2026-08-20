@@ -1,10 +1,9 @@
-use bevy::asset::AssetServer;
 use bevy::color::Color;
 use crate::consts;
 use crate::consts::MAP_SIZE_TILES;
 use crate::consts::ui::grid::{GRID_LINE_THICKNESS};
 use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
-use bevy::prelude::{Commands, Component, Query, Res, Sprite, Text2d, Transform, Vec2, Vec3, Visibility, With, default, SpriteImageMode, SpriteScalingMode};
+use bevy::prelude::{Commands, Component, Query, Res, Sprite, Text2d, Transform, Vec2, Vec3, Visibility, With, default};
 use bevy::text::*;
 use map_parsing::TileType;
 use crate::map::MapResource;
@@ -127,7 +126,7 @@ pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &Res<MapResou
         for y in 0..MAP_SIZE_TILES[1] {
             let position = format!("{}{}", get_letter_from_number(y), x);
 
-            let tile_type: TileType = map_resource.0.return_tile_type(Vec2::new(x as f32,((MAP_SIZE_TILES[1]-y-1) as f32)));
+            let tile_type: TileType = map_resource.0.return_tile_type(Vec2::new(x as f32,(MAP_SIZE_TILES[1]-y-1) as f32));
             let text_color: Color = match tile_type {
                 TileType::None => consts::ui::grid::GRID_POSITION_TILE_COLORS.none,
                 TileType::PathStart => consts::ui::grid::GRID_POSITION_TILE_COLORS.path_start,
@@ -210,8 +209,8 @@ pub fn spawn_contrast_overlay(commands: &mut Commands) {
             ..default()
         },
         Transform::from_xyz(
-            (consts::MAP_SIZE_TILES[0]/2) as f32,
-            (consts::MAP_SIZE_TILES[1]/2) as f32,
+            (MAP_SIZE_TILES[0]/2) as f32,
+            (MAP_SIZE_TILES[1]/2) as f32,
             consts::rendering_layers::CONTRAST,
         ),
         GridOverlay,
