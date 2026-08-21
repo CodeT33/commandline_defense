@@ -13,7 +13,7 @@ pub struct Bullet {
 
 #[derive(Component)]
 pub struct BulletEmissionData {
-    last_spawn_time_ms: Option<u64>,
+    pub last_spawn_time_ms: Option<u64>,
     pub direction: Rot2,
     pub bullet_speed: f32,
     pub spawn_cooldown_ms: u32,

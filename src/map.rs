@@ -61,10 +61,4 @@ pub fn spawn_map(
             Transform::from_xyz(0.0, 0.0, consts::rendering_layers::ENTITY),
         ));
     }
-
-    for &tower_pos in &map.towers {
-        let mut data = BulletEmissionData::default();
-        data.direction = Rot2::degrees(180.0);
-        Tower::spawn(commands, asset_server, tower_pos, data, &mut tower_range_map);
-    }
 }

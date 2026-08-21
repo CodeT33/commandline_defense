@@ -4,10 +4,12 @@ use crate::game_cli::command_event_handling::PlaceTowerMessage;
 use avian2d::parry::glamx::U16Vec2;
 use bevy::asset::AssetServer;
 use bevy::ecs::entity::EntityHashSet;
+use bevy::math::Rot2;
 use bevy::prelude::{
     Commands, Component, Entity, MessageReader, Res, ResMut, Resource, Sprite, SpriteImageMode,
     SpriteScalingMode, Transform, default,
 };
+use crate::consts::towers::TowerAttributes;
 
 #[derive(Component, Default)]
 pub struct Tower {
@@ -61,16 +63,34 @@ pub fn handle_tower_placing_events(
     asset_server: Res<AssetServer>, mut tower_range_map: ResMut<TowerRangeMap>,
 ) {
     for message in messages.read() {
-        let tower_pos = U16Vec2::new(message.tower_pos.x, consts::MAP_SIZE_TILES[1] - message.tower_pos.y - 1);
-        let tower_type = message.tower_type;
 
-        println!("Balls {:?} at {:?}", tower_type, tower_pos);
+        let attributes: TowerAttributes = match message.tower_type {
+            TowerType::None => continue,
+            TowerType::AssaultTower => consts::towers::ASSAULT_TOWER_ATTRIBUTES,
+            TowerType::BoomTower => consts::towers::BOOM_TOWER_ATTRIBUTES,
+            TowerType::GatlingTower => consts::towers::GATLING_TOWER_ATTRIBUTES,
+            TowerType::SniperTower => consts::towers::SNIPER_TOWER_ATTRIBUTES,
+        };
+
+        let tower_pos = U16Vec2::new(message.tower_pos.x, consts::MAP_SIZE_TILES[1] - message.tower_pos.y - 1);
+        let bullet_emission_data: BulletEmissionData = BulletEmissionData{
+            last_spawn_time_ms: Some(0),
+            direction: Rot2::degrees(0.0),
+            bullet_speed: attributes.bullet_speed,
+            spawn_cooldown_ms: attributes.cooldown_ms,
+        };
+        let sprite: Sprite = Sprite {
+            image: asset_server.load(attributes.sprite.s0_0_0),
+            custom_size: attributes.size_tiles.into(),
+            image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
+            ..default()
+        };
 
         Tower::spawn(
             &mut commands,
-            &asset_server,
+            sprite,
             tower_pos,
-            BulletEmissionData::default(),
+            bullet_emission_data,
             &mut tower_range_map,
         );
     }
@@ -78,19 +98,14 @@ pub fn handle_tower_placing_events(
 
 impl Tower {
     pub fn spawn(
-        commands: &mut Commands, asset_server: &Res<AssetServer>, tower_pos: U16Vec2,
-        data: BulletEmissionData, tower_range_map: &mut ResMut<TowerRangeMap>,
+        commands: &mut Commands, sprite: Sprite, tower_pos: U16Vec2,
+        bullet_emission_data: BulletEmissionData, tower_range_map: &mut ResMut<TowerRangeMap>,
     ) {
         let entity = commands
             .spawn((
                 Tower::default(),
-                Sprite {
-                    image: asset_server.load(consts::assets::resource_packs::base_pack::towers::assault_tower::S0_0_0),
-                    custom_size: consts::TOWER_SIZE_TILES.into(),
-                    image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
-                    ..default()
-                },
-                data,
+                sprite,
+                bullet_emission_data,
                 Transform::from_xyz(
                     tower_pos[0] as f32 + 0.5,
                     tower_pos[1] as f32 + 0.5,

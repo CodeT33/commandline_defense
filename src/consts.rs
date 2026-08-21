@@ -7,7 +7,7 @@ pub const PHYSICS_FRAME_RATE: u16 = 144;
 pub const MAP_SIZE_TILES: [u16; 2] = [32, 16];
 pub const TILE_SIZE: u16 = 16;
 
-pub const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(2.0);
+pub const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 
 pub const ENEMY_COUNT: usize = 40;
 pub const ENEMY_SIZE_TILES: Vec2 = Vec2::splat(1.0);
@@ -22,6 +22,66 @@ pub const ENEMY_RADIUS: f32 = ENEMY_SIZE_TILES.x / 2.0;
 pub const ENEMY_PATH_DURATION_MS: u64 = 12000;
 
 pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
+
+pub mod towers {
+    use bevy::math::{U16Vec2, Vec2};
+    use crate::consts::assets;
+    use crate::consts::assets::resource_packs::base_pack::towers::boom_tower::S0_0_0;
+
+    pub struct TowerSpriteCollection<'a> {
+        //Maybe in the future something like this? [[String; 3]; 5]
+        pub s0_0_0: &'a str, 
+    }
+    
+    pub struct TowerAttributes<'a> {
+        pub size_tiles: Vec2,
+        pub range_tiles: U16Vec2,
+        pub cooldown_ms: u32,
+        pub bullet_speed: f32,
+        pub sprite: TowerSpriteCollection<'a>,
+    } 
+    
+    pub const ASSAULT_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
+        size_tiles: Vec2::splat(1.0),
+        range_tiles: U16Vec2::splat(3),
+        cooldown_ms: 1000,
+        bullet_speed: 10.0,
+        sprite: TowerSpriteCollection {
+            s0_0_0: assets::resource_packs::base_pack::towers::assault_tower::S0_0_0,
+        },
+    };
+
+    pub const BOOM_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
+        size_tiles: Vec2::splat(1.0),
+        range_tiles: U16Vec2::splat(2),
+        cooldown_ms: 3000,
+        bullet_speed: 6.0,
+        sprite: TowerSpriteCollection {
+            s0_0_0: assets::resource_packs::base_pack::towers::boom_tower::S0_0_0,
+        },
+    };
+
+
+    pub const GATLING_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
+        size_tiles: Vec2::splat(1.0),
+        range_tiles: U16Vec2::splat(4),
+        cooldown_ms: 300,
+        bullet_speed: 8.0,
+        sprite: TowerSpriteCollection {
+            s0_0_0: assets::resource_packs::base_pack::towers::gatling_tower::S0_0_0,
+        },
+    };
+
+    pub const SNIPER_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
+        size_tiles: Vec2::splat(1.0),
+        range_tiles: U16Vec2::splat(8),
+        cooldown_ms: 4000,
+        bullet_speed: 100.0,
+        sprite: TowerSpriteCollection {
+            s0_0_0: assets::resource_packs::base_pack::towers::sniper_tower::S0_0_0,
+        },
+    };
+}
 
 // ui
 pub mod ui {
