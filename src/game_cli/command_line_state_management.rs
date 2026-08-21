@@ -2,13 +2,12 @@ use crate::game_cli::command_line::CommandHistory;
 use crate::game_cli::send_command_event;
 use crate::tower::TowerType;
 use crate::ui_overlay::grid::get_number_from_letter;
-use avian2d::parry::glamx::Vec2;
+use crate::ui_overlay::selection::SelectionState;
 use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
 use bevy::math::U16Vec2;
 use bevy::prelude::{KeyCode, Message, MessageWriter, Query, Res, ResMut, Resource};
 use bevy::text::EditableText;
-use crate::ui_overlay::selection::SelectionState;
 
 #[derive(Resource, Default)]
 pub struct CommandState {
@@ -51,7 +50,7 @@ pub enum CommandEvent {
 pub fn handle_command_line_state(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
     mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
-    mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
+    mut history: ResMut<CommandHistory>, selection_state: ResMut<SelectionState>,
 ) {
     let Some(entity) = focus.get() else {
         return;

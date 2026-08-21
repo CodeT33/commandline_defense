@@ -81,10 +81,10 @@ fn main() {
 }
 
 fn setup(
-    mut commands: Commands, asset_server: Res<AssetServer>, tower_range_map: ResMut<TowerRangeMap>,
+    mut commands: Commands, asset_server: Res<AssetServer>,
     map_resource: Res<MapResource>,
 ) {
-    spawn_map(&mut commands, &asset_server, tower_range_map);
+    spawn_map(&mut commands, &asset_server);
     spawn_ui_overlay(&mut commands, &asset_server, &map_resource);
     spawn_game_cli(&mut commands);
     spawn_map_visual_layer(&mut commands, &asset_server);

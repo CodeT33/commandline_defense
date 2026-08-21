@@ -16,6 +16,7 @@ pub struct Tower {
     pub enemies_in_range: EntityHashSet,
 }
 
+#[warn(unused)]
 enum UpgradeLevel {
     SmallSchlongKongStrong,
     SchlongMediumIchKackeImTediRum,
@@ -24,11 +25,13 @@ enum UpgradeLevel {
     UnbreakableSnake,
 }
 
+#[warn(unused)]
 enum Effect {
     BallBoost,
     BigBirbMode,
 }
 
+#[warn(unused)]
 #[derive(Component)]
 pub struct TowerData {
     tower_type: TowerType,
@@ -85,11 +88,17 @@ pub fn handle_tower_placing_events(
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()
         };
+        let tower_data = TowerData {
+            tower_type: message.tower_type,
+            upgrade_level: UpgradeLevel::SmallSchlongKongStrong,
+            effects: vec![],
+        };
 
         Tower::spawn(
             &mut commands,
             sprite,
             tower_pos,
+            tower_data,
             bullet_emission_data,
             &mut tower_range_map,
         );
@@ -98,12 +107,13 @@ pub fn handle_tower_placing_events(
 
 impl Tower {
     pub fn spawn(
-        commands: &mut Commands, sprite: Sprite, tower_pos: U16Vec2,
+        commands: &mut Commands, sprite: Sprite, tower_pos: U16Vec2, tower_data: TowerData,
         bullet_emission_data: BulletEmissionData, tower_range_map: &mut ResMut<TowerRangeMap>,
     ) {
         let entity = commands
             .spawn((
                 Tower::default(),
+                tower_data,
                 sprite,
                 bullet_emission_data,
                 Transform::from_xyz(

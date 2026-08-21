@@ -1,11 +1,10 @@
-use crate::bullets::BulletEmissionData;
-use crate::consts;
 pub(crate) use crate::tower::{Tower, TowerRangeMap};
 use avian2d::prelude::*;
 use bevy::asset::AssetServer;
 use bevy::math::U16Vec2;
 use bevy::prelude::*;
 use map_parsing::GameMap;
+use crate::consts;
 
 #[derive(Resource, Clone)]
 pub struct Map {
@@ -42,7 +41,6 @@ impl Default for MapResource {
 
 pub fn spawn_map(
     commands: &mut Commands, asset_server: &Res<AssetServer>,
-    mut tower_range_map: ResMut<TowerRangeMap>,
 ) {
     let map = Map::default();
     commands.insert_resource(map.clone());

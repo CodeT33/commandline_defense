@@ -1,8 +1,6 @@
 use crate::game_cli::command_line_state_management::CommandEvent;
 use crate::tower::TowerType;
 use crate::ui_overlay::selection::SelectionState;
-use avian2d::parry::glamx::Vec2;
-use bevy::asset::AsyncWriteExt;
 use bevy::math::U16Vec2;
 use bevy::prelude::{Message, MessageReader, MessageWriter, ResMut};
 

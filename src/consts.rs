@@ -26,8 +26,7 @@ pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
 pub mod towers {
     use bevy::math::{U16Vec2, Vec2};
     use crate::consts::assets;
-    use crate::consts::assets::resource_packs::base_pack::towers::boom_tower::S0_0_0;
-
+    
     pub struct TowerSpriteCollection<'a> {
         //Maybe in the future something like this? [[String; 3]; 5]
         pub s0_0_0: &'a str, 
