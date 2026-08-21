@@ -8,11 +8,12 @@ use bevy::input_focus::InputFocus;
 use bevy::math::U16Vec2;
 use bevy::prelude::{KeyCode, Message, MessageWriter, Query, Res, ResMut, Resource};
 use bevy::text::EditableText;
+use crate::ui_overlay::selection::SelectionState;
 
 #[derive(Resource, Default)]
 pub struct CommandState {
     pub preview: PreviewCommand,
-    pub last_command: String,
+    pub last_input: String,
 }
 
 #[derive(Default)]
@@ -50,7 +51,7 @@ pub enum CommandEvent {
 pub fn handle_command_line_state(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
     mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
-    mut history: ResMut<CommandHistory>,
+    mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
 ) {
     let Some(entity) = focus.get() else {
         return;
@@ -61,14 +62,17 @@ pub fn handle_command_line_state(
 
     let current_input = input.value().to_string();
 
-    if current_input != command_state.last_command {
-        command_state.last_command = current_input.clone();
+    //Preview
+    if current_input != command_state.last_input {
+        command_state.last_input = current_input.clone();
         command_state.preview = parse_command_preview(&current_input);
-        println!("Preview changed: {:?}", current_input)
     }
 
+    //Submit
     if keys.just_pressed(KeyCode::Enter) {
-        if let Some(command) = parse_command_event(&current_input) {
+        let commands = parse_command_event(&current_input, selection_state.selected_tile);
+
+        for command in commands {
             send_command_event(command, &mut command_events);
             history.entries.push(current_input.clone());
             history.idx = history.entries.len();
@@ -76,64 +80,102 @@ pub fn handle_command_line_state(
 
         input.clear();
 
-        command_state.last_command.clear();
+        command_state.last_input.clear();
         command_state.preview = PreviewCommand::None;
     }
 }
 
 fn parse_command_preview(input: &str) -> PreviewCommand {
-    let tokens: Vec<&str> = input.split_whitespace().collect();
+    let mut preview = PreviewCommand::None;
 
-    let trimmed_input = input.trim();
+    for command_text in input.split(';') {
+        let command_text = command_text.trim();
 
-    if "select".starts_with(trimmed_input) && !"se".starts_with(trimmed_input) {
-        return PreviewCommand::ShowGrid;
+        if command_text.is_empty() {
+            continue;
+        }
+
+        let tokens: Vec<&str> = command_text.split_whitespace().collect();
+
+        match tokens.as_slice() {
+            ["show", "grid"] => return PreviewCommand::ShowGrid,
+            ["select"] => {
+                return PreviewCommand::ShowGrid;
+            },
+            ["select", position] => {
+                preview = match parse_tile_position(position) {
+                    Some(tile) => PreviewCommand::HighlightTile { tile },
+                    None => PreviewCommand::ShowGrid,
+                }
+            },
+            _ => {},
+        }
     }
-
-    match tokens.as_slice() {
-        ["select"] => PreviewCommand::ShowGrid,
-        ["show grid"] => PreviewCommand::ShowGrid,
-        ["show path"] => PreviewCommand::ShowPath,
-        ["show restricted"] => PreviewCommand::ShowRestricted,
-        ["show water"] => PreviewCommand::ShowWater,
-        ["show towers"] => PreviewCommand::ShowTowers,
-        ["show ranges"] => PreviewCommand::ShowRanges,
-        ["select", position] => match parse_tile_position(position) {
-            Some(tile) => PreviewCommand::HighlightTile { tile },
-            None => PreviewCommand::ShowGrid,
-        },
-        _ => PreviewCommand::None,
-    }
+    preview
 }
 
-fn parse_command_event(input: &str) -> Option<Command> {
-    let tokens: Vec<&str> = input.split_whitespace().collect();
+fn parse_command_event(input: &str, selected_tile: Option<U16Vec2>) -> Vec<Command> {
+    let mut commands = Vec::new();
 
-    match tokens.as_slice() {
-        ["help"] => Some(Command::Help),
-        ["select", position] => {
-            let tile = parse_tile_position(position)?;
-            Some(Command::Select { tile })
-        },
-        ["select", tower_pos, "place", tower_type] => {
-            let tower = parse_tower_type(tower_type)?;
-            Some(Command::Place { tower_type: tower, tower_pos: parse_tile_position(tower_pos)? })
-        },
-        ["deselect"] => Some(Command::Deselect),
-        ["exit", "game"] => Some(Command::ExitGame),
-        _ => {
-            println!("Unknown command: {:?}", input);
-            Some(Command::Help)
-        },
+    let mut current_selected_tile = selected_tile;
+
+    for command_text in input.split(';') {
+        let command_text = command_text.trim();
+
+        if command_text.is_empty() {
+            continue;
+        }
+
+        let tokens: Vec<&str> = command_text.split_whitespace().collect();
+
+        match tokens.as_slice() {
+            ["help"] => {
+                commands.push(Command::Help);
+            },
+            ["select", position] => {
+                let Some(tile) = parse_tile_position(position) else {
+                    println!("Invalid tile position: {:?}", position);
+                    continue;
+                };
+
+                current_selected_tile = Some(tile);
+
+                commands.push(Command::Select { tile });
+            },
+            ["place", tower_type] => {
+                let Some(tile) = current_selected_tile else {
+                    println!("Cannot place tower: no tile selected");
+                    continue;
+                };
+                let Some(tower_type) = parse_tower_type(tower_type) else {
+                    println!("Cannot place tower: unknown tower type: {:?}", tower_type);
+                    continue;
+                };
+
+                commands.push(Command::Place { tower_type, tower_pos: tile });
+            },
+            ["deselect"] => {
+                current_selected_tile = None;
+                commands.push(Command::Deselect);
+            },
+            ["exit", "game"] => {
+                commands.push(Command::ExitGame);
+            },
+            _ => {
+                println!("Unknown command: {:?}", command_text);
+                commands.push(Command::Help);
+            },
+        }
     }
+    commands
 }
 
 fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
     match tower_type_string {
-        "assault-tower" => Some(TowerType::AssaultTower),
-        "boom-tower" => Some(TowerType::BoomTower),
-        "gatling-tower" => Some(TowerType::GatlingTower),
-        "sniper-tower" => Some(TowerType::SniperTower),
+        "assault-bober" => Some(TowerType::AssaultTower),
+        "boom-bober" => Some(TowerType::BoomTower),
+        "gatling-bober" => Some(TowerType::GatlingTower),
+        "sniper-bober" => Some(TowerType::SniperTower),
         _ => {
             println!("Unknown tower type: {:?}", tower_type_string);
             Some(TowerType::None)
