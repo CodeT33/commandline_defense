@@ -15,7 +15,7 @@ pub struct Map {
 
 impl Default for Map {
     fn default() -> Self {
-        Self { enemies: 40, towers: (5..16).map(|x| U16Vec2::new(x, 3)).collect() }
+        Self { enemies: consts::ENEMY_COUNT, towers: vec![] }
     }
 }
 
@@ -52,7 +52,8 @@ pub fn spawn_map(
             Enemy { path_offset: index as f32 / enemy_count as f32, path_progress: 0.0 },
             Collider::circle(consts::ENEMY_RADIUS),
             Sprite {
-                image: asset_server.load(consts::assets::sprites::ENEMY),
+                image: asset_server
+                    .load(consts::assets::resource_packs::base_pack::towers::gatling_tower::S0_0_0),
                 custom_size: consts::ENEMY_SIZE_TILES.into(),
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()

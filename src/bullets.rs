@@ -24,8 +24,8 @@ impl Default for BulletEmissionData {
         Self {
             last_spawn_time_ms: None,
             direction: Rot2::degrees(0.0),
-            bullet_speed: 10.0,
-            spawn_cooldown_ms: 1000,
+            bullet_speed: consts::PROJECTILE_SPEED_TILES_PER_SECOND,
+            spawn_cooldown_ms: consts::TOWER_COOLDOWN_MS,
         }
     }
 }
@@ -112,7 +112,8 @@ pub fn tower_shooting(
                     consts::rendering_layers::ENTITY,
                 ),
                 Sprite {
-                    image: asset_server.load(consts::assets::sprites::APPLE),
+                    image: asset_server
+                        .load(consts::assets::resource_packs::base_pack::projectiles::METAL_BALL),
                     custom_size: consts::PROJECTILE_SIZE_TILES.into(),
                     ..default()
                 },
