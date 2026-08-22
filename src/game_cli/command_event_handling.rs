@@ -18,7 +18,9 @@ pub fn handle_command_events(
         match event {
             CommandEvent::Help => print_help(),
             CommandEvent::Select { tile } => select_tile(&mut selection_state, *tile),
-            CommandEvent::Place { tower_type, tower_pos } => place_tower(&mut messages, *tower_type, tower_pos),
+            CommandEvent::Place { tower_type, tower_pos } => {
+                place_tower(&mut messages, *tower_type, tower_pos)
+            },
             CommandEvent::Deselect => deselect_tile(&mut selection_state),
             CommandEvent::ExitGame => exit_game(),
         }
@@ -38,7 +40,7 @@ fn place_tower(
     messages: &mut MessageWriter<PlaceTowerMessage>, tower_type: TowerType, tower_pos: &U16Vec2,
 ) {
     println!("Placing tower {:?} at {:?}", tower_type, tower_pos);
-    messages.write(PlaceTowerMessage{ tower_type, tower_pos: *tower_pos });
+    messages.write(PlaceTowerMessage { tower_type, tower_pos: *tower_pos });
 }
 
 fn deselect_tile(selection_state: &mut SelectionState) {

@@ -24,22 +24,22 @@ pub const ENEMY_PATH_DURATION_MS: u64 = 12000;
 pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
 
 pub mod towers {
-    use bevy::math::{U16Vec2, Vec2};
     use crate::consts::assets;
-    
+    use bevy::math::{U16Vec2, Vec2};
+
     pub struct TowerSpriteCollection<'a> {
         //Maybe in the future something like this? [[String; 3]; 5]
-        pub s0_0_0: &'a str, 
+        pub s0_0_0: &'a str,
     }
-    
+
     pub struct TowerAttributes<'a> {
         pub size_tiles: Vec2,
         pub range_tiles: U16Vec2,
         pub cooldown_ms: u32,
         pub bullet_speed: f32,
         pub sprite: TowerSpriteCollection<'a>,
-    } 
-    
+    }
+
     pub const ASSAULT_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(3),
@@ -59,7 +59,6 @@ pub mod towers {
             s0_0_0: assets::resource_packs::base_pack::towers::boom_tower::S0_0_0,
         },
     };
-
 
     pub const GATLING_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
         size_tiles: Vec2::splat(1.0),
