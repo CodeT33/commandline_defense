@@ -15,7 +15,7 @@ pub struct Tower {
     pub enemies_in_range: EntityHashSet,
 }
 
-#[warn(unused)]
+#[allow(unused)]
 enum UpgradeLevel {
     SmallSchlongKongStrong,
     SchlongMediumIchKackeImTediRum,
@@ -24,13 +24,13 @@ enum UpgradeLevel {
     UnbreakableSnake,
 }
 
-#[warn(unused)]
+#[allow(unused)]
 enum Effect {
     BallBoost,
     BigBirbMode,
 }
 
-#[warn(unused)]
+#[allow(unused)]
 #[derive(Component)]
 pub struct TowerData {
     tower_type: TowerType,
