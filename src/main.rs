@@ -11,7 +11,9 @@ mod ui_overlay;
 
 use crate::bullets::{bullet_collisions, bullet_movement, rotate_towers, tower_shooting};
 use crate::camera::set_camera_position;
-use crate::collision::calculate_collisions;
+use crate::collision::{
+    CollisionEnded, CollisionStarted, CollisionSustained, calculate_collisions,
+};
 use crate::enemy::{move_enemies, update_towers_in_range};
 use crate::game_cli::command_event_handling::{PlaceTowerMessage, handle_command_events};
 use crate::game_cli::command_line::{CommandHistory, navigate_command_history};
@@ -57,6 +59,9 @@ fn main() {
         //messages
         .add_message::<CommandEvent>()
         .add_message::<PlaceTowerMessage>()
+        .add_message::<CollisionStarted>()
+        .add_message::<CollisionSustained>()
+        .add_message::<CollisionEnded>()
         //systems
         .add_systems(Startup, (setup, set_camera_position).chain())
         .add_systems(
