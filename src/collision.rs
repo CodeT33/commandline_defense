@@ -16,19 +16,40 @@ enum Collider {
 }
 
 #[derive(Component)]
-pub struct ColliderTypeA(ColliderShape);
+pub struct ColliderTypeA(pub ColliderShape);
 
 #[derive(Component)]
-pub struct ColliderTypeB(ColliderShape);
+pub struct ColliderTypeB(pub ColliderShape);
+
+pub struct CollisionPair {
+    pub type_a: Entity,
+    pub type_b: Entity,
+}
 
 #[derive(Message)]
-pub struct CollisionStarted(Entity, Entity);
+pub struct CollisionStarted(pub CollisionPair);
+
 #[derive(Message)]
-pub struct CollisionSustained(Entity, Entity);
+pub struct CollisionSustained(pub CollisionPair);
+
 #[derive(Message)]
-pub struct CollisionEnded(Entity, Entity);
+pub struct CollisionEnded(pub CollisionPair);
+
+impl CollisionPair {
+    pub fn new(type_a: Entity, type_b: Entity) -> Self {
+        Self { type_a, type_b }
+    }
+}
 
 impl ColliderShape {
+    pub fn circle(radius: f32) -> Self {
+        ColliderShape::Circle(Circle::new(radius))
+    }
+
+    pub fn rect(size: Vec2) -> Self {
+        ColliderShape::Rectangle(Rectangle::from_size(size))
+    }
+
     fn to_collider(self, position: Vec2) -> Collider {
         match self {
             ColliderShape::Rectangle(rect) => Collider::Aabb(Aabb2d::new(position, rect.half_size)),
@@ -75,14 +96,14 @@ pub fn calculate_collisions(
 
     for &pair in &new_collisions {
         if old_collisions.contains(&pair) {
-            sustained_writer.write(CollisionSustained(pair.0, pair.1));
+            sustained_writer.write(CollisionSustained(CollisionPair::new(pair.0, pair.1)));
             old_collisions.remove(&pair);
         } else {
-            started_writer.write(CollisionStarted(pair.0, pair.1));
+            started_writer.write(CollisionStarted(CollisionPair::new(pair.0, pair.1)));
         }
     }
     for &pair in &old_collisions {
-        ended_writer.write(CollisionEnded(pair.0, pair.1));
+        ended_writer.write(CollisionEnded(CollisionPair::new(pair.0, pair.1)));
     }
 
     std::mem::swap(&mut *old_collisions, &mut *new_collisions);

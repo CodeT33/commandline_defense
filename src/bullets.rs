@@ -1,7 +1,6 @@
-use crate::collision::CollisionStarted;
+use crate::collision::{ColliderShape, ColliderTypeB, CollisionPair, CollisionStarted};
 use crate::consts;
 use crate::map::{Enemy, Tower};
-use avian2d::prelude::*;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::f32::consts::PI;
@@ -103,10 +102,7 @@ pub fn tower_shooting(
                     velocity: data.direction * Vec2::X * data.bullet_speed,
                     spawn_time: shoot_time,
                 },
-                RigidBody::Kinematic,
-                Collider::circle(consts::PROJECTILE_RADIUS),
-                Sensor,
-                CollisionEventsEnabled,
+                ColliderTypeB(ColliderShape::circle(consts::PROJECTILE_RADIUS)),
                 Transform::from_xyz(
                     transform.translation.x,
                     transform.translation.y,
@@ -127,22 +123,12 @@ pub fn bullet_collisions(
     mut commands: Commands, mut collision_reader: MessageReader<CollisionStarted>,
     bullet_query: Query<(), With<Bullet>>, enemy_query: Query<(), With<Enemy>>,
 ) {
-    for event in collision_reader.read() {
-        let bullet = if bullet_query.contains(event.collider1) {
-            event.collider1
-        } else if bullet_query.contains(event.collider2) {
-            event.collider2
-        } else {
+    for &CollisionStarted(CollisionPair { type_a, type_b }) in collision_reader.read() {
+        if !enemy_query.contains(type_a) || !bullet_query.contains(type_b) {
             continue;
-        };
-        let enemy = if enemy_query.contains(event.collider1) {
-            event.collider1
-        } else if enemy_query.contains(event.collider2) {
-            event.collider2
-        } else {
-            continue;
-        };
-        commands.entity(bullet).try_despawn();
-        commands.entity(enemy).try_despawn();
+        }
+
+        commands.entity(type_a).try_despawn();
+        commands.entity(type_b).try_despawn();
     }
 }

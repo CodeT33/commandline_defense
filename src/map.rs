@@ -1,10 +1,10 @@
+use crate::collision::{ColliderShape, ColliderTypeA};
+use crate::consts;
 pub(crate) use crate::tower::{Tower, TowerRangeMap};
-use avian2d::prelude::*;
 use bevy::asset::AssetServer;
 use bevy::math::U16Vec2;
 use bevy::prelude::*;
 use map_parsing::GameMap;
-use crate::consts;
 
 #[derive(Resource, Clone)]
 pub struct Map {
@@ -39,16 +39,14 @@ impl Default for MapResource {
     }
 }
 
-pub fn spawn_map(
-    commands: &mut Commands, asset_server: &Res<AssetServer>,
-) {
+pub fn spawn_map(commands: &mut Commands, asset_server: &Res<AssetServer>) {
     let map = Map::default();
     commands.insert_resource(map.clone());
     let enemy_count = map.enemies;
     for index in 0..enemy_count {
         commands.spawn((
             Enemy { path_offset: index as f32 / enemy_count as f32, path_progress: 0.0 },
-            Collider::circle(consts::ENEMY_RADIUS),
+            ColliderTypeA(ColliderShape::circle(consts::ENEMY_RADIUS)),
             Sprite {
                 image: asset_server
                     .load(consts::assets::resource_packs::base_pack::towers::gatling_tower::S0_0_0),

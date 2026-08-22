@@ -2,10 +2,9 @@ use crate::consts;
 use crate::map::MapResource;
 use crate::ui_overlay::grid::{spawn_contrast_overlay, spawn_grid, spawn_grid_positions};
 use crate::ui_overlay::selection::spawn_tile_highlight;
-use avian2d::parry::glamx::Vec2;
 use bevy::asset::AssetServer;
 use bevy::prelude::{
-    Commands, Res, Sprite, SpriteImageMode, SpriteScalingMode, Transform, default,
+    Commands, Res, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
 };
 
 pub mod grid;

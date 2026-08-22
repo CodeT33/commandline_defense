@@ -1,9 +1,9 @@
 use crate::consts;
 use crate::consts::{MAP_SIZE_TILES, TILE_SIZE};
 use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
-use avian2d::parry::glamx::Vec2;
 use bevy::asset::AssetServer;
 use bevy::math::U16Vec2;
+use bevy::math::Vec2;
 use bevy::prelude::{
     Commands, Component, Query, Res, Resource, Sprite, SpriteImageMode, SpriteScalingMode,
     Transform, Visibility, With, default,
