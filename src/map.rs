@@ -46,7 +46,8 @@ pub fn spawn_map(commands: &mut Commands, asset_server: &Res<AssetServer>) {
     for index in 0..enemy_count {
         commands.spawn((
             Enemy { path_offset: index as f32 / enemy_count as f32, path_progress: 0.0 },
-            ColliderTypeA(ColliderShape::circle(consts::ENEMY_RADIUS)),
+            ColliderTypeA,
+            ColliderShape::circle(consts::ENEMY_RADIUS),
             Sprite {
                 image: asset_server
                     .load(consts::assets::resource_packs::base_pack::towers::gatling_tower::S0_0_0),

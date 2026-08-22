@@ -7,6 +7,7 @@ use bevy::prelude::{
     Commands, Res, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
 };
 
+pub mod debug;
 pub mod grid;
 pub mod selection;
 

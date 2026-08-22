@@ -24,6 +24,7 @@ use crate::game_cli::spawn_game_cli;
 use crate::game_map::map_rendering::spawn_map_visual_layer;
 use crate::map::{MapResource, TowerRangeMap, spawn_map};
 use crate::tower::handle_tower_placing_events;
+use crate::ui_overlay::debug::draw_bounding_boxes;
 use crate::ui_overlay::grid::update_grid_preview;
 use crate::ui_overlay::selection::{SelectionState, update_selected_tile};
 use crate::ui_overlay::spawn_ui_overlay;
@@ -80,6 +81,7 @@ fn main() {
         .add_systems(
             Update,
             (
+                draw_bounding_boxes,
                 update_grid_preview,
                 update_selected_tile,
                 handle_command_events,

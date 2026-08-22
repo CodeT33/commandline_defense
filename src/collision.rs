@@ -1,10 +1,11 @@
 use bevy::math::bounding::{Aabb2d, BoundingCircle, IntersectsVolume};
 use bevy::prelude::{
     Circle, Component, Entity, Local, Message, MessageWriter, Query, Rectangle, Transform, Vec2,
+    With,
 };
 use std::collections::HashSet;
 
-#[derive(Copy, Clone)]
+#[derive(Component, Copy, Clone)]
 pub enum ColliderShape {
     Rectangle(Rectangle),
     Circle(Circle),
@@ -16,10 +17,10 @@ enum Collider {
 }
 
 #[derive(Component)]
-pub struct ColliderTypeA(pub ColliderShape);
+pub struct ColliderTypeA;
 
 #[derive(Component)]
-pub struct ColliderTypeB(pub ColliderShape);
+pub struct ColliderTypeB;
 
 pub struct CollisionPair {
     pub type_a: Entity,
@@ -73,8 +74,8 @@ impl Collider {
 }
 
 pub fn calculate_collisions(
-    type_a: Query<(Entity, &ColliderTypeA, &Transform)>,
-    type_b: Query<(Entity, &ColliderTypeB, &Transform)>,
+    type_a: Query<(Entity, &ColliderShape, &Transform), With<ColliderTypeA>>,
+    type_b: Query<(Entity, &ColliderShape, &Transform), With<ColliderTypeB>>,
     mut old_collisions: Local<HashSet<(Entity, Entity)>>,
     mut new_collisions: Local<HashSet<(Entity, Entity)>>,
     mut started_writer: MessageWriter<CollisionStarted>,
@@ -82,11 +83,11 @@ pub fn calculate_collisions(
     mut ended_writer: MessageWriter<CollisionEnded>,
 ) {
     new_collisions.clear();
-    for (entity_a, type_a, tf_a) in type_a.iter() {
-        let col_a = type_a.0.to_collider(tf_a.translation.truncate());
+    for (entity_a, col_a, tf_a) in type_a.iter() {
+        let col_a = col_a.to_collider(tf_a.translation.truncate());
 
-        for (entity_b, type_b, tf_b) in type_b.iter() {
-            let col_b = type_b.0.to_collider(tf_b.translation.truncate());
+        for (entity_b, col_b, tf_b) in type_b.iter() {
+            let col_b = col_b.to_collider(tf_b.translation.truncate());
 
             if col_a.intersects(&col_b) {
                 new_collisions.insert((entity_a, entity_b));

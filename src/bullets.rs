@@ -102,7 +102,8 @@ pub fn tower_shooting(
                     velocity: data.direction * Vec2::X * data.bullet_speed,
                     spawn_time: shoot_time,
                 },
-                ColliderTypeB(ColliderShape::circle(consts::PROJECTILE_RADIUS)),
+                ColliderTypeB,
+                ColliderShape::circle(consts::PROJECTILE_RADIUS),
                 Transform::from_xyz(
                     transform.translation.x,
                     transform.translation.y,
