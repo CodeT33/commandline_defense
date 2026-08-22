@@ -1,4 +1,4 @@
-use bevy::math::Vec2;
+use bevy::prelude::Vec2;
 use macros::generate_dir_structure_as_modules;
 
 pub const WINDOW_TITLE: &str = "2d game";
@@ -83,9 +83,12 @@ pub mod towers {
 
 // ui
 pub mod ui {
+    use bevy::prelude::Color;
+
+    pub const BOUNDING_BOX_DEBUG_COLOR: Color = Color::hsv(0.3, 1.0, 1.0);
+
     pub mod grid {
-        use bevy::color::Color;
-        use bevy::prelude::FontWeight;
+        use bevy::prelude::{Color, FontWeight};
 
         pub struct FontSettings {
             pub font_size: f32,

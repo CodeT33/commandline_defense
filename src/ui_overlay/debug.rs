@@ -1,6 +1,7 @@
 use crate::collision::ColliderShape;
+use crate::consts;
 use bevy::math::Isometry2d;
-use bevy::prelude::{Color, Gizmos, Query, Transform};
+use bevy::prelude::{Gizmos, Query, Transform};
 
 pub fn draw_bounding_boxes(q: Query<(&ColliderShape, &Transform)>, mut gizmos: Gizmos) {
     for (shape, transform) in q.iter() {
@@ -8,13 +9,13 @@ pub fn draw_bounding_boxes(q: Query<(&ColliderShape, &Transform)>, mut gizmos: G
             ColliderShape::Rectangle(rect) => gizmos.rect_2d(
                 Isometry2d::from_translation(transform.translation.truncate()),
                 rect.half_size * 2.0,
-                Color::hsv(0.3, 1.0, 1.0),
+                consts::ui::BOUNDING_BOX_DEBUG_COLOR,
             ),
             ColliderShape::Circle(circle) => {
                 gizmos.circle_2d(
                     Isometry2d::from_translation(transform.translation.truncate()),
                     circle.radius,
-                    Color::hsv(0.3, 1.0, 1.0),
+                    consts::ui::BOUNDING_BOX_DEBUG_COLOR,
                 );
             },
         }
