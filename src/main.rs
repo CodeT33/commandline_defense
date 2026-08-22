@@ -1,5 +1,6 @@
 mod bullets;
 mod camera;
+pub mod collision;
 pub mod consts;
 pub mod enemy;
 pub mod game_cli;
@@ -10,6 +11,7 @@ mod ui_overlay;
 
 use crate::bullets::{bullet_collisions, bullet_movement, rotate_towers, tower_shooting};
 use crate::camera::set_camera_position;
+use crate::collision::calculate_collisions;
 use crate::enemy::{move_enemies, update_towers_in_range};
 use crate::game_cli::command_event_handling::{PlaceTowerMessage, handle_command_events};
 use crate::game_cli::command_line::{CommandHistory, navigate_command_history};
@@ -23,7 +25,6 @@ use crate::tower::handle_tower_placing_events;
 use crate::ui_overlay::grid::update_grid_preview;
 use crate::ui_overlay::selection::{SelectionState, update_selected_tile};
 use crate::ui_overlay::spawn_ui_overlay;
-use avian2d::prelude::{PhysicsPlugins, PhysicsSystems};
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
@@ -46,7 +47,6 @@ fn main() {
                 .set(AssetPlugin { file_path: "./".to_owned(), ..default() }),
         )
         .add_plugins(TabNavigationPlugin)
-        .add_plugins(PhysicsPlugins::default())
         //resources
         .init_resource::<CommandState>()
         .init_resource::<SelectionState>()
@@ -61,10 +61,17 @@ fn main() {
         .add_systems(Startup, (setup, set_camera_position).chain())
         .add_systems(
             FixedUpdate,
-            (move_enemies, update_towers_in_range, rotate_towers, tower_shooting, bullet_movement)
+            (
+                move_enemies,
+                update_towers_in_range,
+                rotate_towers,
+                tower_shooting,
+                bullet_movement,
+                calculate_collisions,
+                bullet_collisions,
+            )
                 .chain(),
         )
-        .add_systems(FixedPostUpdate, bullet_collisions.after(PhysicsSystems::StepSimulation))
         .add_systems(
             Update,
             (
@@ -80,10 +87,7 @@ fn main() {
         .run();
 }
 
-fn setup(
-    mut commands: Commands, asset_server: Res<AssetServer>,
-    map_resource: Res<MapResource>,
-) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>, map_resource: Res<MapResource>) {
     spawn_map(&mut commands, &asset_server);
     spawn_ui_overlay(&mut commands, &asset_server, &map_resource);
     spawn_game_cli(&mut commands);

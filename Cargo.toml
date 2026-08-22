@@ -18,7 +18,6 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-avian2d = "0.7"
 bevy = { version = "0.19", default-features = false, features = ["2d", "ui", "jpeg"] }
 rand = "0.10.2"
 map_parsing = { path = "./map_parsing" }

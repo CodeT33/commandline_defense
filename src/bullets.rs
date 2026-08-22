@@ -1,3 +1,4 @@
+use crate::collision::CollisionStarted;
 use crate::consts;
 use crate::map::{Enemy, Tower};
 use avian2d::prelude::*;
@@ -123,7 +124,7 @@ pub fn tower_shooting(
 }
 
 pub fn bullet_collisions(
-    mut commands: Commands, mut collision_reader: MessageReader<CollisionStart>,
+    mut commands: Commands, mut collision_reader: MessageReader<CollisionStarted>,
     bullet_query: Query<(), With<Bullet>>, enemy_query: Query<(), With<Enemy>>,
 ) {
     for event in collision_reader.read() {
