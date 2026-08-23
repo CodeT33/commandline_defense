@@ -4,6 +4,7 @@ use macros::generate_dir_structure_as_modules;
 
 pub const WINDOW_TITLE: &str = "2d game";
 pub const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
+
 pub const PHYSICS_FRAME_RATE: u16 = 144;
 
 pub const MAP_SIZE_TILES: U16Vec2 = U16Vec2 { x: 32, y: 16 };
@@ -24,6 +25,20 @@ pub const ENEMY_RADIUS: f32 = ENEMY_SIZE_TILES.x / 2.0;
 pub const ENEMY_PATH_DURATION_MS: u64 = 12000;
 
 pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
+
+pub mod viewports {
+    pub struct Viewport {
+        pub min_zoom: f32,
+        pub max_zoom: f32,
+        pub zoom_speed: f32,
+    }
+
+    pub const BASIC_CAMERA: Viewport = Viewport {
+        min_zoom: 0.01,
+        max_zoom: 0.5,
+        zoom_speed: 0.1,
+    };
+}
 
 pub mod map_logic_parsing {
     pub struct LogicGridTileColors {

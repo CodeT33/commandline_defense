@@ -10,7 +10,7 @@ pub mod tower;
 mod ui_overlay;
 
 use crate::bullets::{bullet_collisions, bullet_movement, rotate_towers, tower_shooting};
-use crate::camera::set_camera_position;
+use crate::camera::{camera_zoom_and_pan, set_camera_position};
 use crate::collision::{
     CollisionEnded, CollisionStarted, CollisionSustained, calculate_collisions,
 };
@@ -85,6 +85,7 @@ fn main() {
                 draw_bounding_boxes.run_if(|debug_settings: Res<DebugSettings>| {
                     debug_settings.enable_bounding_boxes
                 }),
+                camera_zoom_and_pan,
                 update_grid_preview,
                 update_selected_tile,
                 handle_command_events,
