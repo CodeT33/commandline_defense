@@ -1,6 +1,6 @@
 use crate::collision::{ColliderShape, ColliderTypeB, CollisionPair, CollisionStarted};
 use crate::consts;
-use crate::map::{Enemy, Tower};
+use crate::game_map::map::{Enemy, Tower};
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::f32::consts::PI;

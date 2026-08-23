@@ -1,8 +1,8 @@
 use crate::consts;
-use crate::consts::{MAP_SIZE_TILES, TILE_SIZE};
+use crate::consts::TILE_SIZE;
+use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
 use bevy::asset::AssetServer;
-use bevy::math::U16Vec2;
 use bevy::math::Vec2;
 use bevy::prelude::{
     Commands, Component, Query, Res, Resource, Sprite, SpriteImageMode, SpriteScalingMode,
@@ -11,7 +11,7 @@ use bevy::prelude::{
 
 #[derive(Resource, Default)]
 pub struct SelectionState {
-    pub selected_tile: Option<U16Vec2>,
+    pub selected_tile: Option<GridCoordinate>,
 }
 
 #[derive(Component)]
@@ -45,8 +45,8 @@ pub fn update_selected_tile(
 
     match tile {
         Some(tile) => {
-            transform.translation.x = tile.x as f32 + 0.5;
-            transform.translation.y = (MAP_SIZE_TILES[1] as f32) - tile.y as f32 - 0.5;
+            transform.translation.x = tile.position.x as f32 + 0.5;
+            transform.translation.y = tile.position.y as f32 + 0.5;
 
             *visibility = Visibility::Visible
         },

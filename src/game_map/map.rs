@@ -1,10 +1,10 @@
 use crate::collision::{ColliderShape, ColliderTypeA};
 use crate::consts;
+use crate::game_map::map_logic_parsing::GameMap;
 pub(crate) use crate::tower::{Tower, TowerRangeMap};
 use bevy::asset::AssetServer;
 use bevy::math::U16Vec2;
 use bevy::prelude::*;
-use map_parsing::GameMap;
 
 #[derive(Resource, Clone)]
 pub struct Map {
@@ -32,7 +32,7 @@ impl Default for MapResource {
         MapResource(
             GameMap::load(
                 consts::assets::maps::one_bit_castle::LOGIC_LAYER,
-                consts::MAP_SIZE_TILES.into(),
+                consts::MAP_SIZE_TILES,
             )
             .expect("Could not load game map"),
         )

@@ -1,6 +1,7 @@
 use crate::bullets::BulletEmissionData;
 use crate::consts;
 use crate::consts::towers::TowerAttributes;
+use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_event_handling::PlaceTowerMessage;
 use bevy::asset::AssetServer;
 use bevy::ecs::entity::EntityHashSet;
@@ -55,7 +56,7 @@ pub enum TowerType {
 
 impl Default for TowerRangeMap {
     fn default() -> Self {
-        let size = U16Vec2::from_array(consts::MAP_SIZE_TILES);
+        let size = U16Vec2::from_array(<[u16; 2]>::from(consts::MAP_SIZE_TILES));
         Self { size, towers_in_range: vec![Vec::new(); (size.x * size.y) as usize] }
     }
 }
@@ -74,7 +75,7 @@ pub fn handle_tower_placing_events(
         };
 
         let tower_pos =
-            U16Vec2::new(message.tower_pos.x, consts::MAP_SIZE_TILES[1] - message.tower_pos.y - 1);
+            GridCoordinate::new(message.tower_pos.position.x, message.tower_pos.position.y);
         let bullet_emission_data: BulletEmissionData = BulletEmissionData {
             last_spawn_time_ms: Some(0),
             direction: Rot2::degrees(0.0),
@@ -106,7 +107,7 @@ pub fn handle_tower_placing_events(
 
 impl Tower {
     pub fn spawn(
-        commands: &mut Commands, sprite: Sprite, tower_pos: U16Vec2, tower_data: TowerData,
+        commands: &mut Commands, sprite: Sprite, tower_pos: GridCoordinate, tower_data: TowerData,
         bullet_emission_data: BulletEmissionData, tower_range_map: &mut ResMut<TowerRangeMap>,
     ) {
         let entity = commands
@@ -116,8 +117,8 @@ impl Tower {
                 sprite,
                 bullet_emission_data,
                 Transform::from_xyz(
-                    tower_pos[0] as f32 + 0.5,
-                    tower_pos[1] as f32 + 0.5,
+                    tower_pos.position.x as f32 + 0.5,
+                    tower_pos.position.y as f32 + 0.5,
                     consts::rendering_layers::ENTITY,
                 ),
             ))
@@ -133,15 +134,15 @@ impl TowerRangeMap {
         }
     }
 
-    pub fn range_bounds(&self, pos_tiles: U16Vec2, range_tiles: u16) -> (U16Vec2, U16Vec2) {
-        let center = pos_tiles;
+    pub fn range_bounds(&self, pos_tiles: GridCoordinate, range_tiles: u16) -> (U16Vec2, U16Vec2) {
+        let center = pos_tiles.position;
         let range = U16Vec2::splat(range_tiles);
         let min = center.saturating_sub(range);
         let max = center.saturating_add(range).min(self.size.saturating_sub(U16Vec2::ONE));
         (min, max)
     }
 
-    pub fn add_range_rect(&mut self, pos_tiles: U16Vec2, range_tiles: u16, entity: Entity) {
+    pub fn add_range_rect(&mut self, pos_tiles: GridCoordinate, range_tiles: u16, entity: Entity) {
         let (min, max) = self.range_bounds(pos_tiles, range_tiles);
         for y in min.y..=max.y {
             for x in min.x..=max.x {
@@ -150,8 +151,8 @@ impl TowerRangeMap {
         }
     }
 
-    pub fn towers_in_range_at(&self, tile: U16Vec2) -> &[Entity] {
-        let index = tile.y as usize * self.size.x as usize + tile.x as usize;
+    pub fn towers_in_range_at(&self, tile: GridCoordinate) -> &[Entity] {
+        let index = tile.position.y as usize * self.size.x as usize + tile.position.x as usize;
         &self.towers_in_range[index]
     }
 }

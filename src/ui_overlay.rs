@@ -1,5 +1,5 @@
 use crate::consts;
-use crate::map::MapResource;
+use crate::game_map::map::MapResource;
 use crate::ui_overlay::grid::{spawn_contrast_overlay, spawn_grid, spawn_grid_positions};
 use crate::ui_overlay::selection::spawn_tile_highlight;
 use bevy::asset::AssetServer;
@@ -14,8 +14,8 @@ pub mod selection;
 pub fn spawn_ui_overlay(
     commands: &mut Commands, asset_server: &AssetServer, map_resource: &Res<MapResource>,
 ) {
-    spawn_contrast_overlay(commands);
-    spawn_grid(commands);
+    spawn_contrast_overlay(commands, map_resource);
+    spawn_grid(commands, map_resource);
     spawn_grid_positions(commands, map_resource);
     spawn_tile_highlight(commands, asset_server);
     spawn_map_border(commands, asset_server);

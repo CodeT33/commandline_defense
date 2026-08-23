@@ -73,17 +73,3 @@ fn set_input_text(input: &mut EditableText, text: &str) {
     input.editor_mut().set_text(text);
     input.queue_edit(TextEdit::TextEnd(false));
 }
-
-/*
-
-select (temp show grid and grid positions)
-
-select 4c (highlight c4)
-
-deselect (reset highlighting)
-
-path (temp highlights the path)
-
-exit game (exit game)
-
- */

@@ -1,38 +1,52 @@
 use std::f32;
 
 use crate::consts;
-use crate::map::{Enemy, MapResource, Tower, TowerRangeMap};
+use crate::coordinates::GridCoordinate;
+use crate::game_map::map::{Enemy, MapResource, Tower, TowerRangeMap};
+use crate::game_map::map_logic_parsing::EnemyPath;
 use bevy::math::U16Vec2;
 use bevy::prelude::*;
-use map_parsing::EnemyPath;
 
 pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
     let progress = progress.clamp(0.0, 1.0);
-    let len = path.get_length();
-    let target_pos = len as f32 * progress;
-    let mut current_len = 0;
+
+    let Some(start) = path.corners().first() else {
+        return Transform::IDENTITY;
+    };
+
+    if path.corners().len() < 2 {
+        let position = start.position.as_vec2() + Vec2::splat(0.5);
+
+        return Transform::from_translation(position.extend(consts::rendering_layers::ENTITY));
+    }
+
+    let path_length = path.get_length() as f32;
+    let target_distance = path_length * progress;
+
+    let mut current_len = 0.0;
 
     for both in path.corners().windows(2) {
         let a = both[0];
         let b = both[1];
 
-        let segment_len = (a.max(b) - a.min(b)).max_element();
-        let new_len = current_len + segment_len;
+        let segment_len = (a.position.max(b.position) - a.position.min(b.position)).max_element();
+        let new_len = current_len + segment_len as f32;
 
-        if (new_len as f32) < target_pos {
+        if (new_len) < target_distance {
             current_len = new_len;
             continue;
         }
 
-        let normalized_diff = (b.as_vec2() - a.as_vec2()).normalize();
-        let pos =
-            a.as_vec2() + (normalized_diff * (target_pos - current_len as f32)) + Vec2::splat(0.5);
+        let normalized_diff = (b.position.as_vec2() - a.position.as_vec2()).normalize();
+        let pos = a.position.as_vec2()
+            + (normalized_diff * (target_distance - current_len))
+            + Vec2::splat(0.5);
         return Transform::from_translation(pos.extend(consts::rendering_layers::ENTITY))
             .with_rotation(Quat::from_rotation_z(
                 normalized_diff.to_angle() - f32::consts::FRAC_PI_2,
             ));
     }
-    let pos = path.corners().last().unwrap().as_vec2() + Vec2::splat(0.5);
+    let pos = path.corners().last().unwrap().position.as_vec2() + Vec2::splat(0.5);
     Transform::from_translation(pos.extend(consts::rendering_layers::ENTITY))
 }
 
@@ -62,7 +76,9 @@ pub fn update_towers_in_range(
             consts::ENEMY_SIZE_TILES,
             tower_range_map.size,
         ) {
-            for &tower_entity in tower_range_map.towers_in_range_at(tile) {
+            for &tower_entity in
+                tower_range_map.towers_in_range_at(GridCoordinate { position: tile })
+            {
                 towers.get_mut(tower_entity).unwrap().enemies_in_range.insert(entity);
             }
         }

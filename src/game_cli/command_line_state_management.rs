@@ -1,3 +1,4 @@
+use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_line::CommandHistory;
 use crate::game_cli::send_command_event;
 use crate::tower::TowerType;
@@ -5,7 +6,6 @@ use crate::ui_overlay::grid::get_number_from_letter;
 use crate::ui_overlay::selection::SelectionState;
 use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
-use bevy::math::U16Vec2;
 use bevy::prelude::{KeyCode, Message, MessageWriter, Query, Res, ResMut, Resource};
 use bevy::text::EditableText;
 
@@ -26,14 +26,14 @@ pub enum PreviewCommand {
     ShowTowers,
     ShowRanges,
     HighlightTile {
-        tile: U16Vec2,
+        tile: GridCoordinate,
     },
 }
 
 pub enum Command {
     Help,
-    Select { tile: U16Vec2 },
-    Place { tower_type: TowerType, tower_pos: U16Vec2 },
+    Select { tile: GridCoordinate },
+    Place { tower_type: TowerType, tower_pos: GridCoordinate },
     Deselect,
     ExitGame,
 }
@@ -41,8 +41,8 @@ pub enum Command {
 #[derive(Message, Debug)]
 pub enum CommandEvent {
     Help,
-    Select { tile: U16Vec2 },
-    Place { tower_type: TowerType, tower_pos: U16Vec2 },
+    Select { tile: GridCoordinate },
+    Place { tower_type: TowerType, tower_pos: GridCoordinate },
     Deselect,
     ExitGame,
 }
@@ -113,7 +113,7 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
     preview
 }
 
-fn parse_command_event(input: &str, selected_tile: Option<U16Vec2>) -> Vec<Command> {
+fn parse_command_event(input: &str, selected_tile: Option<GridCoordinate>) -> Vec<Command> {
     let mut commands = Vec::new();
 
     let mut current_selected_tile = selected_tile;
@@ -182,7 +182,7 @@ fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
     }
 }
 
-fn parse_tile_position(position: &str) -> Option<U16Vec2> {
+fn parse_tile_position(position: &str) -> Option<GridCoordinate> {
     let position = position.to_ascii_uppercase();
 
     let mut number = String::new();
@@ -206,5 +206,5 @@ fn parse_tile_position(position: &str) -> Option<U16Vec2> {
     let x: u16 = number.parse().ok()?;
     let y: u16 = get_number_from_letter(letter?)?;
 
-    Some(U16Vec2::new(x, y))
+    Some(GridCoordinate::new(x, y))
 }

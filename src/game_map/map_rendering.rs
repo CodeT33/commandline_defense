@@ -1,10 +1,15 @@
 use crate::consts;
+use crate::game_map::map::MapResource;
 use bevy::asset::AssetServer;
 use bevy::prelude::{
     Commands, Res, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
 };
 
-pub fn spawn_map_visual_layer(commands: &mut Commands, asset_server: &Res<AssetServer>) {
+pub fn spawn_map_visual_layer(
+    commands: &mut Commands, asset_server: &Res<AssetServer>, map_resource: &Res<MapResource>,
+) {
+    let map_size = map_resource.0.map_tiles.map_size;
+
     commands.spawn((
         Sprite {
             image: asset_server.load(consts::assets::maps::one_bit_castle::VISUAL_LAYER),
@@ -13,8 +18,8 @@ pub fn spawn_map_visual_layer(commands: &mut Commands, asset_server: &Res<AssetS
             ..default()
         },
         Transform::from_xyz(
-            consts::MAP_SIZE_TILES[0] as f32 / 2.0,
-            consts::MAP_SIZE_TILES[1] as f32 / 2.0,
+            map_size.x as f32 / 2.0,
+            map_size.y as f32 / 2.0,
             consts::rendering_layers::MAP,
         ),
     ));

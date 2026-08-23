@@ -2,10 +2,10 @@ mod bullets;
 mod camera;
 pub mod collision;
 pub mod consts;
+pub mod coordinates;
 pub mod enemy;
 pub mod game_cli;
 pub mod game_map;
-pub mod map;
 pub mod tower;
 mod ui_overlay;
 
@@ -22,7 +22,6 @@ use crate::game_cli::command_line_state_management::{
 };
 use crate::game_cli::spawn_game_cli;
 use crate::game_map::map_rendering::spawn_map_visual_layer;
-use crate::map::{MapResource, TowerRangeMap, spawn_map};
 use crate::tower::handle_tower_placing_events;
 use crate::ui_overlay::debug::{DebugSettings, draw_bounding_boxes};
 use crate::ui_overlay::grid::update_grid_preview;
@@ -31,6 +30,7 @@ use crate::ui_overlay::spawn_ui_overlay;
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
+use game_map::map::{MapResource, TowerRangeMap, spawn_map};
 
 fn main() {
     App::new()
@@ -90,7 +90,6 @@ fn main() {
                 handle_command_events,
                 handle_command_line_state,
                 navigate_command_history,
-                set_camera_position,
                 handle_tower_placing_events,
             ),
         )
@@ -101,6 +100,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, map_resource: R
     spawn_map(&mut commands, &asset_server);
     spawn_ui_overlay(&mut commands, &asset_server, &map_resource);
     spawn_game_cli(&mut commands);
-    spawn_map_visual_layer(&mut commands, &asset_server);
+    spawn_map_visual_layer(&mut commands, &asset_server, &map_resource);
     commands.spawn((Camera2d, IsDefaultUiCamera));
 }

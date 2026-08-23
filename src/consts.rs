@@ -1,10 +1,12 @@
+use bevy::math::U16Vec2;
 use bevy::prelude::Vec2;
 use macros::generate_dir_structure_as_modules;
 
 pub const WINDOW_TITLE: &str = "2d game";
 pub const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
 pub const PHYSICS_FRAME_RATE: u16 = 144;
-pub const MAP_SIZE_TILES: [u16; 2] = [32, 16];
+
+pub const MAP_SIZE_TILES: U16Vec2 = U16Vec2 { x: 32, y: 16 };
 pub const TILE_SIZE: u16 = 16;
 
 pub const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
@@ -22,6 +24,24 @@ pub const ENEMY_RADIUS: f32 = ENEMY_SIZE_TILES.x / 2.0;
 pub const ENEMY_PATH_DURATION_MS: u64 = 12000;
 
 pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
+
+pub mod map_logic_parsing {
+    pub struct LogicGridTileColors {
+        pub path_start: u32,
+        pub path: u32,
+        pub restricted: u32,
+        pub placeable: u32,
+        pub water: u32,
+    }
+
+    pub const LOGIC_GRID_TILE_COLORS: LogicGridTileColors = LogicGridTileColors {
+        path_start: 0xff00ff,
+        path: 0xffff00,
+        restricted: 0xff0000,
+        placeable: 0x00ff00,
+        water: 0x0000ff,
+    };
+}
 
 pub mod towers {
     use crate::consts::assets;

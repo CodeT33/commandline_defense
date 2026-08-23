@@ -1,79 +1,22 @@
 use crate::consts;
-use crate::consts::MAP_SIZE_TILES;
 use crate::consts::ui::grid::GRID_LINE_THICKNESS;
+use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
-use crate::map::MapResource;
-use bevy::color::Color;
+use crate::game_map::map::MapResource;
+use crate::game_map::map_logic_parsing::TileType;
 use bevy::prelude::{
     Commands, Component, Query, Res, Sprite, Text2d, Transform, Vec2, Vec3, Visibility, With,
     default,
 };
 use bevy::text::*;
-use map_parsing::TileType;
 
-fn get_letter_from_number(number: u16) -> char {
-    match number {
-        0 => 'A',
-        1 => 'B',
-        2 => 'C',
-        3 => 'D',
-        4 => 'E',
-        5 => 'F',
-        6 => 'G',
-        7 => 'H',
-        8 => 'I',
-        9 => 'J',
-        10 => 'K',
-        11 => 'L',
-        12 => 'M',
-        13 => 'N',
-        14 => 'O',
-        15 => 'P',
-        16 => 'Q',
-        17 => 'R',
-        18 => 'S',
-        19 => 'T',
-        20 => 'U',
-        21 => 'V',
-        22 => 'W',
-        23 => 'X',
-        24 => 'Y',
-        25 => 'Z',
-        _ => '_',
-    }
+pub fn get_letter_from_number(number: u16) -> char {
+    if number < 26 { (b'A' + number as u8) as char } else { '_' }
 }
 
 pub fn get_number_from_letter(letter: char) -> Option<u16> {
-    match letter.to_ascii_uppercase() {
-        'A' => Some(0),
-        'B' => Some(1),
-        'C' => Some(2),
-        'D' => Some(3),
-        'E' => Some(4),
-        'F' => Some(5),
-        'G' => Some(6),
-        'H' => Some(7),
-        'I' => Some(8),
-        'J' => Some(9),
-        'K' => Some(10),
-        'L' => Some(11),
-        'M' => Some(12),
-        'N' => Some(13),
-        'O' => Some(14),
-        'P' => Some(15),
-        'Q' => Some(16),
-        'R' => Some(17),
-        'S' => Some(18),
-        'T' => Some(19),
-        'U' => Some(20),
-        'V' => Some(21),
-        'W' => Some(22),
-        'X' => Some(23),
-        'Y' => Some(24),
-        'Z' => Some(25),
-
-        _ => None,
-    }
+    let letter = letter.to_ascii_uppercase();
+    if letter.is_ascii_uppercase() { Some((letter as u8 - b'A') as u16) } else { None }
 }
 
 #[derive(Component)]
@@ -91,15 +34,16 @@ pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &Res<MapResou
         weight: consts::ui::grid::GRID_META_POSITION.font_weight,
         ..default()
     };
+    let map_size = map_resource.0.map_tiles.map_size;
 
-    for x in 0..MAP_SIZE_TILES[0] {
+    for x in 0..map_size.x {
         commands.spawn((
             Text2d::new(x.to_string()),
             meta_position_text_font.clone(),
             TextColor(consts::ui::grid::GRID_META_POSITION.color),
             Transform::from_xyz(
                 x as f32 + 0.5,
-                MAP_SIZE_TILES[1] as f32 + 0.5,
+                map_size.y as f32 + 0.5,
                 consts::rendering_layers::GRID_LABEL,
             )
             .with_scale(Vec3::splat(0.025)),
@@ -108,30 +52,25 @@ pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &Res<MapResou
         ));
     }
 
-    for y in 0..MAP_SIZE_TILES[1] {
+    for y in 0..map_size.y {
         commands.spawn((
             Text2d::new(get_letter_from_number(y)),
             meta_position_text_font.clone(),
             TextColor(consts::ui::grid::GRID_META_POSITION.color),
-            Transform::from_xyz(
-                -0.5,
-                MAP_SIZE_TILES[1] as f32 - (y as f32) - 0.5,
-                consts::rendering_layers::GRID_LABEL,
-            )
-            .with_scale(Vec3::splat(0.025)),
+            Transform::from_xyz(-0.5, y as f32 + 0.5, consts::rendering_layers::GRID_LABEL)
+                .with_scale(Vec3::splat(0.025)),
             GridPositionLabel,
             GridOverlay,
         ));
     }
 
-    for x in 0..MAP_SIZE_TILES[0] {
-        for y in 0..MAP_SIZE_TILES[1] {
+    for x in 0..map_size.x {
+        for y in 0..map_size.y {
+            let coordinate = GridCoordinate::new(x, y);
             let position = format!("{}{}", get_letter_from_number(y), x);
 
-            let tile_type: TileType = map_resource
-                .0
-                .return_tile_type(Vec2::new(x as f32, (MAP_SIZE_TILES[1] - y - 1) as f32));
-            let text_color: Color = match tile_type {
+            let tile_type: TileType = map_resource.0.return_tile_type(coordinate);
+            let text_color = match tile_type {
                 TileType::None => consts::ui::grid::GRID_POSITION_TILE_COLORS.none,
                 TileType::PathStart => consts::ui::grid::GRID_POSITION_TILE_COLORS.path_start,
                 TileType::Path => consts::ui::grid::GRID_POSITION_TILE_COLORS.path,
@@ -150,7 +89,7 @@ pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &Res<MapResou
                 TextColor(text_color),
                 Transform::from_xyz(
                     x as f32 + 0.5,
-                    (MAP_SIZE_TILES[1] - y) as f32 - 0.5,
+                    y as f32 + 0.5,
                     consts::rendering_layers::GRID_LABEL,
                 )
                 .with_scale(Vec3::splat(0.025)),
@@ -161,9 +100,9 @@ pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &Res<MapResou
     }
 }
 
-pub fn spawn_grid(commands: &mut Commands) {
-    let width = MAP_SIZE_TILES[0];
-    let height = MAP_SIZE_TILES[1];
+pub fn spawn_grid(commands: &mut Commands, map_resource: &Res<MapResource>) {
+    let width = map_resource.0.map_tiles.map_size.x;
+    let height = map_resource.0.map_tiles.map_size.y;
 
     // Vertical lines
     for x in 0..=width {
@@ -205,19 +144,18 @@ pub fn update_grid_preview(
     }
 }
 
-pub fn spawn_contrast_overlay(commands: &mut Commands) {
+pub fn spawn_contrast_overlay(commands: &mut Commands, map_resource: &Res<MapResource>) {
+    let map_size = map_resource.0.map_tiles.map_size;
+
     commands.spawn((
         Sprite {
             color: consts::ui::grid::GRID_CONTRAST_COLOR,
-            custom_size: Option::from(Vec2::new(
-                MAP_SIZE_TILES[0] as f32,
-                MAP_SIZE_TILES[1] as f32,
-            )),
+            custom_size: Option::from(Vec2::new(map_size.x as f32, map_size.y as f32)),
             ..default()
         },
         Transform::from_xyz(
-            (MAP_SIZE_TILES[0] / 2) as f32,
-            (MAP_SIZE_TILES[1] / 2) as f32,
+            (map_size.x / 2) as f32,
+            (map_size.y / 2) as f32,
             consts::rendering_layers::CONTRAST,
         ),
         GridOverlay,

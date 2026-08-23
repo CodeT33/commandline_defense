@@ -22,6 +22,7 @@ bevy = { version = "0.19", default-features = false, features = ["2d", "ui", "jp
 rand = "0.10.2"
 map_parsing = { path = "./map_parsing" }
 macros = { path = "./macros" }
+image = "0.25.10"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 bevy = { version = "0.19", default-features = false, features = ["wayland"] }
