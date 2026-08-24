@@ -6,9 +6,9 @@ pub mod coordinates;
 pub mod enemy;
 pub mod game_cli;
 pub mod game_map;
+pub mod player_suite;
 pub mod tower;
 mod ui_overlay;
-pub mod player_suite;
 
 use crate::bullets::{bullet_collisions, bullet_movement, rotate_towers, tower_shooting};
 use crate::camera::{camera_zoom_and_pan, set_camera_position};
@@ -23,6 +23,7 @@ use crate::game_cli::command_line_state_management::{
 };
 use crate::game_cli::spawn_game_cli;
 use crate::game_map::map_rendering::spawn_map_visual_layer;
+use crate::player_suite::PlayerSuiteResource;
 use crate::tower::handle_tower_placing_events;
 use crate::ui_overlay::debug::{DebugSettings, draw_bounding_boxes};
 use crate::ui_overlay::grid::update_grid_preview;
@@ -32,7 +33,6 @@ use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
 use game_map::map::{MapResource, TowerRangeMap, spawn_map};
-use crate::player_suite::PlayerSuiteResource;
 
 fn main() {
     App::new()

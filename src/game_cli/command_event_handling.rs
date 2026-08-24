@@ -2,10 +2,10 @@ use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_line_state_management::CommandEvent;
 use crate::game_map::map::MapResource;
 use crate::game_map::map_logic_parsing::TileType;
+use crate::player_suite::PlayerSuiteResource;
 use crate::tower::TowerType;
 use crate::ui_overlay::selection::SelectionState;
 use bevy::prelude::{Message, MessageReader, MessageWriter, Res, ResMut};
-use crate::player_suite::{PlayerSuiteResource};
 
 #[derive(Message)]
 pub struct PlaceTowerMessage {
@@ -15,7 +15,8 @@ pub struct PlaceTowerMessage {
 
 pub fn handle_command_events(
     mut messages: MessageWriter<PlaceTowerMessage>, mut events: MessageReader<CommandEvent>,
-    mut selection_state: ResMut<SelectionState>, game_map: Res<MapResource>, player_suite: Res<PlayerSuiteResource>,
+    mut selection_state: ResMut<SelectionState>, game_map: Res<MapResource>,
+    player_suite: Res<PlayerSuiteResource>,
 ) {
     for event in events.read() {
         match event {

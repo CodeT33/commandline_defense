@@ -44,7 +44,6 @@ pub fn camera_zoom_and_pan(
 
     let settings = consts::viewports::BASIC_CAMERA;
 
-
     // Pan
 
     if buttons.pressed(MouseButton::Right) {
@@ -80,10 +79,8 @@ pub fn camera_zoom_and_pan(
 
     let window_size = window.size();
 
-    let mouse_from_center = Vec2::new(
-        cursor_position.x -window_size.x / 2.0,
-        window_size.y / 2.0 - cursor_position.y,
-    );
+    let mouse_from_center =
+        Vec2::new(cursor_position.x - window_size.x / 2.0, window_size.y / 2.0 - cursor_position.y);
 
     // World position under mouse before zoom
 

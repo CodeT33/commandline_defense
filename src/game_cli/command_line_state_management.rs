@@ -161,7 +161,7 @@ fn parse_command_event(input: &str, selected_tile: Option<GridCoordinate>) -> Ve
             },
             ["show", "balance"] => {
                 commands.push(Command::Balance);
-            }
+            },
             ["exit", "game"] => {
                 commands.push(Command::ExitGame);
             },
