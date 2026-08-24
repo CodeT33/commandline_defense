@@ -8,6 +8,7 @@ pub mod game_cli;
 pub mod game_map;
 pub mod tower;
 mod ui_overlay;
+pub mod player_suite;
 
 use crate::bullets::{bullet_collisions, bullet_movement, rotate_towers, tower_shooting};
 use crate::camera::{camera_zoom_and_pan, set_camera_position};
@@ -31,6 +32,7 @@ use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
 use game_map::map::{MapResource, TowerRangeMap, spawn_map};
+use crate::player_suite::PlayerSuiteResource;
 
 fn main() {
     App::new()
@@ -54,10 +56,11 @@ fn main() {
         .init_resource::<CommandState>()
         .init_resource::<DebugSettings>()
         .init_resource::<SelectionState>()
-        .insert_resource(MapResource::default())
+        .init_resource::<MapResource>()
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
-        .insert_resource(TowerRangeMap::default())
-        .insert_resource(CommandHistory::default())
+        .init_resource::<TowerRangeMap>()
+        .init_resource::<CommandHistory>()
+        .init_resource::<PlayerSuiteResource>()
         //messages
         .add_message::<CommandEvent>()
         .add_message::<PlaceTowerMessage>()

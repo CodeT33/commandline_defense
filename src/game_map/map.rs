@@ -3,18 +3,16 @@ use crate::consts;
 use crate::game_map::map_logic_parsing::GameMap;
 pub(crate) use crate::tower::{Tower, TowerRangeMap};
 use bevy::asset::AssetServer;
-use bevy::math::U16Vec2;
 use bevy::prelude::*;
 
 #[derive(Resource, Clone)]
 pub struct Map {
     pub enemies: usize,
-    pub towers: Vec<U16Vec2>,
 }
 
 impl Default for Map {
     fn default() -> Self {
-        Self { enemies: consts::ENEMY_COUNT, towers: vec![] }
+        Self { enemies: consts::ENEMY_COUNT }
     }
 }
 

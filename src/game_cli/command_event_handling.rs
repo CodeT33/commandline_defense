@@ -5,6 +5,7 @@ use crate::game_map::map_logic_parsing::TileType;
 use crate::tower::TowerType;
 use crate::ui_overlay::selection::SelectionState;
 use bevy::prelude::{Message, MessageReader, MessageWriter, Res, ResMut};
+use crate::player_suite::{PlayerSuiteResource};
 
 #[derive(Message)]
 pub struct PlaceTowerMessage {
@@ -14,7 +15,7 @@ pub struct PlaceTowerMessage {
 
 pub fn handle_command_events(
     mut messages: MessageWriter<PlaceTowerMessage>, mut events: MessageReader<CommandEvent>,
-    mut selection_state: ResMut<SelectionState>, game_map: Res<MapResource>,
+    mut selection_state: ResMut<SelectionState>, game_map: Res<MapResource>, player_suite: Res<PlayerSuiteResource>,
 ) {
     for event in events.read() {
         match event {
@@ -24,6 +25,7 @@ pub fn handle_command_events(
                 place_tower(&mut messages, tower_type, tower_pos, &game_map)
             },
             CommandEvent::Deselect => deselect_tile(&mut selection_state),
+            CommandEvent::Balance => show_balance(&player_suite),
             CommandEvent::ExitGame => exit_game(),
         }
     }
@@ -57,6 +59,10 @@ fn place_tower(
 fn deselect_tile(selection_state: &mut SelectionState) {
     selection_state.selected_tile = None;
     println!("Deselect everything");
+}
+
+fn show_balance(player_suite: &Res<PlayerSuiteResource>) {
+    println!("Current balance: {:?}", player_suite.money);
 }
 
 fn exit_game() {

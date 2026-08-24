@@ -3,6 +3,7 @@ use crate::consts;
 use crate::consts::towers::TowerAttributes;
 use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_event_handling::PlaceTowerMessage;
+use crate::player_suite::{PlayerSuiteResource, TransactionReturnStatus};
 use bevy::asset::AssetServer;
 use bevy::ecs::entity::EntityHashSet;
 use bevy::math::{Rot2, U16Vec2};
@@ -64,6 +65,7 @@ impl Default for TowerRangeMap {
 pub fn handle_tower_placing_events(
     mut messages: MessageReader<PlaceTowerMessage>, mut commands: Commands,
     asset_server: Res<AssetServer>, mut tower_range_map: ResMut<TowerRangeMap>,
+    mut player_suite: ResMut<PlayerSuiteResource>,
 ) {
     for message in messages.read() {
         let attributes: TowerAttributes = match message.tower_type {
@@ -73,6 +75,14 @@ pub fn handle_tower_placing_events(
             TowerType::GatlingTower => consts::towers::GATLING_TOWER_ATTRIBUTES,
             TowerType::SniperTower => consts::towers::SNIPER_TOWER_ATTRIBUTES,
         };
+
+        if player_suite.perform_transaction(attributes.price)
+            == TransactionReturnStatus::NotEnoughMoney
+        {
+            println!("Not enough money!");
+            return;
+        }
+        println!("Performing transaction of {:?}", attributes.price);
 
         let tower_pos =
             GridCoordinate::new(message.tower_pos.position.x, message.tower_pos.position.y);

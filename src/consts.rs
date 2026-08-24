@@ -33,11 +33,7 @@ pub mod viewports {
         pub zoom_speed: f32,
     }
 
-    pub const BASIC_CAMERA: Viewport = Viewport {
-        min_zoom: 0.01,
-        max_zoom: 0.5,
-        zoom_speed: 0.1,
-    };
+    pub const BASIC_CAMERA: Viewport = Viewport { min_zoom: 0.01, max_zoom: 0.5, zoom_speed: 0.1 };
 }
 
 pub mod map_logic_parsing {
@@ -68,6 +64,7 @@ pub mod towers {
     }
 
     pub struct TowerAttributes<'a> {
+        pub price: u16,
         pub size_tiles: Vec2,
         pub range_tiles: U16Vec2,
         pub cooldown_ms: u32,
@@ -76,6 +73,7 @@ pub mod towers {
     }
 
     pub const ASSAULT_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
+        price: 100,
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(3),
         cooldown_ms: 1000,
@@ -86,6 +84,7 @@ pub mod towers {
     };
 
     pub const BOOM_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
+        price: 320,
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(2),
         cooldown_ms: 3000,
@@ -96,6 +95,7 @@ pub mod towers {
     };
 
     pub const GATLING_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
+        price: 210,
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(4),
         cooldown_ms: 300,
@@ -106,6 +106,7 @@ pub mod towers {
     };
 
     pub const SNIPER_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
+        price: 160,
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(8),
         cooldown_ms: 4000,
