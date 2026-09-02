@@ -4,6 +4,7 @@ use crate::game_map::map_logic_parsing::GameMap;
 pub(crate) use crate::tower::{Tower, TowerRangeMap};
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
+use consts::{BASE_TEXTURE_PACK_PATH, asset_path, texture_paths};
 
 #[derive(Resource, Clone)]
 pub struct Map {
@@ -29,7 +30,10 @@ impl Default for MapResource {
     fn default() -> Self {
         MapResource(
             GameMap::load(
-                consts::assets::maps::one_bit_castle::LOGIC_LAYER,
+                &asset_path(
+                    BASE_TEXTURE_PACK_PATH,
+                    texture_paths::maps::one_bit_castle::LOGIC_LAYER,
+                ),
                 consts::MAP_SIZE_TILES,
             )
             .expect("Could not load game map"),
@@ -47,8 +51,10 @@ pub fn spawn_map(commands: &mut Commands, asset_server: &Res<AssetServer>) {
             ColliderTypeA,
             ColliderShape::circle(consts::ENEMY_RADIUS),
             Sprite {
-                image: asset_server
-                    .load(consts::assets::resource_packs::base_pack::towers::gatling_tower::S0_0_0),
+                image: asset_server.load(asset_path(
+                    BASE_TEXTURE_PACK_PATH,
+                    texture_paths::towers::gatling_tower::A0_0_0,
+                )),
                 custom_size: consts::ENEMY_SIZE_TILES.into(),
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()

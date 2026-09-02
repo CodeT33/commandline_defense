@@ -6,6 +6,7 @@ use bevy::asset::AssetServer;
 use bevy::prelude::{
     Commands, Res, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
 };
+use consts::{BASE_TEXTURE_PACK_PATH, asset_path, texture_paths};
 
 pub mod debug;
 pub mod grid;
@@ -24,7 +25,8 @@ pub fn spawn_ui_overlay(
 pub fn spawn_map_border(commands: &mut Commands, asset_server: &AssetServer) {
     commands.spawn((
         Sprite {
-            image: asset_server.load(consts::assets::sprites::BORDER_TEST),
+            image: asset_server
+                .load(asset_path(BASE_TEXTURE_PACK_PATH, texture_paths::sprites::BORDER_TEST)),
             custom_size: Option::from(Vec2::splat((consts::TILE_SIZE * 2 + 2) as f32)),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

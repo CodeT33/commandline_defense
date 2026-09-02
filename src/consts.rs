@@ -55,7 +55,7 @@ pub mod map_logic_parsing {
 }
 
 pub mod towers {
-    use crate::consts::assets;
+    use crate::consts::texture_paths::towers;
     use bevy::math::{U16Vec2, Vec2};
 
     pub struct TowerSpriteCollection<'a> {
@@ -78,9 +78,7 @@ pub mod towers {
         range_tiles: U16Vec2::splat(3),
         cooldown_ms: 1000,
         bullet_speed: 10.0,
-        sprite: TowerSpriteCollection {
-            s0_0_0: assets::resource_packs::base_pack::towers::assault_tower::S0_0_0,
-        },
+        sprite: TowerSpriteCollection { s0_0_0: towers::assault_tower::A0_0_0 },
     };
 
     pub const BOOM_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
@@ -89,9 +87,7 @@ pub mod towers {
         range_tiles: U16Vec2::splat(2),
         cooldown_ms: 3000,
         bullet_speed: 6.0,
-        sprite: TowerSpriteCollection {
-            s0_0_0: assets::resource_packs::base_pack::towers::boom_tower::S0_0_0,
-        },
+        sprite: TowerSpriteCollection { s0_0_0: towers::boom_tower::A0_0_0 },
     };
 
     pub const GATLING_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
@@ -100,9 +96,7 @@ pub mod towers {
         range_tiles: U16Vec2::splat(4),
         cooldown_ms: 300,
         bullet_speed: 8.0,
-        sprite: TowerSpriteCollection {
-            s0_0_0: assets::resource_packs::base_pack::towers::gatling_tower::S0_0_0,
-        },
+        sprite: TowerSpriteCollection { s0_0_0: towers::gatling_tower::A0_0_0 },
     };
 
     pub const SNIPER_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
@@ -111,9 +105,7 @@ pub mod towers {
         range_tiles: U16Vec2::splat(8),
         cooldown_ms: 4000,
         bullet_speed: 100.0,
-        sprite: TowerSpriteCollection {
-            s0_0_0: assets::resource_packs::base_pack::towers::sniper_tower::S0_0_0,
-        },
+        sprite: TowerSpriteCollection { s0_0_0: towers::sniper_tower::A0_0_0 },
     };
 }
 
@@ -177,4 +169,10 @@ pub mod rendering_layers {
     pub const HIGHLIGHT: f32 = 20.0;
 }
 
-generate_dir_structure_as_modules!(default_pack, "assets/texture_packs/default");
+/// Repo-relative path for an asset given its base directory and its path
+/// relative to that directory.
+pub fn asset_path(base: &str, pack_relative: &str) -> String {
+    format!("{base}/{pack_relative}")
+}
+pub const BASE_TEXTURE_PACK_PATH: &str = "assets/texture_packs/default";
+generate_dir_structure_as_modules!(texture_paths, "assets/texture_packs/default");
