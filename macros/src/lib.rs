@@ -5,18 +5,101 @@ use quote::quote;
 use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;
+use syn::parse::{Parse, ParseStream};
+use syn::{Ident, LitStr, Token, parse_macro_input};
 
+struct MacroInput {
+    mod_name: Ident,
+    path: LitStr,
+}
+
+impl Parse for MacroInput {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let mod_name = input.parse()?;
+        let _: Token![,] = input.parse()?;
+        let path = input.parse()?;
+        Ok(Self { mod_name, path })
+    }
+}
+
+/// Expands a directory tree into a nested module tree of `pub const &str` paths.
+///
+/// Each directory becomes a `pub mod`, each file becomes a `pub const` holding
+/// the file's path relative to the source directory. The root directory itself
+/// becomes the module named by `mod_name`.
+///
+/// # Syntax
+///
+/// ```text
+/// generate_dir_structure_as_modules!(mod_name, "relative/path/to/dir");
+/// ```
+///
+/// `mod_name` is a Rust identifier (the name of the root module); `path` is a
+/// literal string path to the directory. The path is resolved relative to the
+/// crate root (i.e. where `cargo build` is invoked) and must exist, otherwise
+/// the macro panics.
+///
+/// # Example
+///
+/// Given:
+///
+/// ```text
+/// assets/texture_packs/default/
+/// ├── core_runes/
+/// │   └── core.png
+/// └── troops/
+///     └── assault/
+///         └── assault_troop_lvl1.png
+/// ```
+///
+/// `generate_dir_structure_as_modules!(default_pack, "assets/texture_packs/default")`
+/// expands to approximately:
+///
+/// ```text
+/// pub mod default_pack {
+///     pub mod core_runes {
+///         pub const CORE: &str = "core_runes/core.png";
+///     }
+///     pub mod troops {
+///         pub mod assault {
+///             pub const ASSAULT_TROOP_LVL1: &str = "troops/assault/assault_troop_lvl1.png";
+///         }
+///     }
+/// }
+/// ```
+///
+/// # Constant naming rules
+///
+/// - The file extension is stripped, then `-` and `.` are replaced with `_`,
+///   and the remaining name is upper-cased.
+/// - Names that would start with a digit are prefixed with `S` so they form a
+///   valid Rust identifier (e.g. `2x.png` → `S2X`).
+/// - Names that become empty after stripping the extension (e.g. dotfiles)
+///   cause a panic.
+///
+/// # Note
+///
+/// The directory is read at compile time. Cargo does not automatically track
+/// files read inside a proc macro, so a clean build (or touching the crate)
+/// is required for added/removed assets to be picked up.
 #[proc_macro]
-pub fn generate_dir_structure_as_modules(dir_path: TokenStream) -> TokenStream {
-    let path = dir_path.to_string();
+pub fn generate_dir_structure_as_modules(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as MacroInput);
+    let path = input.path.value();
+    let outer_module_name = input.mod_name.to_string();
+
     println!("path: {}", path);
+    println!("outer_module_name: {}", outer_module_name);
+
     let path_buf: PathBuf = path.into();
     if !path_buf.exists() {
         panic!("Path {:?} doesn't exit.", path_buf);
     }
     let map = parse_dir(&path_buf);
     println!("generated map with {} entries", map.len());
-    let stream = generate_tokens(&map, &path_buf).unwrap();
+    let stream =
+        generate_tokens(&map, &path_buf, path_buf.components().count(), &outer_module_name)
+            .unwrap();
     println!("generated tokens\n{}", stream);
     stream.into()
 }
@@ -69,31 +152,54 @@ fn format_as_const(s: &str) -> String {
     string
 }
 
-fn to_ident(s: &str) -> syn::Result<syn::Ident> {
+fn to_ident(s: &str) -> syn::Result<Ident> {
     syn::parse_str(s)
 }
 
 fn generate_tokens(
-    map: &HashMap<PathBuf, DirEntry>, path: &Path,
+    map: &HashMap<PathBuf, DirEntry>, path: &Path, strip_first_n_components: usize,
+    outer_module_name: &str,
 ) -> Option<proc_macro2::TokenStream> {
     let entry = map.get(path)?;
     let name = &entry.name;
     println!("{}", name);
 
-    if let Some(enemies) = &entry.sub {
-        let sub_modules =
-            enemies.iter().filter_map(|p| generate_tokens(map, p)).collect::<Vec<_>>();
-        let mod_name = to_ident(name).unwrap();
-        Some(quote! {
-            pub mod #mod_name {
-                #(#sub_modules)*
-            }
+    Some(if let Some(enemies) = &entry.sub {
+        let sub_modules = enemies
+            .iter()
+            .filter_map(|p| generate_tokens(map, p, strip_first_n_components, outer_module_name))
+            .collect::<Vec<_>>();
+        let mod_name = to_ident(if path.components().count() == strip_first_n_components {
+            outer_module_name
+        } else {
+            name
         })
+        .unwrap();
+        create_module(mod_name, sub_modules)
     } else {
-        let path_str = path.to_string_lossy().to_string();
+        let path_str = path
+            .components()
+            .skip(strip_first_n_components)
+            .collect::<PathBuf>()
+            .to_string_lossy()
+            .to_string();
         let const_name = to_ident(&format_as_const(name)).unwrap();
-        Some(quote! {
-            pub const #const_name: &str = #path_str;
-        })
+        create_constant(const_name, path_str)
+    })
+}
+
+fn create_module(
+    mod_name: Ident, sub_modules: Vec<proc_macro2::TokenStream>,
+) -> proc_macro2::TokenStream {
+    quote! {
+        pub mod #mod_name {
+            #(#sub_modules)*
+        }
+    }
+}
+
+fn create_constant(name: Ident, path_str: String) -> proc_macro2::TokenStream {
+    quote! {
+        pub const #name: &str = #path_str;
     }
 }

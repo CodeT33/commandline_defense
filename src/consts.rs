@@ -177,4 +177,4 @@ pub mod rendering_layers {
     pub const HIGHLIGHT: f32 = 20.0;
 }
 
-generate_dir_structure_as_modules!(assets);
+generate_dir_structure_as_modules!(default_pack, "assets/texture_packs/default");
