@@ -97,9 +97,7 @@ pub fn generate_dir_structure_as_modules(input: TokenStream) -> TokenStream {
     }
     let map = parse_dir(&path_buf);
     println!("generated map with {} entries", map.len());
-    let stream =
-        generate_tokens(&map, &path_buf, path_buf.components().count(), &outer_module_name)
-            .unwrap();
+    let stream = generate_tokens_outer(&map, &path_buf, &outer_module_name).unwrap();
     println!("generated tokens\n{}", stream);
     stream.into()
 }
@@ -166,9 +164,29 @@ fn to_ident(s: &str) -> syn::Result<Ident> {
     syn::parse_str(s)
 }
 
+fn generate_tokens_outer(
+    map: &HashMap<PathBuf, DirEntry>, path: &Path, outer_module_name: &str,
+) -> Option<proc_macro2::TokenStream> {
+    let entry = map.get(path)?;
+    let name = &entry.name;
+    println!("{}", name);
+
+    let skip_components = path.components().count();
+
+    Some(if let Some(enemies) = &entry.sub {
+        let sub_modules = enemies
+            .iter()
+            .filter_map(|p| generate_tokens(map, p, skip_components))
+            .collect::<Vec<_>>();
+        let mod_name = to_ident(outer_module_name).unwrap();
+        create_module(mod_name, sub_modules)
+    } else {
+        panic!("root path {:?} is not a directory", path);
+    })
+}
+
 fn generate_tokens(
-    map: &HashMap<PathBuf, DirEntry>, path: &Path, strip_first_n_components: usize,
-    outer_module_name: &str,
+    map: &HashMap<PathBuf, DirEntry>, path: &Path, skip_components: usize,
 ) -> Option<proc_macro2::TokenStream> {
     let entry = map.get(path)?;
     let name = &entry.name;
@@ -177,19 +195,14 @@ fn generate_tokens(
     Some(if let Some(enemies) = &entry.sub {
         let sub_modules = enemies
             .iter()
-            .filter_map(|p| generate_tokens(map, p, strip_first_n_components, outer_module_name))
+            .filter_map(|p| generate_tokens(map, p, skip_components))
             .collect::<Vec<_>>();
-        let mod_name = to_ident(if path.components().count() == strip_first_n_components {
-            outer_module_name
-        } else {
-            name
-        })
-        .unwrap();
+        let mod_name = to_ident(name).unwrap();
         create_module(mod_name, sub_modules)
     } else {
         let path_str = path
             .components()
-            .skip(strip_first_n_components)
+            .skip(skip_components)
             .collect::<PathBuf>()
             .to_string_lossy()
             .to_string();
