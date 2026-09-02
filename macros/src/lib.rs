@@ -10,7 +10,10 @@ use std::path::PathBuf;
 pub fn generate_dir_structure_as_modules(dir_path: TokenStream) -> TokenStream {
     let path = dir_path.to_string();
     println!("path: {}", path);
-    let path_buf = path.into();
+    let path_buf: PathBuf = path.into();
+    if !path_buf.exists() {
+        panic!("Path {:?} doesn't exit.", path_buf);
+    }
     let map = parse_dir(&path_buf);
     println!("generated map with {} entries", map.len());
     let stream = generate_tokens(&map, &path_buf).unwrap();
