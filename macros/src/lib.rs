@@ -141,15 +141,25 @@ fn parse_dir(path: &PathBuf) -> HashMap<PathBuf, DirEntry> {
     map
 }
 
-fn format_as_const(s: &str) -> String {
-    let mut string = s.rsplit_once(".").unwrap().0.replace(['-', '.'], "_").to_uppercase();
+/// Formats a file name into a `SCREAMING_SNAKE_CASE` const identifier.
+///
+/// Strips a leading dot and the file extension, replaces `-` and `.` with
+/// `_`, upper-cases, and prefixes `A` if the filename starts with a digit
+/// (e.g. `25x.png` → `A25X`). Panics with the file name if the result is empty
+/// or not a valid Rust identifier.
+fn format_as_const_name(s: &str) -> Ident {
+    let s = s.strip_prefix(".").unwrap_or(s);
+    let mut string =
+        s.rsplit_once(".").map(|both| both.0).unwrap_or(s).replace(['-', '.'], "_").to_uppercase();
     if string.is_empty() {
-        panic!("String is empty")
-    };
-    if string.chars().next().unwrap().is_numeric() {
-        string.insert(0, 'S');
+        panic!("file name {:?} becomes an empty const name", s);
     }
-    string
+    if string.chars().next().is_some_and(|c| c.is_numeric()) {
+        string.insert(0, 'A');
+    }
+    to_ident(&string).unwrap_or_else(|_| {
+        panic!("file name {:?} cannot become a valid const identifier: {:?}", s, string)
+    })
 }
 
 fn to_ident(s: &str) -> syn::Result<Ident> {
@@ -183,7 +193,7 @@ fn generate_tokens(
             .collect::<PathBuf>()
             .to_string_lossy()
             .to_string();
-        let const_name = to_ident(&format_as_const(name)).unwrap();
+        let const_name = format_as_const_name(name);
         create_constant(const_name, path_str)
     })
 }
