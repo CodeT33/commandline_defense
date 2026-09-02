@@ -88,16 +88,21 @@ pub fn generate_dir_structure_as_modules(input: TokenStream) -> TokenStream {
     let path = input.path.value();
     let outer_module_name = input.mod_name.to_string();
 
-    println!("path: {}", path);
-    println!("outer_module_name: {}", outer_module_name);
+    #[cfg(feature = "macro_debug")]
+    {
+        println!("path: {}", path);
+        println!("outer_module_name: {}", outer_module_name);
+    }
 
     let path_buf: PathBuf = path.into();
     if !path_buf.exists() {
         panic!("Path {:?} doesn't exit.", path_buf);
     }
     let map = parse_dir(&path_buf);
+    #[cfg(feature = "macro_debug")]
     println!("generated map with {} entries", map.len());
     let stream = generate_tokens_outer(&map, &path_buf, &outer_module_name).unwrap();
+    #[cfg(feature = "macro_debug")]
     println!("generated tokens\n{}", stream);
     stream.into()
 }
@@ -168,8 +173,6 @@ fn generate_tokens_outer(
     map: &HashMap<PathBuf, DirEntry>, path: &Path, outer_module_name: &str,
 ) -> Option<proc_macro2::TokenStream> {
     let entry = map.get(path)?;
-    let name = &entry.name;
-    println!("{}", name);
 
     let skip_components = path.components().count();
 
@@ -190,6 +193,7 @@ fn generate_tokens(
 ) -> Option<proc_macro2::TokenStream> {
     let entry = map.get(path)?;
     let name = &entry.name;
+    #[cfg(feature = "macro_debug")]
     println!("{}", name);
 
     Some(if let Some(enemies) = &entry.sub {
