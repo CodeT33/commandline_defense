@@ -11,6 +11,7 @@ use bevy::prelude::{
     Commands, Component, Entity, MessageReader, Res, ResMut, Resource, Sprite, SpriteImageMode,
     SpriteScalingMode, Transform, default,
 };
+use consts::{BASE_TEXTURE_PACK_PATH, asset_path};
 
 #[derive(Component, Default)]
 pub struct Tower {
@@ -93,7 +94,7 @@ pub fn handle_tower_placing_events(
             spawn_cooldown_ms: attributes.cooldown_ms,
         };
         let sprite: Sprite = Sprite {
-            image: asset_server.load(attributes.sprite.s0_0_0),
+            image: asset_server.load(asset_path(BASE_TEXTURE_PACK_PATH, attributes.sprite.s0_0_0)),
             custom_size: attributes.size_tiles.into(),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

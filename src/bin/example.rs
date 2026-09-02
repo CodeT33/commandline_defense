@@ -46,7 +46,7 @@ fn setup(
     commands.spawn((
         Jitter,
         Sprite {
-            image: asset_server.load("sprites/uzsg4bc3e2mg1.png"),
+            image: asset_server.load("texture_packs/default/sprites/angry_birb.png"),
             custom_size: Some(RECT_SIZE),
             ..default()
         },
