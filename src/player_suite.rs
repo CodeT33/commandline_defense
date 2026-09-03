@@ -2,7 +2,7 @@ use crate::resources::PlayerSuiteResource;
 
 impl Default for PlayerSuiteResource {
     fn default() -> Self {
-        PlayerSuiteResource { health: 100, shield: 0, points: 0, money: 200 }
+        PlayerSuiteResource { health: 100, shield: 0, points: 0, money: 10000 }
     }
 }
 

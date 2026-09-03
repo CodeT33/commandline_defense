@@ -44,6 +44,14 @@ pub enum TowerType {
     BoomTower,
     GatlingTower,
     SniperTower,
+
+    Eitshtu,
+    Acitonion,
+    Strorm,
+    Infernon,
+    Icebyte,
+    Goldt,
+    Copprina,
 }
 
 pub struct TowerRangeMapInner {
@@ -89,7 +97,7 @@ pub fn handle_tower_placing_events(
         };
         let sprite: Sprite = Sprite {
             image: asset_server
-                .load(texture_pack_settings.get_asset_path(attributes.sprite.s0_0_0)),
+                .load(texture_pack_settings.get_asset_path(&attributes.sprites[0])),
             custom_size: attributes.size_tiles.into(),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

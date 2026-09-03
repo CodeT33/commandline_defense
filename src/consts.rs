@@ -57,54 +57,90 @@ pub mod towers {
     use crate::texture_packs::TexturePackAssets;
     use bevy::math::{U16Vec2, Vec2};
 
-    pub struct TowerSpriteCollection {
-        //Maybe in the future something like this? [[String; 3]; 5]
-        pub s0_0_0: TexturePackAssets,
-    }
-
     pub struct TowerAttributes {
         pub price: u16,
         pub size_tiles: Vec2,
         pub range_tiles: U16Vec2,
         pub cooldown_ms: u32,
         pub bullet_speed: f32,
-        pub sprite: TowerSpriteCollection,
+        pub sprites: [TexturePackAssets; 4],
+        pub tower_rotates: bool,
     }
 
-    pub const ASSAULT_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
+    pub const ASSAULT_TROOP_ATTRIBUTES: TowerAttributes = TowerAttributes {
         price: 100,
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(3),
         cooldown_ms: 1000,
         bullet_speed: 10.0,
-        sprite: TowerSpriteCollection { s0_0_0: TexturePackAssets::Towers_AssaultTower_000 },
+        sprites: [
+            TexturePackAssets::Troops_Assault_AssaultTroopLvl1,
+            TexturePackAssets::Troops_Assault_AssaultTroopLvl2,
+            TexturePackAssets::Troops_Assault_AssaultTroopLvl3,
+            TexturePackAssets::Troops_Assault_AssaultTroopLvl3,
+        ],
+        tower_rotates: true,
     };
 
-    pub const BOOM_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
+    pub const BOOM_TROOP_ATTRIBUTES: TowerAttributes = TowerAttributes {
         price: 320,
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(2),
         cooldown_ms: 3000,
         bullet_speed: 6.0,
-        sprite: TowerSpriteCollection { s0_0_0: TexturePackAssets::Towers_BoomTower_000 },
+        sprites: [
+            TexturePackAssets::Troops_Boom_BoomTroopLvl1,
+            TexturePackAssets::Troops_Boom_BoomTroopLvl2,
+            TexturePackAssets::Troops_Boom_BoomTroopLvl3,
+            TexturePackAssets::Troops_Boom_BoomTroopLvl3,
+        ],
+        tower_rotates: true,
     };
 
-    pub const GATLING_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
+    pub const GATLING_TROOP_ATTRIBUTES: TowerAttributes = TowerAttributes {
         price: 210,
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(4),
         cooldown_ms: 300,
         bullet_speed: 8.0,
-        sprite: TowerSpriteCollection { s0_0_0: TexturePackAssets::Towers_GatlingTower_000 },
+        sprites: [
+            TexturePackAssets::Troops_Gatling_GatlingTroopLvl1,
+            TexturePackAssets::Troops_Gatling_GatlingTroopLvl2,
+            TexturePackAssets::Troops_Gatling_GatlingTroopLvl3,
+            TexturePackAssets::Troops_Gatling_GatlingTroopLvl3,
+        ],
+
+        tower_rotates: true,
     };
 
-    pub const SNIPER_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
+    pub const SNIPER_TROOP_ATTRIBUTES: TowerAttributes = TowerAttributes {
         price: 160,
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(8),
         cooldown_ms: 4000,
         bullet_speed: 100.0,
-        sprite: TowerSpriteCollection { s0_0_0: TexturePackAssets::Towers_SniperTower_000 },
+        sprites: [
+            TexturePackAssets::Troops_Sniper_SniperTroopLvl1,
+            TexturePackAssets::Troops_Sniper_SniperTroopLvl2,
+            TexturePackAssets::Troops_Sniper_SniperTroopLvl3,
+            TexturePackAssets::Troops_Sniper_SniperTroopLvl3,
+        ],
+        tower_rotates: true,
+    };
+
+    pub const EITSHTU_ATTRIBUTES: TowerAttributes = TowerAttributes {
+        price: 0,
+        size_tiles: Vec2::splat(1.0),
+        range_tiles: U16Vec2::splat(3),
+        cooldown_ms: 300,
+        bullet_speed: 10.0,
+        sprites: [
+            TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl1,
+            TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl2,
+            TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl3,
+            TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl4,
+        ],
+        tower_rotates: false,
     };
 }
 

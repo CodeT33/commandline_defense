@@ -37,7 +37,7 @@ pub fn spawn_map(
             Sprite {
                 image: asset_server.load(
                     texture_pack_settings
-                        .get_asset_path(TexturePackAssets::Towers_GatlingTower_000),
+                        .get_asset_path(&TexturePackAssets::Towers_GatlingTower_000),
                 ),
                 custom_size: consts::ENEMY_SIZE_TILES.into(),
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
