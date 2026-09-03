@@ -37,25 +37,34 @@ use bevy::window::PresentMode;
 use game_map::map::{MapResource, TowerRangeMap, spawn_map};
 
 fn main() {
-    App::new()
-        //plugins
-        .add_plugins(
-            DefaultPlugins
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        title: consts::WINDOW_TITLE.to_owned(),
-                        resolution: consts::WINDOW_RESOLUTION.into(),
-                        present_mode: PresentMode::Immediate,
-                        ..default()
-                    }),
+    let mut app = App::new();
+    register_plugins(&mut app);
+    register_resources(&mut app);
+    register_messages(&mut app);
+    register_systems(&mut app);
+    app.run();
+}
+
+fn register_plugins(app: &mut App) {
+    app.add_plugins((
+        DefaultPlugins
+            .set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: consts::WINDOW_TITLE.to_owned(),
+                    resolution: consts::WINDOW_RESOLUTION.into(),
+                    present_mode: PresentMode::Immediate,
                     ..default()
-                })
-                .set(ImagePlugin::default_nearest())
-                .set(AssetPlugin { file_path: "./".to_owned(), ..default() }),
-        )
-        .add_plugins(TabNavigationPlugin)
-        //resources
-        .init_resource::<CommandState>()
+                }),
+                ..default()
+            })
+            .set(ImagePlugin::default_nearest())
+            .set(AssetPlugin { file_path: "./".to_owned(), ..default() }),
+        TabNavigationPlugin,
+    ));
+}
+
+fn register_resources(app: &mut App) {
+    app.init_resource::<CommandState>()
         .init_resource::<DebugSettings>()
         .init_resource::<SelectionState>()
         .init_resource::<TexturePackSettings>()
@@ -63,16 +72,13 @@ fn main() {
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
         .init_resource::<TowerRangeMap>()
         .init_resource::<CommandHistory>()
-        .init_resource::<PlayerSuiteResource>()
-        //messages
-        .add_message::<CommandEvent>()
-        .add_message::<PlaceTowerMessage>()
-        .add_message::<CollisionStarted>()
-        .add_message::<CollisionSustained>()
-        .add_message::<CollisionEnded>()
-        //systems
-        .add_systems(Startup, (setup, set_camera_position).chain())
+        .init_resource::<PlayerSuiteResource>();
+}
+
+fn register_systems(app: &mut App) {
+    app.add_systems(Startup, (setup, set_camera_position).chain())
         .add_systems(
+            // physics
             FixedUpdate,
             (
                 move_enemies,
@@ -86,6 +92,7 @@ fn main() {
                 .chain(),
         )
         .add_systems(
+            // display
             Update,
             (
                 draw_bounding_boxes.run_if(|debug_settings: Res<DebugSettings>| {
@@ -99,8 +106,15 @@ fn main() {
                 navigate_command_history,
                 handle_tower_placing_events,
             ),
-        )
-        .run();
+        );
+}
+
+fn register_messages(app: &mut App) {
+    app.add_message::<CommandEvent>()
+        .add_message::<PlaceTowerMessage>()
+        .add_message::<CollisionStarted>()
+        .add_message::<CollisionSustained>()
+        .add_message::<CollisionEnded>();
 }
 
 fn setup(
