@@ -1,12 +1,12 @@
+use crate::components::{GridLine, GridOverlay, GridPositionLabel};
 use crate::consts::ui::grid::GRID_LINE_THICKNESS;
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
-use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
-use crate::game_map::map::MapResource;
+use crate::game_cli::command_line_state_management::PreviewCommand;
 use crate::game_map::map_logic_parsing::TileType;
+use crate::resources::{CommandState, MapResource};
 use bevy::prelude::{
-    Commands, Component, Query, Res, Sprite, Text2d, Transform, Vec2, Vec3, Visibility, With,
-    default,
+    Commands, Query, Res, Sprite, Text2d, Transform, Vec2, Vec3, Visibility, With, default,
 };
 use bevy::text::*;
 
@@ -18,15 +18,6 @@ pub fn get_number_from_letter(letter: char) -> Option<u16> {
     let letter = letter.to_ascii_uppercase();
     if letter.is_ascii_uppercase() { Some((letter as u8 - b'A') as u16) } else { None }
 }
-
-#[derive(Component)]
-pub struct GridOverlay;
-
-#[derive(Component)]
-pub struct GridLine;
-
-#[derive(Component)]
-pub struct GridPositionLabel;
 
 pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapResource) {
     let meta_position_text_font: TextFont = TextFont {

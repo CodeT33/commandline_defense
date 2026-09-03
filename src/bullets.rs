@@ -1,25 +1,12 @@
-use crate::collision::{ColliderShape, ColliderTypeB, CollisionPair};
+use crate::collision::CollisionPair;
+use crate::components::{Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, Enemy, Tower};
 use crate::consts;
-use crate::game_map::map::{Enemy, Tower};
 use crate::messages::CollisionStarted;
-use crate::texture_packs::{TexturePackAssets, TexturePackSettings};
+use crate::resources::TexturePackSettings;
+use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::f32::consts::PI;
-
-#[derive(Component)]
-pub struct Bullet {
-    pub velocity: Vec2,
-    pub spawn_time: u64,
-}
-
-#[derive(Component)]
-pub struct BulletEmissionData {
-    pub last_spawn_time_ms: Option<u64>,
-    pub direction: Rot2,
-    pub bullet_speed: f32,
-    pub spawn_cooldown_ms: u32,
-}
 
 impl Default for BulletEmissionData {
     fn default() -> Self {

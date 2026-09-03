@@ -1,6 +1,7 @@
 mod bullets;
 mod camera;
 pub mod collision;
+pub mod components;
 pub mod consts;
 pub mod coordinates;
 pub mod enemy;
@@ -8,6 +9,7 @@ pub mod game_cli;
 pub mod game_map;
 pub mod messages;
 pub mod player_suite;
+pub mod resources;
 pub mod texture_packs;
 pub mod tower;
 mod ui_overlay;
@@ -17,24 +19,26 @@ use crate::camera::{camera_zoom_and_pan, set_camera_position};
 use crate::collision::calculate_collisions;
 use crate::enemy::{move_enemies, update_towers_in_range};
 use crate::game_cli::command_event_handling::handle_command_events;
-use crate::game_cli::command_line::{CommandHistory, navigate_command_history};
-use crate::game_cli::command_line_state_management::{CommandState, handle_command_line_state};
+use crate::game_cli::command_line::navigate_command_history;
+use crate::game_cli::command_line_state_management::handle_command_line_state;
 use crate::game_cli::spawn_game_cli;
+use crate::game_map::map::spawn_map;
 use crate::game_map::map_rendering::spawn_map_visual_layer;
 use crate::messages::{
     CollisionEnded, CollisionStarted, CollisionSustained, CommandEvent, PlaceTowerMessage,
 };
-use crate::player_suite::PlayerSuiteResource;
-use crate::texture_packs::TexturePackSettings;
+use crate::resources::{
+    CommandHistory, CommandState, DebugSettings, MapResource, PlayerSuiteResource, SelectionState,
+    TexturePackSettings, TowerRangeMap,
+};
 use crate::tower::handle_tower_placing_events;
-use crate::ui_overlay::debug::{DebugSettings, draw_bounding_boxes};
+use crate::ui_overlay::debug::draw_bounding_boxes;
 use crate::ui_overlay::grid::update_grid_preview;
-use crate::ui_overlay::selection::{SelectionState, update_selected_tile};
+use crate::ui_overlay::selection::update_selected_tile;
 use crate::ui_overlay::spawn_ui_overlay;
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
-use game_map::map::{MapResource, TowerRangeMap, spawn_map};
 
 fn main() {
     let mut app = App::new();

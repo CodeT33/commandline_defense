@@ -1,26 +1,15 @@
+use crate::components::{ColliderShape, ColliderTypeA, ColliderTypeB};
 use crate::messages::{CollisionEnded, CollisionStarted, CollisionSustained};
 use bevy::math::bounding::{Aabb2d, BoundingCircle, IntersectsVolume};
 use bevy::prelude::{
-    Circle, Component, Entity, Local, MessageWriter, Query, Rectangle, Transform, Vec2, With,
+    Circle, Entity, Local, MessageWriter, Query, Rectangle, Transform, Vec2, With,
 };
 use std::collections::HashSet;
-
-#[derive(Component, Copy, Clone)]
-pub enum ColliderShape {
-    Rectangle(Rectangle),
-    Circle(Circle),
-}
 
 enum Collider {
     Aabb(Aabb2d),
     Circle(BoundingCircle),
 }
-
-#[derive(Component)]
-pub struct ColliderTypeA;
-
-#[derive(Component)]
-pub struct ColliderTypeB;
 
 pub struct CollisionPair {
     pub type_a: Entity,

@@ -1,9 +1,10 @@
 use std::f32;
 
+use crate::components::{Enemy, Tower};
 use crate::consts;
 use crate::coordinates::GridCoordinate;
-use crate::game_map::map::{Enemy, MapResource, Tower, TowerRangeMap};
 use crate::game_map::map_logic_parsing::EnemyPath;
+use crate::resources::{MapResource, TowerRangeMap};
 use bevy::math::U16Vec2;
 use bevy::prelude::*;
 
@@ -74,10 +75,10 @@ pub fn update_towers_in_range(
         for tile in enemy_covered_tiles(
             transform.translation.truncate(),
             consts::ENEMY_SIZE_TILES,
-            tower_range_map.size,
+            tower_range_map.0.size,
         ) {
             for &tower_entity in
-                tower_range_map.towers_in_range_at(GridCoordinate { position: tile })
+                tower_range_map.0.towers_in_range_at(GridCoordinate { position: tile })
             {
                 towers.get_mut(tower_entity).unwrap().enemies_in_range.insert(entity);
             }

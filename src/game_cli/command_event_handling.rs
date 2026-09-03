@@ -1,10 +1,8 @@
 use crate::coordinates::GridCoordinate;
-use crate::game_map::map::MapResource;
 use crate::game_map::map_logic_parsing::TileType;
 use crate::messages::{CommandEvent, PlaceTowerMessage};
-use crate::player_suite::PlayerSuiteResource;
+use crate::resources::{MapResource, PlayerSuiteResource, SelectionState};
 use crate::tower::TowerType;
-use crate::ui_overlay::selection::SelectionState;
 use bevy::prelude::{MessageReader, MessageWriter, Res, ResMut};
 
 pub fn handle_command_events(

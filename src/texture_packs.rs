@@ -1,11 +1,6 @@
 use crate::consts;
-use bevy::prelude::Resource;
+use crate::resources::TexturePackSettings;
 use macros::dir_structure_as_enum;
-
-#[derive(Resource)]
-pub struct TexturePackSettings {
-    base_path: String,
-}
 
 impl Default for TexturePackSettings {
     fn default() -> Self {

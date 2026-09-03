@@ -1,6 +1,6 @@
 use crate::consts;
-use crate::game_map::map::MapResource;
-use crate::texture_packs::{TexturePackAssets, TexturePackSettings};
+use crate::resources::{MapResource, TexturePackSettings};
+use crate::texture_packs::TexturePackAssets;
 use crate::ui_overlay::grid::{spawn_contrast_overlay, spawn_grid, spawn_grid_positions};
 use crate::ui_overlay::selection::spawn_tile_highlight;
 use bevy::asset::AssetServer;

@@ -1,20 +1,13 @@
 use crate::coordinates::GridCoordinate;
-use crate::game_cli::command_line::CommandHistory;
 use crate::game_cli::send_command_event;
 use crate::messages::CommandEvent;
+use crate::resources::{CommandHistory, CommandState, SelectionState};
 use crate::tower::TowerType;
 use crate::ui_overlay::grid::get_number_from_letter;
-use crate::ui_overlay::selection::SelectionState;
 use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
-use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut, Resource};
+use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut};
 use bevy::text::EditableText;
-
-#[derive(Resource, Default)]
-pub struct CommandState {
-    pub preview: PreviewCommand,
-    pub last_input: String,
-}
 
 #[derive(Default)]
 pub enum PreviewCommand {

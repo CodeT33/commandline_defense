@@ -1,12 +1,4 @@
-use bevy::prelude::Resource;
-
-#[derive(Resource)]
-pub struct PlayerSuiteResource {
-    pub health: u16,
-    pub shield: u16,
-    pub points: u16,
-    pub money: u16,
-}
+use crate::resources::PlayerSuiteResource;
 
 impl Default for PlayerSuiteResource {
     fn default() -> Self {

@@ -1,21 +1,15 @@
 use crate::consts::{self, TILE_SIZE};
-use crate::coordinates::GridCoordinate;
-use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
-use crate::texture_packs::{TexturePackAssets, TexturePackSettings};
+
+use crate::components::TileHighlight;
+use crate::game_cli::command_line_state_management::PreviewCommand;
+use crate::resources::{CommandState, SelectionState, TexturePackSettings};
+use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::math::Vec2;
 use bevy::prelude::{
-    Commands, Component, Query, Res, Resource, Sprite, SpriteImageMode, SpriteScalingMode,
-    Transform, Visibility, With, default,
+    Commands, Query, Res, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Visibility, With,
+    default,
 };
-
-#[derive(Resource, Default)]
-pub struct SelectionState {
-    pub selected_tile: Option<GridCoordinate>,
-}
-
-#[derive(Component)]
-pub struct TileHighlight;
 
 pub fn spawn_tile_highlight(
     commands: &mut Commands, asset_server: &AssetServer,

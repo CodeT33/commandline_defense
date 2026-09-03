@@ -1,21 +1,26 @@
-use crate::bullets::BulletEmissionData;
+use crate::components::{BulletEmissionData, Tower, TowerData};
 use crate::consts::towers::TowerAttributes;
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
 use crate::messages::PlaceTowerMessage;
-use crate::player_suite::{PlayerSuiteResource, TransactionReturnStatus};
-use crate::texture_packs::TexturePackSettings;
+
+use crate::resources::{PlayerSuiteResource, TexturePackSettings, TowerRangeMap};
+
+use crate::player_suite::TransactionReturnStatus;
 use bevy::asset::AssetServer;
-use bevy::ecs::entity::EntityHashSet;
 use bevy::math::{Rot2, U16Vec2};
 use bevy::prelude::{
-    Commands, Component, Entity, MessageReader, Res, ResMut, Resource, Sprite, SpriteImageMode,
-    SpriteScalingMode, Transform, default,
+    Commands, Entity, MessageReader, Res, ResMut, Sprite, SpriteImageMode, SpriteScalingMode,
+    Transform, default,
 };
 
-#[derive(Component, Default)]
-pub struct Tower {
-    pub enemies_in_range: EntityHashSet,
+pub struct TowerDataInner {
+    #[allow(unused)]
+    tower_type: TowerType,
+    #[allow(unused)]
+    upgrade_level: UpgradeLevel,
+    #[allow(unused)]
+    effects: Vec<Effect>,
 }
 
 #[allow(unused)]
@@ -33,20 +38,6 @@ enum Effect {
     BigBirbMode,
 }
 
-#[allow(unused)]
-#[derive(Component)]
-pub struct TowerData {
-    tower_type: TowerType,
-    upgrade_level: UpgradeLevel,
-    effects: Vec<Effect>,
-}
-
-#[derive(Resource)]
-pub struct TowerRangeMap {
-    pub size: U16Vec2,
-    towers_in_range: Vec<Vec<Entity>>,
-}
-
 #[derive(Debug, Clone, Copy)]
 pub enum TowerType {
     AssaultTower,
@@ -55,7 +46,12 @@ pub enum TowerType {
     SniperTower,
 }
 
-impl Default for TowerRangeMap {
+pub struct TowerRangeMapInner {
+    pub size: U16Vec2,
+    towers_in_range: Vec<Vec<Entity>>,
+}
+
+impl Default for TowerRangeMapInner {
     fn default() -> Self {
         let size = U16Vec2::from_array(<[u16; 2]>::from(consts::MAP_SIZE_TILES));
         Self { size, towers_in_range: vec![Vec::new(); (size.x * size.y) as usize] }
@@ -98,11 +94,11 @@ pub fn handle_tower_placing_events(
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()
         };
-        let tower_data = TowerData {
+        let tower_data = TowerData(TowerDataInner {
             tower_type: message.tower_type,
             upgrade_level: UpgradeLevel::SmallSchlongKongStrong,
             effects: vec![],
-        };
+        });
 
         Tower::spawn(
             &mut commands,
@@ -133,11 +129,11 @@ impl Tower {
                 ),
             ))
             .id();
-        tower_range_map.add_range_rect(tower_pos, consts::TOWER_RANGE_TILES, entity);
+        tower_range_map.0.add_range_rect(tower_pos, consts::TOWER_RANGE_TILES, entity);
     }
 }
 
-impl TowerRangeMap {
+impl TowerRangeMapInner {
     pub fn clear(&mut self) {
         for x in &mut self.towers_in_range {
             x.clear();

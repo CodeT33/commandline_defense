@@ -1,12 +1,7 @@
-use crate::collision::ColliderShape;
+use crate::components::ColliderShape;
 use crate::consts;
 use bevy::math::Isometry2d;
-use bevy::prelude::{Gizmos, Query, Resource, Transform};
-
-#[derive(Resource, Default)]
-pub struct DebugSettings {
-    pub enable_bounding_boxes: bool,
-}
+use bevy::prelude::{Gizmos, Query, Transform};
 
 pub fn draw_bounding_boxes(q: Query<(&ColliderShape, &Transform)>, mut gizmos: Gizmos) {
     for (shape, transform) in q.iter() {

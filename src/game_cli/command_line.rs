@@ -1,13 +1,8 @@
+use crate::resources::CommandHistory;
 use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
 use bevy::input_focus::{AutoFocus, InputFocus};
 use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle, TextEdit};
-
-#[derive(Resource, Default)]
-pub struct CommandHistory {
-    pub(crate) entries: Vec<String>,
-    pub(crate) idx: usize,
-}
 
 pub fn spawn_command_line(commands: &mut Commands) {
     commands

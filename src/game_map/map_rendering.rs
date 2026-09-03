@@ -1,6 +1,6 @@
 use crate::consts;
-use crate::game_map::map::MapResource;
-use crate::texture_packs::{TexturePackAssets, TexturePackSettings};
+use crate::resources::{MapResource, TexturePackSettings};
+use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::prelude::{
     Commands, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
