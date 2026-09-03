@@ -5,6 +5,7 @@ use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_line_state_management::PreviewCommand;
 use crate::game_map::map_logic_parsing::TileType;
 use crate::resources::{CommandState, MapResource};
+use bevy::color::Color;
 use bevy::prelude::{
     Commands, Query, Res, Sprite, Text2d, Transform, Vec2, Vec3, Visibility, With, default,
 };
@@ -152,4 +153,27 @@ pub fn spawn_contrast_overlay(commands: &mut Commands, map_resource: &MapResourc
         GridOverlay,
         Visibility::Hidden,
     ));
+}
+
+pub struct LogicGridTileColors {
+    pub path_start: u32,
+    pub path: u32,
+    pub restricted: u32,
+    pub placeable: u32,
+    pub water: u32,
+}
+
+pub struct FontSettings {
+    pub font_size: f32,
+    pub font_weight: FontWeight,
+    pub color: Color,
+}
+
+pub struct GridTileColors {
+    pub none: Color,
+    pub path_start: Color,
+    pub path: Color,
+    pub restricted: Color,
+    pub placeable: Color,
+    pub water: Color,
 }

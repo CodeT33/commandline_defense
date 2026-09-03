@@ -1,5 +1,4 @@
 use crate::components::{BulletEmissionData, Tower, TowerData};
-use crate::consts::towers::TowerAttributes;
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
 use crate::messages::PlaceTowerMessage;
@@ -7,8 +6,9 @@ use crate::messages::PlaceTowerMessage;
 use crate::resources::{PlayerSuiteResource, TexturePackSettings, TowerRangeMap};
 
 use crate::player_suite::TransactionReturnStatus;
+use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
-use bevy::math::{Rot2, U16Vec2};
+use bevy::math::{Rot2, U16Vec2, Vec2};
 use bevy::prelude::{
     Commands, Entity, MessageReader, Res, ResMut, Sprite, SpriteImageMode, SpriteScalingMode,
     Transform, default,
@@ -169,4 +169,14 @@ impl TowerRangeMapInner {
         let index = tile.position.y as usize * self.size.x as usize + tile.position.x as usize;
         &self.towers_in_range[index]
     }
+}
+
+pub struct TowerAttributes {
+    pub price: u16,
+    pub size_tiles: Vec2,
+    pub range_tiles: U16Vec2,
+    pub cooldown_ms: u32,
+    pub bullet_speed: f32,
+    pub sprites: [TexturePackAssets; 4],
+    pub tower_rotates: bool,
 }

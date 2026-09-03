@@ -26,23 +26,13 @@ pub const ENEMY_PATH_DURATION_MS: u64 = 12000;
 pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
 
 pub mod viewports {
-    pub struct Viewport {
-        pub min_zoom: f32,
-        pub max_zoom: f32,
-        pub zoom_speed: f32,
-    }
+    use crate::camera::Viewport;
 
     pub const BASIC_CAMERA: Viewport = Viewport { min_zoom: 0.01, max_zoom: 0.5, zoom_speed: 0.1 };
 }
 
 pub mod map_logic_parsing {
-    pub struct LogicGridTileColors {
-        pub path_start: u32,
-        pub path: u32,
-        pub restricted: u32,
-        pub placeable: u32,
-        pub water: u32,
-    }
+    use crate::ui_overlay::grid::LogicGridTileColors;
 
     pub const LOGIC_GRID_TILE_COLORS: LogicGridTileColors = LogicGridTileColors {
         path_start: 0xff00ff,
@@ -55,17 +45,8 @@ pub mod map_logic_parsing {
 
 pub mod towers {
     use crate::texture_packs::TexturePackAssets;
+    use crate::tower::TowerAttributes;
     use bevy::math::{U16Vec2, Vec2};
-
-    pub struct TowerAttributes {
-        pub price: u16,
-        pub size_tiles: Vec2,
-        pub range_tiles: U16Vec2,
-        pub cooldown_ms: u32,
-        pub bullet_speed: f32,
-        pub sprites: [TexturePackAssets; 4],
-        pub tower_rotates: bool,
-    }
 
     pub const ASSAULT_TROOP_ATTRIBUTES: TowerAttributes = TowerAttributes {
         price: 100,
@@ -151,13 +132,8 @@ pub mod ui {
     pub const BOUNDING_BOX_DEBUG_COLOR: Color = Color::hsv(0.3, 1.0, 1.0);
 
     pub mod grid {
+        use crate::ui_overlay::grid::{FontSettings, GridTileColors};
         use bevy::prelude::{Color, FontWeight};
-
-        pub struct FontSettings {
-            pub font_size: f32,
-            pub font_weight: FontWeight,
-            pub color: Color,
-        }
 
         pub const GRID_POSITION: FontSettings = FontSettings {
             font_size: 12.0,
@@ -170,15 +146,6 @@ pub mod ui {
             font_weight: FontWeight(240),
             color: Color::srgba(1.0, 1.0, 1.0, 1.0),
         };
-
-        pub struct GridTileColors {
-            pub none: Color,
-            pub path_start: Color,
-            pub path: Color,
-            pub restricted: Color,
-            pub placeable: Color,
-            pub water: Color,
-        }
 
         pub const GRID_POSITION_TILE_COLORS: GridTileColors = GridTileColors {
             none: Color::srgba(0.0, 0.0, 0.0, 0.0),

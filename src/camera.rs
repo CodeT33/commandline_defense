@@ -110,3 +110,9 @@ pub fn camera_zoom_and_pan(
 
     camera_transform.translation += correction.extend(0.0);
 }
+
+pub struct Viewport {
+    pub min_zoom: f32,
+    pub max_zoom: f32,
+    pub zoom_speed: f32,
+}
