@@ -73,10 +73,11 @@ pub fn handle_tower_placing_events(
 ) {
     for message in messages.read() {
         let attributes: TowerAttributes = match message.tower_type {
-            TowerType::AssaultTower => consts::towers::ASSAULT_TOWER_ATTRIBUTES,
-            TowerType::BoomTower => consts::towers::BOOM_TOWER_ATTRIBUTES,
-            TowerType::GatlingTower => consts::towers::GATLING_TOWER_ATTRIBUTES,
-            TowerType::SniperTower => consts::towers::SNIPER_TOWER_ATTRIBUTES,
+            TowerType::AssaultTower => consts::towers::ASSAULT_TROOP_ATTRIBUTES,
+            TowerType::BoomTower => consts::towers::BOOM_TROOP_ATTRIBUTES,
+            TowerType::GatlingTower => consts::towers::GATLING_TROOP_ATTRIBUTES,
+            TowerType::SniperTower => consts::towers::SNIPER_TROOP_ATTRIBUTES,
+            tt => panic!("TowerType {tt:?} not implemented yet"),
         };
 
         if player_suite.perform_transaction(attributes.price)
@@ -96,8 +97,7 @@ pub fn handle_tower_placing_events(
             spawn_cooldown_ms: attributes.cooldown_ms,
         };
         let sprite: Sprite = Sprite {
-            image: asset_server
-                .load(texture_pack_settings.get_asset_path(&attributes.sprites[0])),
+            image: asset_server.load(texture_pack_settings.get_asset_path(attributes.sprites[0])),
             custom_size: attributes.size_tiles.into(),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

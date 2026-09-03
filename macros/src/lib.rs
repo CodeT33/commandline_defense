@@ -91,6 +91,7 @@ fn implementation(input: TokenStream, use_absolute_paths: bool) -> TokenStream {
 
     let stream = quote! {
         #[allow(non_camel_case_types)]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         pub enum #enum_name {
             #(#variants),*
         }
