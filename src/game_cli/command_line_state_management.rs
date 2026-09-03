@@ -28,7 +28,7 @@ pub enum Command {
     Help,
     Select { tile: GridCoordinate },
     Place { tower_type: TowerType, tower_pos: GridCoordinate },
-    Deselect,
+    Clear,
     Balance,
     ExitGame,
 }
@@ -139,9 +139,9 @@ fn parse_command_event(input: &str, selected_tile: Option<GridCoordinate>) -> Ve
 
                 commands.push(Command::Place { tower_type, tower_pos: tile });
             },
-            ["deselect"] => {
+            ["clear"] => {
                 current_selected_tile = None;
-                commands.push(Command::Deselect);
+                commands.push(Command::Clear);
             },
             ["show", "balance"] => {
                 commands.push(Command::Balance);

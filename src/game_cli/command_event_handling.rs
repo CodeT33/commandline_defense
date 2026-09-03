@@ -17,7 +17,7 @@ pub fn handle_command_events(
             CommandEvent::Place { tower_type, tower_pos } => {
                 place_tower(&mut messages, tower_type, tower_pos, &game_map)
             },
-            CommandEvent::Deselect => deselect_tile(&mut selection_state),
+            CommandEvent::Clear => deselect_tile(&mut selection_state),
             CommandEvent::Balance => show_balance(&player_suite),
             CommandEvent::ExitGame => exit_game(),
         }

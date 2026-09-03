@@ -23,7 +23,7 @@ pub enum CommandEvent {
     Help,
     Select { tile: GridCoordinate },
     Place { tower_type: TowerType, tower_pos: GridCoordinate },
-    Deselect,
+    Clear,
     Balance,
     ExitGame,
 }
