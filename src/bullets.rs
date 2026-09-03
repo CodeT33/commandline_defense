@@ -1,6 +1,7 @@
-use crate::collision::{ColliderShape, ColliderTypeB, CollisionPair, CollisionStarted};
+use crate::collision::{ColliderShape, ColliderTypeB, CollisionPair};
 use crate::consts;
 use crate::game_map::map::{Enemy, Tower};
+use crate::messages::CollisionStarted;
 use crate::texture_packs::{TexturePackAssets, TexturePackSettings};
 use bevy::asset::AssetServer;
 use bevy::prelude::*;

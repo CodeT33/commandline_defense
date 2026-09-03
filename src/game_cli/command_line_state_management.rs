@@ -1,12 +1,13 @@
 use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_line::CommandHistory;
 use crate::game_cli::send_command_event;
+use crate::messages::CommandEvent;
 use crate::tower::TowerType;
 use crate::ui_overlay::grid::get_number_from_letter;
 use crate::ui_overlay::selection::SelectionState;
 use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
-use bevy::prelude::{KeyCode, Message, MessageWriter, Query, Res, ResMut, Resource};
+use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut, Resource};
 use bevy::text::EditableText;
 
 #[derive(Resource, Default)]
@@ -31,16 +32,6 @@ pub enum PreviewCommand {
 }
 
 pub enum Command {
-    Help,
-    Select { tile: GridCoordinate },
-    Place { tower_type: TowerType, tower_pos: GridCoordinate },
-    Deselect,
-    Balance,
-    ExitGame,
-}
-
-#[derive(Message, Debug)]
-pub enum CommandEvent {
     Help,
     Select { tile: GridCoordinate },
     Place { tower_type: TowerType, tower_pos: GridCoordinate },

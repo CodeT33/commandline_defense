@@ -1,17 +1,11 @@
 use crate::coordinates::GridCoordinate;
-use crate::game_cli::command_line_state_management::CommandEvent;
 use crate::game_map::map::MapResource;
 use crate::game_map::map_logic_parsing::TileType;
+use crate::messages::{CommandEvent, PlaceTowerMessage};
 use crate::player_suite::PlayerSuiteResource;
 use crate::tower::TowerType;
 use crate::ui_overlay::selection::SelectionState;
-use bevy::prelude::{Message, MessageReader, MessageWriter, Res, ResMut};
-
-#[derive(Message)]
-pub struct PlaceTowerMessage {
-    pub tower_type: TowerType,
-    pub tower_pos: GridCoordinate,
-}
+use bevy::prelude::{MessageReader, MessageWriter, Res, ResMut};
 
 pub fn handle_command_events(
     mut messages: MessageWriter<PlaceTowerMessage>, mut events: MessageReader<CommandEvent>,

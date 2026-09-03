@@ -6,6 +6,7 @@ pub mod coordinates;
 pub mod enemy;
 pub mod game_cli;
 pub mod game_map;
+pub mod messages;
 pub mod player_suite;
 pub mod texture_packs;
 pub mod tower;
@@ -13,17 +14,16 @@ mod ui_overlay;
 
 use crate::bullets::{bullet_collisions, bullet_movement, rotate_towers, tower_shooting};
 use crate::camera::{camera_zoom_and_pan, set_camera_position};
-use crate::collision::{
-    CollisionEnded, CollisionStarted, CollisionSustained, calculate_collisions,
-};
+use crate::collision::calculate_collisions;
 use crate::enemy::{move_enemies, update_towers_in_range};
-use crate::game_cli::command_event_handling::{PlaceTowerMessage, handle_command_events};
+use crate::game_cli::command_event_handling::handle_command_events;
 use crate::game_cli::command_line::{CommandHistory, navigate_command_history};
-use crate::game_cli::command_line_state_management::{
-    CommandEvent, CommandState, handle_command_line_state,
-};
+use crate::game_cli::command_line_state_management::{CommandState, handle_command_line_state};
 use crate::game_cli::spawn_game_cli;
 use crate::game_map::map_rendering::spawn_map_visual_layer;
+use crate::messages::{
+    CollisionEnded, CollisionStarted, CollisionSustained, CommandEvent, PlaceTowerMessage,
+};
 use crate::player_suite::PlayerSuiteResource;
 use crate::texture_packs::TexturePackSettings;
 use crate::tower::handle_tower_placing_events;

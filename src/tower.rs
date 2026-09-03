@@ -2,7 +2,7 @@ use crate::bullets::BulletEmissionData;
 use crate::consts::towers::TowerAttributes;
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
-use crate::game_cli::command_event_handling::PlaceTowerMessage;
+use crate::messages::PlaceTowerMessage;
 use crate::player_suite::{PlayerSuiteResource, TransactionReturnStatus};
 use crate::texture_packs::TexturePackSettings;
 use bevy::asset::AssetServer;

@@ -1,7 +1,7 @@
+use crate::messages::{CollisionEnded, CollisionStarted, CollisionSustained};
 use bevy::math::bounding::{Aabb2d, BoundingCircle, IntersectsVolume};
 use bevy::prelude::{
-    Circle, Component, Entity, Local, Message, MessageWriter, Query, Rectangle, Transform, Vec2,
-    With,
+    Circle, Component, Entity, Local, MessageWriter, Query, Rectangle, Transform, Vec2, With,
 };
 use std::collections::HashSet;
 
@@ -26,15 +26,6 @@ pub struct CollisionPair {
     pub type_a: Entity,
     pub type_b: Entity,
 }
-
-#[derive(Message)]
-pub struct CollisionStarted(pub CollisionPair);
-
-#[derive(Message)]
-pub struct CollisionSustained(pub CollisionPair);
-
-#[derive(Message)]
-pub struct CollisionEnded(pub CollisionPair);
 
 impl CollisionPair {
     pub fn new(type_a: Entity, type_b: Entity) -> Self {
