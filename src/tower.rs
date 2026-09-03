@@ -50,10 +50,19 @@ pub struct TowerRangeMap {
 #[derive(Debug, Clone, Copy)]
 pub enum TowerType {
     None,
+
     AssaultTower,
     BoomTower,
     GatlingTower,
     SniperTower,
+
+    Eitshtu,
+    Acitonion,
+    Strorm,
+    Infernon,
+    Icebyte,
+    Goldt,
+    Copprina,
 }
 
 impl Default for TowerRangeMap {
@@ -71,10 +80,12 @@ pub fn handle_tower_placing_events(
     for message in messages.read() {
         let attributes: TowerAttributes = match message.tower_type {
             TowerType::None => continue,
-            TowerType::AssaultTower => consts::towers::ASSAULT_TOWER_ATTRIBUTES,
-            TowerType::BoomTower => consts::towers::BOOM_TOWER_ATTRIBUTES,
-            TowerType::GatlingTower => consts::towers::GATLING_TOWER_ATTRIBUTES,
-            TowerType::SniperTower => consts::towers::SNIPER_TOWER_ATTRIBUTES,
+            TowerType::AssaultTower => consts::towers::ASSAULT_TROOP_ATTRIBUTES,
+            TowerType::BoomTower => consts::towers::BOOM_TROOP_ATTRIBUTES,
+            TowerType::GatlingTower => consts::towers::GATLING_TROOP_ATTRIBUTES,
+            TowerType::SniperTower => consts::towers::SNIPER_TROOP_ATTRIBUTES,
+            TowerType::Eitshtu => consts::towers::EITSHTU_ATTRIBUTES,
+            _ => consts::towers::ASSAULT_TROOP_ATTRIBUTES,
         };
 
         if player_suite.perform_transaction(attributes.price)
@@ -95,7 +106,7 @@ pub fn handle_tower_placing_events(
         };
         let sprite: Sprite = Sprite {
             image: asset_server
-                .load(texture_pack_settings.get_asset_path(attributes.sprite.s0_0_0)),
+                .load(texture_pack_settings.get_asset_path(&attributes.sprites[0])),
             custom_size: attributes.size_tiles.into(),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

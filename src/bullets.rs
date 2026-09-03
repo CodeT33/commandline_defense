@@ -113,7 +113,7 @@ pub fn tower_shooting(
                 Sprite {
                     image: asset_server.load(
                         texture_pack_settings
-                            .get_asset_path(TexturePackAssets::Projectiles_MetalBall),
+                            .get_asset_path(&TexturePackAssets::Projectiles_MetalBall),
                     ),
                     custom_size: consts::PROJECTILE_SIZE_TILES.into(),
                     ..default()

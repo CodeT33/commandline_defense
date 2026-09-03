@@ -176,10 +176,17 @@ fn parse_command_event(input: &str, selected_tile: Option<GridCoordinate>) -> Ve
 
 fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
     match tower_type_string {
-        "assault-bober" => Some(TowerType::AssaultTower),
-        "boom-bober" => Some(TowerType::BoomTower),
-        "gatling-bober" => Some(TowerType::GatlingTower),
-        "sniper-bober" => Some(TowerType::SniperTower),
+        "assault-troop" => Some(TowerType::AssaultTower),
+        "boom-troop" => Some(TowerType::BoomTower),
+        "gatling-troop" => Some(TowerType::GatlingTower),
+        "sniper-troop" => Some(TowerType::SniperTower),
+        "eitshtu" => Some(TowerType::Eitshtu),
+        "acitonion" => Some(TowerType::Acitonion),
+        "strorm" => Some(TowerType::Strorm),
+        "infernon" => Some(TowerType::Infernon),
+        "icebyte" => Some(TowerType::Icebyte),
+        "goldt" => Some(TowerType::Goldt),
+        "copprina" => Some(TowerType::Copprina),
         _ => {
             println!("Unknown tower type: {:?}", tower_type_string);
             Some(TowerType::None)

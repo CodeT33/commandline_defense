@@ -14,7 +14,7 @@ impl Default for TexturePackSettings {
 }
 
 impl TexturePackSettings {
-    pub fn get_asset_path(&self, asset: TexturePackAssets) -> String {
+    pub fn get_asset_path(&self, asset: &TexturePackAssets) -> String {
         format!("{}/{}", self.base_path, asset.get_path())
     }
 }
