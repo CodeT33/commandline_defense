@@ -49,7 +49,6 @@ pub struct TowerRangeMap {
 
 #[derive(Debug, Clone, Copy)]
 pub enum TowerType {
-    None,
     AssaultTower,
     BoomTower,
     GatlingTower,
@@ -70,7 +69,6 @@ pub fn handle_tower_placing_events(
 ) {
     for message in messages.read() {
         let attributes: TowerAttributes = match message.tower_type {
-            TowerType::None => continue,
             TowerType::AssaultTower => consts::towers::ASSAULT_TOWER_ATTRIBUTES,
             TowerType::BoomTower => consts::towers::BOOM_TOWER_ATTRIBUTES,
             TowerType::GatlingTower => consts::towers::GATLING_TOWER_ATTRIBUTES,

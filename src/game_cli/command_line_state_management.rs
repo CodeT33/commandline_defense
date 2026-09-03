@@ -173,7 +173,7 @@ fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
         "sniper-bober" => Some(TowerType::SniperTower),
         _ => {
             println!("Unknown tower type: {:?}", tower_type_string);
-            Some(TowerType::None)
+            None
         },
     }
 }
