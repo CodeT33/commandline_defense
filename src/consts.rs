@@ -9,19 +9,18 @@ pub const PHYSICS_FRAME_RATE: u16 = 144;
 pub const MAP_SIZE_TILES: U16Vec2 = U16Vec2 { x: 32, y: 16 };
 pub const TILE_SIZE: u16 = 16;
 
-pub const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
-
 pub const ENEMY_COUNT: usize = 40;
 pub const ENEMY_SIZE_TILES: Vec2 = Vec2::splat(1.0);
+pub const ENEMY_RADIUS: f32 = ENEMY_SIZE_TILES.x / 2.0;
+pub const ENEMY_SPEED_TILES_PER_SECOND: f32 = 1.0;
+
 pub const TOWER_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 pub const TOWER_RANGE_TILES: u16 = 5;
 pub const TOWER_COOLDOWN_MS: u32 = 1000;
 
+pub const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 pub const PROJECTILE_RADIUS: f32 = PROJECTILE_SIZE_TILES.x / 8.0;
 pub const PROJECTILE_SPEED_TILES_PER_SECOND: f32 = 10.0;
-pub const ENEMY_RADIUS: f32 = ENEMY_SIZE_TILES.x / 2.0;
-
-pub const ENEMY_PATH_DURATION_MS: u64 = 12000;
 
 pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
 
