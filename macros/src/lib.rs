@@ -45,6 +45,8 @@ pub fn dir_structure_as_enum_absolute_paths(input: TokenStream) -> TokenStream {
 }
 
 fn implementation(input: TokenStream, use_absolute_paths: bool) -> TokenStream {
+    const _: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../assets/.stamp"));
+
     let input = parse_macro_input!(input as MacroInput);
     let path = input.path.value();
     let enum_name = input.enum_name;
