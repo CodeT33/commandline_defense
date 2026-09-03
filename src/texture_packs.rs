@@ -1,5 +1,6 @@
 use crate::consts;
 use bevy::prelude::Resource;
+use consts::TexturePackAssets;
 
 #[derive(Resource)]
 pub struct TexturePackSettings {
@@ -13,7 +14,7 @@ impl Default for TexturePackSettings {
 }
 
 impl TexturePackSettings {
-    pub fn get_asset_path(&self, path_extension: &str) -> String {
-        format!("{}/{}", self.base_path, path_extension)
+    pub fn get_asset_path(&self, asset: TexturePackAssets) -> String {
+        format!("{}/{}", self.base_path, asset.get_path())
     }
 }

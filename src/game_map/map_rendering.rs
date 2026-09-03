@@ -5,7 +5,7 @@ use bevy::asset::AssetServer;
 use bevy::prelude::{
     Commands, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
 };
-use consts::texture_paths;
+use consts::TexturePackAssets;
 
 pub fn spawn_map_visual_layer(
     commands: &mut Commands, asset_server: &AssetServer, map_resource: &MapResource,
@@ -17,7 +17,7 @@ pub fn spawn_map_visual_layer(
         Sprite {
             image: asset_server.load(
                 texture_pack_settings
-                    .get_asset_path(texture_paths::map_visual_layers::ONE_BIT_CASTLE),
+                    .get_asset_path(TexturePackAssets::MapVisualLayers_OneBitCastle),
             ),
             custom_size: Option::from(Vec2::splat((consts::TILE_SIZE * 2) as f32)),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),

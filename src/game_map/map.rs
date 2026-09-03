@@ -5,7 +5,7 @@ use crate::texture_packs::TexturePackSettings;
 pub(crate) use crate::tower::{Tower, TowerRangeMap};
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
-use consts::texture_paths;
+use consts::{MapLogicLayers, TexturePackAssets};
 
 #[derive(Resource, Clone)]
 pub struct Map {
@@ -30,7 +30,7 @@ pub struct MapResource(pub GameMap);
 impl Default for MapResource {
     fn default() -> Self {
         MapResource(
-            GameMap::load(consts::map_logic_layers::ONE_BIT_CASTLE, consts::MAP_SIZE_TILES)
+            GameMap::load(MapLogicLayers::OneBitCastle, consts::MAP_SIZE_TILES)
                 .expect("Could not load game map"),
         )
     }
@@ -50,7 +50,7 @@ pub fn spawn_map(
             Sprite {
                 image: asset_server.load(
                     texture_pack_settings
-                        .get_asset_path(texture_paths::towers::gatling_tower::A0_0_0),
+                        .get_asset_path(TexturePackAssets::Towers_GatlingTower_000),
                 ),
                 custom_size: consts::ENEMY_SIZE_TILES.into(),
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),

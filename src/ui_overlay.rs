@@ -7,7 +7,7 @@ use bevy::asset::AssetServer;
 use bevy::prelude::{
     Commands, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
 };
-use consts::texture_paths;
+use consts::TexturePackAssets;
 
 pub mod debug;
 pub mod grid;
@@ -31,7 +31,7 @@ pub fn spawn_map_border(
     commands.spawn((
         Sprite {
             image: asset_server
-                .load(texture_pack_settings.get_asset_path(texture_paths::sprites::BORDER_TEST)),
+                .load(texture_pack_settings.get_asset_path(TexturePackAssets::Sprites_BorderTest)),
             custom_size: Option::from(Vec2::splat((consts::TILE_SIZE * 2 + 2) as f32)),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

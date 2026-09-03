@@ -4,7 +4,7 @@ use crate::game_map::map::{Enemy, Tower};
 use crate::texture_packs::TexturePackSettings;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
-use consts::texture_paths;
+use consts::TexturePackAssets;
 use std::f32::consts::PI;
 
 #[derive(Component)]
@@ -114,7 +114,7 @@ pub fn tower_shooting(
                 Sprite {
                     image: asset_server.load(
                         texture_pack_settings
-                            .get_asset_path(texture_paths::projectiles::METAL_BALL),
+                            .get_asset_path(TexturePackAssets::Projectiles_MetalBall),
                     ),
                     custom_size: consts::PROJECTILE_SIZE_TILES.into(),
                     ..default()

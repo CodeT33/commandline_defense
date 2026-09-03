@@ -9,7 +9,7 @@ use bevy::prelude::{
     Commands, Component, Query, Res, Resource, Sprite, SpriteImageMode, SpriteScalingMode,
     Transform, Visibility, With, default,
 };
-use consts::texture_paths;
+use consts::TexturePackAssets;
 
 #[derive(Resource, Default)]
 pub struct SelectionState {
@@ -27,7 +27,7 @@ pub fn spawn_tile_highlight(
         Sprite {
             image: asset_server.load(
                 texture_pack_settings
-                    .get_asset_path(texture_paths::sprites::SELECTION_SQUARE_ARROW_TOP),
+                    .get_asset_path(TexturePackAssets::Sprites_SelectionSquareArrowTop),
             ),
             custom_size: Option::from(Vec2::splat(TILE_SIZE as f32 / 8.0)),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),

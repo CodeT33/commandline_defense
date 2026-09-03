@@ -1,5 +1,7 @@
+use crate::consts;
 use crate::coordinates::GridCoordinate;
 use bevy::math::{I16Vec2, U16Vec2};
+use consts::MapLogicLayers;
 
 const PATH_START: u32 = 0xff00ff;
 const PATH: u32 = 0xffff00;
@@ -222,8 +224,8 @@ pub struct GameMap {
 }
 
 impl GameMap {
-    pub fn load(path: &str, map_size: U16Vec2) -> Option<Self> {
-        let map_tiles = MapTiles::load(path, map_size)?;
+    pub fn load(logic_layer: MapLogicLayers, map_size: U16Vec2) -> Option<Self> {
+        let map_tiles = MapTiles::load(logic_layer.get_abs_path(), map_size)?;
 
         let enemy_path = EnemyPath::parse_from_map_tiles(&map_tiles)?;
 

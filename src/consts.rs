@@ -1,6 +1,6 @@
 use bevy::math::U16Vec2;
 use bevy::prelude::Vec2;
-use macros::{dir_structure_as_modules, dir_structure_as_modules_absolute_paths};
+use macros::{dir_structure_as_enum, dir_structure_as_enum_absolute_paths};
 
 pub const WINDOW_TITLE: &str = "2d game";
 pub const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
@@ -55,21 +55,21 @@ pub mod map_logic_parsing {
 }
 
 pub mod towers {
-    use crate::consts::texture_paths::towers;
+    use crate::consts::TexturePackAssets;
     use bevy::math::{U16Vec2, Vec2};
 
-    pub struct TowerSpriteCollection<'a> {
+    pub struct TowerSpriteCollection {
         //Maybe in the future something like this? [[String; 3]; 5]
-        pub s0_0_0: &'a str,
+        pub s0_0_0: TexturePackAssets,
     }
 
-    pub struct TowerAttributes<'a> {
+    pub struct TowerAttributes {
         pub price: u16,
         pub size_tiles: Vec2,
         pub range_tiles: U16Vec2,
         pub cooldown_ms: u32,
         pub bullet_speed: f32,
-        pub sprite: TowerSpriteCollection<'a>,
+        pub sprite: TowerSpriteCollection,
     }
 
     pub const ASSAULT_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
@@ -78,7 +78,7 @@ pub mod towers {
         range_tiles: U16Vec2::splat(3),
         cooldown_ms: 1000,
         bullet_speed: 10.0,
-        sprite: TowerSpriteCollection { s0_0_0: towers::assault_tower::A0_0_0 },
+        sprite: TowerSpriteCollection { s0_0_0: TexturePackAssets::Towers_AssaultTower_000 },
     };
 
     pub const BOOM_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
@@ -87,7 +87,7 @@ pub mod towers {
         range_tiles: U16Vec2::splat(2),
         cooldown_ms: 3000,
         bullet_speed: 6.0,
-        sprite: TowerSpriteCollection { s0_0_0: towers::boom_tower::A0_0_0 },
+        sprite: TowerSpriteCollection { s0_0_0: TexturePackAssets::Towers_BoomTower_000 },
     };
 
     pub const GATLING_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
@@ -96,7 +96,7 @@ pub mod towers {
         range_tiles: U16Vec2::splat(4),
         cooldown_ms: 300,
         bullet_speed: 8.0,
-        sprite: TowerSpriteCollection { s0_0_0: towers::gatling_tower::A0_0_0 },
+        sprite: TowerSpriteCollection { s0_0_0: TexturePackAssets::Towers_GatlingTower_000 },
     };
 
     pub const SNIPER_TOWER_ATTRIBUTES: TowerAttributes = TowerAttributes {
@@ -105,7 +105,7 @@ pub mod towers {
         range_tiles: U16Vec2::splat(8),
         cooldown_ms: 4000,
         bullet_speed: 100.0,
-        sprite: TowerSpriteCollection { s0_0_0: towers::sniper_tower::A0_0_0 },
+        sprite: TowerSpriteCollection { s0_0_0: TexturePackAssets::Towers_SniperTower_000 },
     };
 }
 
@@ -170,5 +170,5 @@ pub mod rendering_layers {
 }
 
 pub const BASE_TEXTURE_PACK_PATH: &str = "assets/texture_packs/default";
-dir_structure_as_modules_absolute_paths!(map_logic_layers, "assets/map_logic_layers");
-dir_structure_as_modules!(texture_paths, "assets/texture_packs/default");
+dir_structure_as_enum_absolute_paths!(MapLogicLayers, "assets/map_logic_layers");
+dir_structure_as_enum!(TexturePackAssets, "assets/texture_packs/default");
