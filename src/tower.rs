@@ -1,6 +1,6 @@
 use crate::bullets::BulletEmissionData;
-use crate::consts;
 use crate::consts::towers::TowerAttributes;
+use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_event_handling::PlaceTowerMessage;
 use crate::player_suite::{PlayerSuiteResource, TransactionReturnStatus};

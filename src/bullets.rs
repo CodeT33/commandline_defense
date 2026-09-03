@@ -1,10 +1,9 @@
 use crate::collision::{ColliderShape, ColliderTypeB, CollisionPair, CollisionStarted};
 use crate::consts;
 use crate::game_map::map::{Enemy, Tower};
-use crate::texture_packs::TexturePackSettings;
+use crate::texture_packs::{TexturePackAssets, TexturePackSettings};
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
-use consts::TexturePackAssets;
 use std::f32::consts::PI;
 
 #[derive(Component)]

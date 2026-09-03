@@ -1,6 +1,5 @@
 use bevy::math::U16Vec2;
 use bevy::prelude::Vec2;
-use macros::{dir_structure_as_enum, dir_structure_as_enum_absolute_paths};
 
 pub const WINDOW_TITLE: &str = "2d game";
 pub const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
@@ -55,7 +54,7 @@ pub mod map_logic_parsing {
 }
 
 pub mod towers {
-    use crate::consts::TexturePackAssets;
+    use crate::texture_packs::TexturePackAssets;
     use bevy::math::{U16Vec2, Vec2};
 
     pub struct TowerSpriteCollection {
@@ -170,5 +169,3 @@ pub mod rendering_layers {
 }
 
 pub const BASE_TEXTURE_PACK_PATH: &str = "assets/texture_packs/default";
-dir_structure_as_enum_absolute_paths!(MapLogicLayers, "assets/map_logic_layers");
-dir_structure_as_enum!(TexturePackAssets, "assets/texture_packs/default");

@@ -1,11 +1,11 @@
 use crate::collision::{ColliderShape, ColliderTypeA};
 use crate::consts;
+use crate::game_map::MapLogicLayers;
 use crate::game_map::map_logic_parsing::GameMap;
-use crate::texture_packs::TexturePackSettings;
+use crate::texture_packs::{TexturePackAssets, TexturePackSettings};
 pub(crate) use crate::tower::{Tower, TowerRangeMap};
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
-use consts::{MapLogicLayers, TexturePackAssets};
 
 #[derive(Resource, Clone)]
 pub struct Map {

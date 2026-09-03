@@ -1,15 +1,13 @@
-use crate::consts;
-use crate::consts::TILE_SIZE;
+use crate::consts::{self, TILE_SIZE};
 use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
-use crate::texture_packs::TexturePackSettings;
+use crate::texture_packs::{TexturePackAssets, TexturePackSettings};
 use bevy::asset::AssetServer;
 use bevy::math::Vec2;
 use bevy::prelude::{
     Commands, Component, Query, Res, Resource, Sprite, SpriteImageMode, SpriteScalingMode,
     Transform, Visibility, With, default,
 };
-use consts::TexturePackAssets;
 
 #[derive(Resource, Default)]
 pub struct SelectionState {

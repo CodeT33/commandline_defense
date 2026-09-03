@@ -1,11 +1,10 @@
 use crate::consts;
 use crate::game_map::map::MapResource;
-use crate::texture_packs::TexturePackSettings;
+use crate::texture_packs::{TexturePackAssets, TexturePackSettings};
 use bevy::asset::AssetServer;
 use bevy::prelude::{
     Commands, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
 };
-use consts::TexturePackAssets;
 
 pub fn spawn_map_visual_layer(
     commands: &mut Commands, asset_server: &AssetServer, map_resource: &MapResource,

@@ -1,6 +1,6 @@
 use crate::consts;
 use bevy::prelude::Resource;
-use consts::TexturePackAssets;
+use macros::dir_structure_as_enum;
 
 #[derive(Resource)]
 pub struct TexturePackSettings {
@@ -18,3 +18,5 @@ impl TexturePackSettings {
         format!("{}/{}", self.base_path, asset.get_path())
     }
 }
+
+dir_structure_as_enum!(TexturePackAssets, "assets/texture_packs/default");

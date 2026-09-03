@@ -1,7 +1,5 @@
-use bevy::input_focus::{
-    AutoFocus, InputFocus,
-    tab_navigation::{TabGroup, TabIndex, TabNavigationPlugin},
-};
+use bevy::input_focus::tab_navigation::{TabGroup, TabIndex, TabNavigationPlugin};
+use bevy::input_focus::{AutoFocus, InputFocus};
 use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle};
 use bevy::window::{PresentMode, PrimaryWindow};

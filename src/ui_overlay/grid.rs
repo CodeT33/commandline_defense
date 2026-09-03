@@ -1,5 +1,5 @@
-use crate::consts;
 use crate::consts::ui::grid::GRID_LINE_THICKNESS;
+use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_line_state_management::{CommandState, PreviewCommand};
 use crate::game_map::map::MapResource;

@@ -1,7 +1,6 @@
-use crate::consts;
 use crate::coordinates::GridCoordinate;
+use crate::game_map::MapLogicLayers;
 use bevy::math::{I16Vec2, U16Vec2};
-use consts::MapLogicLayers;
 
 const PATH_START: u32 = 0xff00ff;
 const PATH: u32 = 0xffff00;
