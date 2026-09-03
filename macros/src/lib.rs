@@ -111,7 +111,7 @@ fn format_as_variant_name(path: &str) -> Ident {
     let path = path.strip_prefix(".").unwrap_or(path);
     let stem = path.rsplit_once('.').map(|(stem, _)| stem).unwrap_or(path);
     let mut name = stem
-        .split('/')
+        .split(['/', '\\'])
         .map(pascal_case_segment)
         .filter(|s| !s.is_empty())
         .collect::<Vec<_>>()
