@@ -4,6 +4,7 @@ use crate::consts::towers::TowerAttributes;
 use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_event_handling::PlaceTowerMessage;
 use crate::player_suite::{PlayerSuiteResource, TransactionReturnStatus};
+use crate::texture_packs::TexturePackSettings;
 use bevy::asset::AssetServer;
 use bevy::ecs::entity::EntityHashSet;
 use bevy::math::{Rot2, U16Vec2};
@@ -11,7 +12,6 @@ use bevy::prelude::{
     Commands, Component, Entity, MessageReader, Res, ResMut, Resource, Sprite, SpriteImageMode,
     SpriteScalingMode, Transform, default,
 };
-use consts::{BASE_TEXTURE_PACK_PATH, asset_path};
 
 #[derive(Component, Default)]
 pub struct Tower {
@@ -66,7 +66,7 @@ impl Default for TowerRangeMap {
 pub fn handle_tower_placing_events(
     mut messages: MessageReader<PlaceTowerMessage>, mut commands: Commands,
     asset_server: Res<AssetServer>, mut tower_range_map: ResMut<TowerRangeMap>,
-    mut player_suite: ResMut<PlayerSuiteResource>,
+    mut player_suite: ResMut<PlayerSuiteResource>, texture_pack_settings: Res<TexturePackSettings>,
 ) {
     for message in messages.read() {
         let attributes: TowerAttributes = match message.tower_type {
@@ -94,7 +94,8 @@ pub fn handle_tower_placing_events(
             spawn_cooldown_ms: attributes.cooldown_ms,
         };
         let sprite: Sprite = Sprite {
-            image: asset_server.load(asset_path(BASE_TEXTURE_PACK_PATH, attributes.sprite.s0_0_0)),
+            image: asset_server
+                .load(texture_pack_settings.get_asset_path(attributes.sprite.s0_0_0)),
             custom_size: attributes.size_tiles.into(),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

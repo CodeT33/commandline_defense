@@ -1,6 +1,6 @@
 use bevy::math::U16Vec2;
 use bevy::prelude::Vec2;
-use macros::generate_dir_structure_as_modules;
+use macros::{dir_structure_as_modules, dir_structure_as_modules_absolute_paths};
 
 pub const WINDOW_TITLE: &str = "2d game";
 pub const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
@@ -169,10 +169,6 @@ pub mod rendering_layers {
     pub const HIGHLIGHT: f32 = 20.0;
 }
 
-/// Repo-relative path for an asset given its base directory and its path
-/// relative to that directory.
-pub fn asset_path(base: &str, pack_relative: &str) -> String {
-    format!("{base}/{pack_relative}")
-}
 pub const BASE_TEXTURE_PACK_PATH: &str = "assets/texture_packs/default";
-generate_dir_structure_as_modules!(texture_paths, "assets/texture_packs/default");
+dir_structure_as_modules_absolute_paths!(map_logic_layers, "assets/map_logic_layers");
+dir_structure_as_modules!(texture_paths, "assets/texture_packs/default");

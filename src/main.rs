@@ -7,6 +7,7 @@ pub mod enemy;
 pub mod game_cli;
 pub mod game_map;
 pub mod player_suite;
+pub mod texture_packs;
 pub mod tower;
 mod ui_overlay;
 
@@ -24,6 +25,7 @@ use crate::game_cli::command_line_state_management::{
 use crate::game_cli::spawn_game_cli;
 use crate::game_map::map_rendering::spawn_map_visual_layer;
 use crate::player_suite::PlayerSuiteResource;
+use crate::texture_packs::TexturePackSettings;
 use crate::tower::handle_tower_placing_events;
 use crate::ui_overlay::debug::{DebugSettings, draw_bounding_boxes};
 use crate::ui_overlay::grid::update_grid_preview;
@@ -56,6 +58,7 @@ fn main() {
         .init_resource::<CommandState>()
         .init_resource::<DebugSettings>()
         .init_resource::<SelectionState>()
+        .init_resource::<TexturePackSettings>()
         .init_resource::<MapResource>()
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
         .init_resource::<TowerRangeMap>()
@@ -100,10 +103,13 @@ fn main() {
         .run();
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>, map_resource: Res<MapResource>) {
-    spawn_map(&mut commands, &asset_server);
-    spawn_ui_overlay(&mut commands, &asset_server, &map_resource);
+fn setup(
+    mut commands: Commands, asset_server: Res<AssetServer>, map_resource: Res<MapResource>,
+    texture_pack_settings: Res<TexturePackSettings>,
+) {
+    spawn_map(&mut commands, &asset_server, &texture_pack_settings);
+    spawn_ui_overlay(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
     spawn_game_cli(&mut commands);
-    spawn_map_visual_layer(&mut commands, &asset_server, &map_resource);
+    spawn_map_visual_layer(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
     commands.spawn((Camera2d, IsDefaultUiCamera));
 }

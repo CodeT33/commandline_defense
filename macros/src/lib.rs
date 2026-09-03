@@ -83,7 +83,16 @@ impl Parse for MacroInput {
 /// files read inside a proc macro, so a clean build (or touching the crate)
 /// is required for added/removed assets to be picked up.
 #[proc_macro]
-pub fn generate_dir_structure_as_modules(input: TokenStream) -> TokenStream {
+pub fn dir_structure_as_modules(input: TokenStream) -> TokenStream {
+    implementation(input, false)
+}
+
+#[proc_macro]
+pub fn dir_structure_as_modules_absolute_paths(input: TokenStream) -> TokenStream {
+    implementation(input, true)
+}
+
+fn implementation(input: TokenStream, use_absolute_paths: bool) -> TokenStream {
     let input = parse_macro_input!(input as MacroInput);
     let path = input.path.value();
     let outer_module_name = input.mod_name.to_string();
@@ -101,7 +110,8 @@ pub fn generate_dir_structure_as_modules(input: TokenStream) -> TokenStream {
     let map = parse_dir(&path_buf);
     #[cfg(feature = "macro_debug")]
     println!("generated map with {} entries", map.len());
-    let stream = generate_tokens_outer(&map, &path_buf, &outer_module_name).unwrap();
+    let stream =
+        generate_tokens_outer(&map, &path_buf, &outer_module_name, use_absolute_paths).unwrap();
     #[cfg(feature = "macro_debug")]
     println!("generated tokens\n{}", stream);
     stream.into()
@@ -171,10 +181,11 @@ fn to_ident(s: &str) -> syn::Result<Ident> {
 
 fn generate_tokens_outer(
     map: &HashMap<PathBuf, DirEntry>, path: &Path, outer_module_name: &str,
+    use_absolute_paths: bool,
 ) -> Option<proc_macro2::TokenStream> {
     let entry = map.get(path)?;
 
-    let skip_components = path.components().count();
+    let skip_components = if use_absolute_paths { 0 } else { path.components().count() };
 
     Some(if let Some(enemies) = &entry.sub {
         let sub_modules = enemies

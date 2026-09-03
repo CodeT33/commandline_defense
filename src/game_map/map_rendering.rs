@@ -1,22 +1,24 @@
 use crate::consts;
 use crate::game_map::map::MapResource;
+use crate::texture_packs::TexturePackSettings;
 use bevy::asset::AssetServer;
 use bevy::prelude::{
-    Commands, Res, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
+    Commands, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
 };
-use consts::{BASE_TEXTURE_PACK_PATH, asset_path, texture_paths};
+use consts::texture_paths;
 
 pub fn spawn_map_visual_layer(
-    commands: &mut Commands, asset_server: &Res<AssetServer>, map_resource: &Res<MapResource>,
+    commands: &mut Commands, asset_server: &AssetServer, map_resource: &MapResource,
+    texture_pack_settings: &TexturePackSettings,
 ) {
     let map_size = map_resource.0.map_tiles.map_size;
 
     commands.spawn((
         Sprite {
-            image: asset_server.load(asset_path(
-                BASE_TEXTURE_PACK_PATH,
-                texture_paths::maps::one_bit_castle::VISUAL_LAYER,
-            )),
+            image: asset_server.load(
+                texture_pack_settings
+                    .get_asset_path(texture_paths::map_visual_layers::ONE_BIT_CASTLE),
+            ),
             custom_size: Option::from(Vec2::splat((consts::TILE_SIZE * 2) as f32)),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

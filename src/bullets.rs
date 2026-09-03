@@ -1,9 +1,10 @@
 use crate::collision::{ColliderShape, ColliderTypeB, CollisionPair, CollisionStarted};
 use crate::consts;
 use crate::game_map::map::{Enemy, Tower};
+use crate::texture_packs::TexturePackSettings;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
-use consts::{BASE_TEXTURE_PACK_PATH, asset_path, texture_paths};
+use consts::texture_paths;
 use std::f32::consts::PI;
 
 #[derive(Component)]
@@ -90,7 +91,7 @@ pub fn rotate_towers(
 pub fn tower_shooting(
     mut commands: Commands,
     mut q: Query<(&Transform, &Tower, &mut BulletEmissionData), With<Tower>>, time: Res<Time>,
-    asset_server: Res<AssetServer>,
+    asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
 ) {
     for (transform, tower, mut data) in &mut q {
         if tower.enemies_in_range.is_empty() {
@@ -111,10 +112,10 @@ pub fn tower_shooting(
                     consts::rendering_layers::ENTITY,
                 ),
                 Sprite {
-                    image: asset_server.load(asset_path(
-                        BASE_TEXTURE_PACK_PATH,
-                        texture_paths::projectiles::METAL_BALL,
-                    )),
+                    image: asset_server.load(
+                        texture_pack_settings
+                            .get_asset_path(texture_paths::projectiles::METAL_BALL),
+                    ),
                     custom_size: consts::PROJECTILE_SIZE_TILES.into(),
                     ..default()
                 },

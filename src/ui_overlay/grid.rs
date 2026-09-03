@@ -28,7 +28,7 @@ pub struct GridLine;
 #[derive(Component)]
 pub struct GridPositionLabel;
 
-pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &Res<MapResource>) {
+pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapResource) {
     let meta_position_text_font: TextFont = TextFont {
         font_size: FontSize::Px(consts::ui::grid::GRID_META_POSITION.font_size),
         weight: consts::ui::grid::GRID_META_POSITION.font_weight,
@@ -100,7 +100,7 @@ pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &Res<MapResou
     }
 }
 
-pub fn spawn_grid(commands: &mut Commands, map_resource: &Res<MapResource>) {
+pub fn spawn_grid(commands: &mut Commands, map_resource: &MapResource) {
     let width = map_resource.0.map_tiles.map_size.x;
     let height = map_resource.0.map_tiles.map_size.y;
 
@@ -144,7 +144,7 @@ pub fn update_grid_preview(
     }
 }
 
-pub fn spawn_contrast_overlay(commands: &mut Commands, map_resource: &Res<MapResource>) {
+pub fn spawn_contrast_overlay(commands: &mut Commands, map_resource: &MapResource) {
     let map_size = map_resource.0.map_tiles.map_size;
 
     commands.spawn((
