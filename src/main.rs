@@ -75,6 +75,14 @@ fn register_resources(app: &mut App) {
         .init_resource::<PlayerSuiteResource>();
 }
 
+fn register_messages(app: &mut App) {
+    app.add_message::<CommandEvent>()
+        .add_message::<PlaceTowerMessage>()
+        .add_message::<CollisionStarted>()
+        .add_message::<CollisionSustained>()
+        .add_message::<CollisionEnded>();
+}
+
 fn register_systems(app: &mut App) {
     app.add_systems(Startup, (setup, set_camera_position).chain())
         .add_systems(
@@ -107,14 +115,6 @@ fn register_systems(app: &mut App) {
                 handle_tower_placing_events,
             ),
         );
-}
-
-fn register_messages(app: &mut App) {
-    app.add_message::<CommandEvent>()
-        .add_message::<PlaceTowerMessage>()
-        .add_message::<CollisionStarted>()
-        .add_message::<CollisionSustained>()
-        .add_message::<CollisionEnded>();
 }
 
 fn setup(
