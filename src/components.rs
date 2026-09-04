@@ -5,14 +5,17 @@ use bevy::prelude::{Circle, Component, Rectangle};
 
 #[derive(Component)]
 pub struct Enemy {
-    pub path_offset: f32,
     pub path_progress: f32,
 }
 
 #[derive(Component)]
 pub struct Bullet {
     pub velocity: Vec2,
-    pub spawn_time: u64,
+}
+
+#[derive(Component)]
+pub struct CreationTime {
+    pub ms: u64,
 }
 
 #[derive(Component)]

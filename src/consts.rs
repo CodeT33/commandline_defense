@@ -12,7 +12,8 @@ pub const TILE_SIZE: u16 = 16;
 pub const ENEMY_COUNT: usize = 40;
 pub const ENEMY_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 pub const ENEMY_RADIUS: f32 = ENEMY_SIZE_TILES.x / 2.0;
-pub const ENEMY_SPEED_TILES_PER_SECOND: f32 = 1.0;
+pub const ENEMY_SPEED_TILES_PER_SECOND: f32 = 3.0;
+pub const ENEMY_SPAWN_INTERVAL_MS: u64 = 2000;
 
 pub const TOWER_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 pub const TOWER_RANGE_TILES: u16 = 5;

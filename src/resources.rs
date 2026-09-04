@@ -1,3 +1,4 @@
+use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::game_cli::command_line_state_management::PreviewCommand;
 use crate::game_map::map_logic_parsing::GameMap;
@@ -45,7 +46,17 @@ pub struct SelectionState {
     pub selected_tile: Option<GridCoordinate>,
 }
 
-#[derive(Resource, Default)]
+#[derive(Resource)]
 pub struct DebugSettings {
     pub enable_bounding_boxes: bool,
+    pub enemy_spawn_interval_ms: u64,
+}
+
+impl Default for DebugSettings {
+    fn default() -> Self {
+        Self {
+            enable_bounding_boxes: false,
+            enemy_spawn_interval_ms: consts::ENEMY_SPAWN_INTERVAL_MS,
+        }
+    }
 }

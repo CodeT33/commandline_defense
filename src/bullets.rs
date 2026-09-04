@@ -1,5 +1,7 @@
 use crate::collision::CollisionPair;
-use crate::components::{Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, Enemy, Tower};
+use crate::components::{
+    Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, Tower,
+};
 use crate::consts;
 use crate::messages::CollisionStarted;
 use crate::resources::TexturePackSettings;
@@ -41,14 +43,14 @@ impl BulletEmissionData {
     }
 }
 
-pub fn bullet_movement(mut q: Query<(&mut Transform, &Bullet)>, time: Res<Time>) {
-    for (mut tf, bullet) in &mut q {
+pub fn move_bullets(mut q: Query<(&mut Transform, &Bullet, &CreationTime)>, time: Res<Time>) {
+    for (mut tf, bullet, creation_time) in &mut q {
         let velocity = bullet.velocity * 1.0 / consts::PHYSICS_FRAME_RATE as f32;
         tf.translation.x += velocity.x;
         tf.translation.y += velocity.y;
+
         tf.rotation = Quat::from_rotation_z(
-            ((time.elapsed().as_millis() as u64 - bullet.spawn_time)
-                % consts::BULLET_ROTATION_DURATION_MS) as f32
+            (creation_time.elapsed_ms(&time) % consts::BULLET_ROTATION_DURATION_MS) as f32
                 / consts::BULLET_ROTATION_DURATION_MS as f32
                 * PI
                 * 2.0,
@@ -75,7 +77,7 @@ pub fn rotate_towers(
     }
 }
 
-pub fn tower_shooting(
+pub fn spawn_bullets(
     mut commands: Commands,
     mut q: Query<(&Transform, &Tower, &mut BulletEmissionData), With<Tower>>, time: Res<Time>,
     asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
@@ -87,10 +89,8 @@ pub fn tower_shooting(
         }
         while let Some(shoot_time) = data.shoot_if_ready(time.elapsed().as_millis() as u64) {
             commands.spawn((
-                Bullet {
-                    velocity: data.direction * Vec2::X * data.bullet_speed,
-                    spawn_time: shoot_time,
-                },
+                Bullet { velocity: data.direction * Vec2::X * data.bullet_speed },
+                CreationTime::from_ms(shoot_time),
                 ColliderTypeB,
                 ColliderShape::circle(consts::PROJECTILE_RADIUS),
                 Transform::from_xyz(
@@ -111,7 +111,7 @@ pub fn tower_shooting(
     }
 }
 
-pub fn bullet_collisions(
+pub fn handle_bullet_enemy_collisions(
     mut commands: Commands, mut collision_reader: MessageReader<CollisionStarted>,
     bullet_query: Query<(), With<Bullet>>, enemy_query: Query<(), With<Enemy>>,
 ) {

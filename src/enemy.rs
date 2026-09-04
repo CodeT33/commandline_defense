@@ -1,12 +1,13 @@
-use std::f32;
-
-use crate::components::{Enemy, Tower};
+use crate::components::{ColliderShape, ColliderTypeA, CreationTime, Enemy, Tower};
 use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::game_map::map_logic_parsing::EnemyPath;
-use crate::resources::{MapResource, TowerRangeMap};
+use crate::resources::{DebugSettings, MapResource, TexturePackSettings, TowerRangeMap};
+use crate::texture_packs::TexturePackAssets;
 use bevy::math::U16Vec2;
 use bevy::prelude::*;
+use std::f32;
+use std::time::Duration;
 
 pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
     let progress = progress.clamp(0.0, 1.0);
@@ -52,15 +53,16 @@ pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
 }
 
 pub fn move_enemies(
-    map_resource: Res<MapResource>, time: Res<Time>, mut enemy: Query<(&mut Transform, &mut Enemy)>,
+    map_resource: Res<MapResource>, mut enemy: Query<(&mut Transform, &mut Enemy, &CreationTime)>,
+    time: Res<Time>,
 ) {
     let path_len = map_resource.0.enemy_path.get_length();
     let path_duration_secs = path_len as f32 / consts::ENEMY_SPEED_TILES_PER_SECOND;
     let path_duration_ms = (path_duration_secs * 1000.0).round() as u64;
-    let base_progress =
-        (time.elapsed().as_millis() as u64 % path_duration_ms) as f32 / path_duration_ms as f32;
-    for (mut transform, mut enemy) in &mut enemy {
-        let progress = (base_progress + enemy.path_offset) % 1.0;
+
+    for (mut transform, mut enemy, creation_time) in &mut enemy {
+        let elapsed_ms = creation_time.elapsed_ms(&time);
+        let progress = elapsed_ms.min(path_duration_ms) as f32 / path_duration_ms as f32;
         enemy.path_progress = progress;
         *transform = get_enemy_transform(progress, map_resource.0.enemy_path());
     }
@@ -100,4 +102,39 @@ fn enemy_covered_tiles(
     let min = min.as_u16vec2();
     let max = max.as_u16vec2();
     (min.y..=max.y).flat_map(move |y| (min.x..=max.x).map(move |x| U16Vec2::new(x, y)))
+}
+
+pub fn spawn_enemies(
+    mut commands: Commands, mut timer: Local<Option<Timer>>, time: Res<Time>,
+    asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
+    debug_settings: Res<DebugSettings>,
+) {
+    let t = timer.get_or_insert_with(|| {
+        Timer::new(
+            Duration::from_millis(debug_settings.enemy_spawn_interval_ms),
+            TimerMode::Repeating,
+        )
+    });
+    if t.duration().as_millis() as u64 != debug_settings.enemy_spawn_interval_ms {
+        t.set_duration(Duration::from_millis(debug_settings.enemy_spawn_interval_ms));
+    }
+    t.tick(time.delta());
+    if !t.just_finished() {
+        return;
+    }
+    commands.spawn((
+        Enemy { path_progress: 0.0 },
+        CreationTime::new(&time),
+        ColliderTypeA,
+        ColliderShape::circle(consts::ENEMY_RADIUS),
+        Sprite {
+            image: asset_server.load(
+                texture_pack_settings.get_asset_path(TexturePackAssets::Towers_GatlingTower_000),
+            ),
+            custom_size: consts::ENEMY_SIZE_TILES.into(),
+            image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
+            ..default()
+        },
+        Transform::from_xyz(0.0, 0.0, consts::rendering_layers::ENTITY),
+    ));
 }

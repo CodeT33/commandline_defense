@@ -10,19 +10,19 @@ pub mod game_map;
 pub mod messages;
 pub mod player_suite;
 pub mod resources;
+pub mod scheduling;
 pub mod texture_packs;
 pub mod tower;
 mod ui_overlay;
 
-use crate::bullets::{bullet_collisions, bullet_movement, rotate_towers, tower_shooting};
+use crate::bullets::{handle_bullet_enemy_collisions, move_bullets, rotate_towers, spawn_bullets};
 use crate::camera::{camera_zoom_and_pan, set_camera_position};
 use crate::collision::calculate_collisions;
-use crate::enemy::{move_enemies, update_towers_in_range};
+use crate::enemy::{move_enemies, spawn_enemies, update_towers_in_range};
 use crate::game_cli::command_event_handling::handle_command_events;
 use crate::game_cli::command_line::navigate_command_history;
 use crate::game_cli::command_line_state_management::handle_command_line_state;
 use crate::game_cli::spawn_game_cli;
-use crate::game_map::map::spawn_map;
 use crate::game_map::map_rendering::spawn_map_visual_layer;
 use crate::messages::{
     CollisionEnded, CollisionStarted, CollisionSustained, CommandEvent, PlaceTowerMessage,
@@ -93,13 +93,15 @@ fn register_systems(app: &mut App) {
             // physics
             FixedUpdate,
             (
-                move_enemies,
+                // movement
+                (move_enemies, move_bullets),
+                // collision handling
+                calculate_collisions,
+                handle_bullet_enemy_collisions,
+                // rest
                 update_towers_in_range,
                 rotate_towers,
-                tower_shooting,
-                bullet_movement,
-                calculate_collisions,
-                bullet_collisions,
+                (spawn_bullets, spawn_enemies),
             )
                 .chain(),
         )
@@ -125,7 +127,6 @@ fn setup(
     mut commands: Commands, asset_server: Res<AssetServer>, map_resource: Res<MapResource>,
     texture_pack_settings: Res<TexturePackSettings>,
 ) {
-    spawn_map(&mut commands, &asset_server, &texture_pack_settings);
     spawn_ui_overlay(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
     spawn_game_cli(&mut commands);
     spawn_map_visual_layer(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
