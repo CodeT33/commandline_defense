@@ -1,28 +1,23 @@
-mod bullets;
 mod camera;
+pub mod cli;
 pub mod collision;
 pub mod consts;
 pub mod coordinates;
 pub mod ecs_elements;
-pub mod enemy;
-pub mod game_cli;
-pub mod game_map;
+pub mod entities;
+pub mod map;
 pub mod player_suite;
 pub mod scheduling;
 pub mod texture_packs;
-pub mod tower;
 mod ui_overlay;
 
-use crate::bullets::{handle_bullet_enemy_collisions, move_bullets, rotate_towers, spawn_bullets};
 use crate::camera::{camera_zoom_and_pan, set_camera_position};
+use crate::cli::command_event_handling::handle_command_events;
+use crate::cli::command_line::navigate_command_history;
+use crate::cli::command_line_state_management::handle_command_line_state;
+use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
-use crate::enemy::{move_enemies, spawn_enemies, update_towers_in_range};
-use crate::game_cli::command_event_handling::handle_command_events;
-use crate::game_cli::command_line::navigate_command_history;
-use crate::game_cli::command_line_state_management::handle_command_line_state;
-use crate::game_cli::spawn_game_cli;
-use crate::game_map::map_rendering::spawn_map_visual_layer;
-use crate::tower::handle_tower_placing_events;
+use crate::map::map_rendering::spawn_map_visual_layer;
 use crate::ui_overlay::debug::draw_bounding_boxes;
 use crate::ui_overlay::grid::update_grid_preview;
 use crate::ui_overlay::selection::update_selected_tile;
@@ -37,6 +32,11 @@ use ecs_elements::resources::{
     CommandHistory, CommandState, DebugSettings, MapResource, PlayerSuiteResource, SelectionState,
     TexturePackSettings, TowerRangeMap,
 };
+use entities::bullets::{
+    handle_bullet_enemy_collisions, move_bullets, rotate_towers, spawn_bullets,
+};
+use entities::enemies::{move_enemies, spawn_enemies, update_towers_in_range};
+use entities::tower::handle_tower_placing_events;
 
 fn main() {
     let mut app = App::new();

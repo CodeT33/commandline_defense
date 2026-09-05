@@ -44,8 +44,8 @@ pub mod map_logic_parsing {
 }
 
 pub mod towers {
+    use crate::entities::tower::TowerAttributes;
     use crate::texture_packs::TexturePackAssets;
-    use crate::tower::TowerAttributes;
     use bevy::math::{U16Vec2, Vec2};
 
     pub const ASSAULT_TROOP_ATTRIBUTES: TowerAttributes = TowerAttributes {

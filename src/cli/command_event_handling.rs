@@ -1,8 +1,8 @@
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::{CommandEvent, PlaceTowerMessage};
 use crate::ecs_elements::resources::{MapResource, PlayerSuiteResource, SelectionState};
-use crate::game_map::map_logic_parsing::TileType;
-use crate::tower::TowerType;
+use crate::entities::tower::TowerType;
+use crate::map::map_logic_parsing::TileType;
 use bevy::prelude::{MessageReader, MessageWriter, Res, ResMut};
 
 pub fn handle_command_events(

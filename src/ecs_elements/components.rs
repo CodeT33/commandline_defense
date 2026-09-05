@@ -1,4 +1,4 @@
-use crate::tower::TowerDataInner;
+use crate::entities::tower::TowerDataInner;
 use bevy::ecs::entity::EntityHashSet;
 use bevy::math::{Rot2, Vec2};
 use bevy::prelude::{Circle, Component, Rectangle};

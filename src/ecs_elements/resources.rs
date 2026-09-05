@@ -1,8 +1,8 @@
+use crate::cli::command_line_state_management::PreviewCommand;
 use crate::consts;
 use crate::coordinates::GridCoordinate;
-use crate::game_cli::command_line_state_management::PreviewCommand;
-use crate::game_map::map_logic_parsing::GameMap;
-use crate::tower::TowerRangeMapInner;
+use crate::entities::tower::TowerRangeMapInner;
+use crate::map::map_logic_parsing::GameMap;
 use bevy::prelude::Resource;
 
 #[derive(Resource, Clone)]

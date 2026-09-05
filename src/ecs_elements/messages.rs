@@ -1,6 +1,6 @@
 use crate::collision::CollisionPair;
 use crate::coordinates::GridCoordinate;
-use crate::tower::TowerType;
+use crate::entities::tower::TowerType;
 use bevy::prelude::Message;
 
 #[derive(Message)]
