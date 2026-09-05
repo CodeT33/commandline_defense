@@ -110,12 +110,12 @@ pub fn spawn_enemies(
         Enemy { path_progress: 0.0 },
         CreationTime::new(&time),
         ColliderTypeA,
-        ColliderShape::circle(consts::ENEMY_RADIUS),
+        ColliderShape::circle(consts::ENEMY_BOUNDING_CIRCLE_RADIUS),
         Sprite {
             image: asset_server.load(
                 texture_pack_settings.get_asset_path(TexturePackAssets::Towers_GatlingTower_000),
             ),
-            custom_size: consts::ENEMY_SIZE_TILES.into(),
+            custom_size: consts::ENEMY_SPRITE_SIZE_TILES.into(),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()
         },

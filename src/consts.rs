@@ -10,8 +10,8 @@ pub const MAP_SIZE_TILES: U16Vec2 = U16Vec2 { x: 32, y: 16 };
 pub const TILE_SIZE: u16 = 16;
 
 pub const ENEMY_COUNT: usize = 40;
-pub const ENEMY_SIZE_TILES: Vec2 = Vec2::splat(1.0);
-pub const ENEMY_RADIUS: f32 = ENEMY_SIZE_TILES.x / 2.0;
+pub const ENEMY_SPRITE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
+pub const ENEMY_BOUNDING_CIRCLE_RADIUS: f32 = ENEMY_SPRITE_SIZE_TILES.x * 0.3;
 pub const ENEMY_SPEED_TILES_PER_SECOND: f32 = 3.0;
 pub const ENEMY_SPAWN_INTERVAL_MS: u64 = 2000;
 
