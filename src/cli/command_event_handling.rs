@@ -1,6 +1,9 @@
+use crate::cli::command_line_state_management::TogglableSettings;
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::{CommandEvent, PlaceTowerMessage};
-use crate::ecs_elements::resources::{MapResource, PlayerSuiteResource, SelectionState};
+use crate::ecs_elements::resources::{
+    DebugSettings, MapResource, PlayerSuiteResource, SelectionState,
+};
 use crate::entities::tower::TowerType;
 use crate::map::map_logic_parsing::TileType;
 use bevy::prelude::{MessageReader, MessageWriter, Res, ResMut};
@@ -8,7 +11,7 @@ use bevy::prelude::{MessageReader, MessageWriter, Res, ResMut};
 pub fn handle_command_events(
     mut messages: MessageWriter<PlaceTowerMessage>, mut events: MessageReader<CommandEvent>,
     mut selection_state: ResMut<SelectionState>, game_map: Res<MapResource>,
-    player_suite: Res<PlayerSuiteResource>,
+    player_suite: Res<PlayerSuiteResource>, mut debug_settings: ResMut<DebugSettings>,
 ) {
     for event in events.read() {
         match event {
@@ -20,6 +23,11 @@ pub fn handle_command_events(
             CommandEvent::Clear => deselect_tile(&mut selection_state),
             CommandEvent::Balance => show_balance(&player_suite),
             CommandEvent::ExitGame => exit_game(),
+            CommandEvent::Toggle(togglable) => match togglable {
+                TogglableSettings::Balls => {
+                    debug_settings.enable_bounding_boxes ^= true;
+                },
+            },
         }
     }
 }

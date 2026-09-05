@@ -1,3 +1,4 @@
+use crate::cli::command_line_state_management::TogglableSettings;
 use crate::collision::CollisionPair;
 use crate::coordinates::GridCoordinate;
 use crate::entities::tower::TowerType;
@@ -26,4 +27,5 @@ pub enum CommandEvent {
     Clear,
     Balance,
     ExitGame,
+    Toggle(TogglableSettings),
 }

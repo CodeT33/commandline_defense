@@ -1,4 +1,3 @@
-use crate::cli::send_command_event;
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::CommandEvent;
 use crate::ecs_elements::resources::{CommandHistory, CommandState, SelectionState};
@@ -24,13 +23,9 @@ pub enum PreviewCommand {
     },
 }
 
-pub enum Command {
-    Help,
-    Select { tile: GridCoordinate },
-    Place { tower_type: TowerType, tower_pos: GridCoordinate },
-    Clear,
-    Balance,
-    ExitGame,
+#[derive(Debug)]
+pub enum TogglableSettings {
+    Balls,
 }
 
 pub fn handle_command_line_state(
@@ -58,7 +53,7 @@ pub fn handle_command_line_state(
         let commands = parse_command_event(&current_input, selection_state.selected_tile);
 
         for command in commands {
-            send_command_event(command, &mut command_events);
+            command_events.write(command);
             history.entries.push(current_input.clone());
             history.idx = history.entries.len();
         }
@@ -99,7 +94,7 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
     preview
 }
 
-fn parse_command_event(input: &str, selected_tile: Option<GridCoordinate>) -> Vec<Command> {
+fn parse_command_event(input: &str, selected_tile: Option<GridCoordinate>) -> Vec<CommandEvent> {
     let mut commands = Vec::new();
 
     let mut current_selected_tile = selected_tile;
@@ -115,7 +110,7 @@ fn parse_command_event(input: &str, selected_tile: Option<GridCoordinate>) -> Ve
 
         match tokens.as_slice() {
             ["help"] => {
-                commands.push(Command::Help);
+                commands.push(CommandEvent::Help);
             },
             ["select", position] => {
                 let Some(tile) = parse_tile_position(position) else {
@@ -125,7 +120,7 @@ fn parse_command_event(input: &str, selected_tile: Option<GridCoordinate>) -> Ve
 
                 current_selected_tile = Some(tile);
 
-                commands.push(Command::Select { tile });
+                commands.push(CommandEvent::Select { tile });
             },
             ["place", tower_type] => {
                 let Some(tile) = current_selected_tile else {
@@ -137,21 +132,31 @@ fn parse_command_event(input: &str, selected_tile: Option<GridCoordinate>) -> Ve
                     continue;
                 };
 
-                commands.push(Command::Place { tower_type, tower_pos: tile });
+                commands.push(CommandEvent::Place { tower_type, tower_pos: tile });
             },
             ["clear"] => {
                 current_selected_tile = None;
-                commands.push(Command::Clear);
+                commands.push(CommandEvent::Clear);
             },
             ["show", "balance"] => {
-                commands.push(Command::Balance);
+                commands.push(CommandEvent::Balance);
             },
             ["exit", "game"] => {
-                commands.push(Command::ExitGame);
+                commands.push(CommandEvent::ExitGame);
+            },
+            #[allow(clippy::collapsible_match)]
+            ["toggle", togglable_settings] => match *togglable_settings {
+                "balls" => {
+                    commands.push(CommandEvent::Toggle(TogglableSettings::Balls));
+                },
+                _ => {
+                    println!("Unknown command: {:?}", command_text);
+                    commands.push(CommandEvent::Help);
+                },
             },
             _ => {
                 println!("Unknown command: {:?}", command_text);
-                commands.push(Command::Help);
+                commands.push(CommandEvent::Help);
             },
         }
     }
