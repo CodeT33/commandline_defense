@@ -10,24 +10,43 @@ use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::f32::consts::PI;
 
-impl Default for BulletEmissionData {
+pub struct BulletEmissionDataInner {
+    last_spawn_time_ms: Option<u64>,
+    paused: bool,
+    direction: Rot2,
+    bullet_speed_tps: f32,
+    spawn_cooldown_ms: u32,
+}
+
+impl Default for BulletEmissionDataInner {
     fn default() -> Self {
         Self {
             last_spawn_time_ms: None,
+            paused: false,
             direction: Rot2::degrees(0.0),
-            bullet_speed: consts::PROJECTILE_SPEED_TILES_PER_SECOND,
+            bullet_speed_tps: consts::PROJECTILE_SPEED_TILES_PER_SECOND,
             spawn_cooldown_ms: consts::TOWER_COOLDOWN_MS,
         }
     }
 }
 
-impl BulletEmissionData {
+impl BulletEmissionDataInner {
+    pub fn new(spawn_cooldown_ms: u32, bullet_speed_tps: f32) -> Self {
+        Self { spawn_cooldown_ms, bullet_speed_tps, ..Default::default() }
+    }
+
     /// Call this function in a loop until it returns None to ensure no bullets are dropped.\
     /// When a shot is available, the function returns the time at which the shot was fired. Otherwise, it returns None.
     pub fn shoot_if_ready(&mut self, current_time_ms: u64) -> Option<u64> {
+        let was_paused = self.paused;
+        self.paused = false;
         if let Some(last_spawn_time_ms) = &mut self.last_spawn_time_ms {
             if *last_spawn_time_ms + self.spawn_cooldown_ms as u64 <= current_time_ms {
-                *last_spawn_time_ms += self.spawn_cooldown_ms as u64;
+                if was_paused {
+                    *last_spawn_time_ms = current_time_ms;
+                } else {
+                    *last_spawn_time_ms += self.spawn_cooldown_ms as u64;
+                }
                 Some(*last_spawn_time_ms)
             } else {
                 None
@@ -39,7 +58,7 @@ impl BulletEmissionData {
     }
 
     pub fn pause(&mut self) {
-        self.last_spawn_time_ms = None;
+        self.paused = true;
     }
 }
 
@@ -73,7 +92,7 @@ pub fn rotate_towers(
         };
         let angle = (enemy_transform.translation.truncate() - t.translation.truncate()).to_angle();
         t.rotation = Quat::from_rotation_z(angle - PI / 2.0);
-        bullet_data.direction = Rot2::radians(angle);
+        bullet_data.0.direction = Rot2::radians(angle);
     }
 }
 
@@ -83,13 +102,17 @@ pub fn spawn_bullets(
     asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
 ) {
     for (transform, tower, mut data) in &mut q {
+        let emission_data = &mut data.0;
         if tower.enemies_in_range.is_empty() {
-            data.pause();
+            emission_data.pause();
             continue;
         }
-        while let Some(shoot_time) = data.shoot_if_ready(time.elapsed().as_millis() as u64) {
+        while let Some(shoot_time) = emission_data.shoot_if_ready(time.elapsed().as_millis() as u64)
+        {
             commands.spawn((
-                Bullet { velocity: data.direction * Vec2::X * data.bullet_speed },
+                Bullet {
+                    velocity: emission_data.direction * Vec2::X * emission_data.bullet_speed_tps,
+                },
                 CreationTime::from_ms(shoot_time),
                 ColliderTypeB,
                 ColliderShape::circle(consts::PROJECTILE_RADIUS),

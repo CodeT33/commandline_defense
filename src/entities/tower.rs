@@ -7,10 +7,11 @@ use crate::ecs_elements::messages::PlaceTowerMessage;
 
 use crate::ecs_elements::resources::{PlayerSuiteResource, TexturePackSettings};
 
+use crate::entities::bullets::BulletEmissionDataInner;
 use crate::player_suite::TransactionReturnStatus;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
-use bevy::math::{Rot2, U16Vec2, Vec2};
+use bevy::math::{U16Vec2, Vec2};
 use bevy::prelude::{
     Circle, Commands, Entity, MessageReader, Res, ResMut, Sprite, SpriteImageMode,
     SpriteScalingMode, Transform, default,
@@ -92,12 +93,9 @@ pub fn handle_tower_placing_events(
 
         let tower_pos =
             GridCoordinate::new(message.tower_pos.position.x, message.tower_pos.position.y);
-        let bullet_emission_data: BulletEmissionData = BulletEmissionData {
-            last_spawn_time_ms: Some(0),
-            direction: Rot2::degrees(0.0),
-            bullet_speed: attributes.bullet_speed,
-            spawn_cooldown_ms: attributes.cooldown_ms,
-        };
+        let bullet_emission_data: BulletEmissionData = BulletEmissionData(
+            BulletEmissionDataInner::new(attributes.cooldown_ms, attributes.bullet_speed),
+        );
         let sprite: Sprite = Sprite {
             image: asset_server.load(texture_pack_settings.get_asset_path(attributes.sprites[0])),
             custom_size: attributes.size_tiles.into(),

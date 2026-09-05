@@ -1,7 +1,7 @@
+use crate::entities::bullets::BulletEmissionDataInner;
 use crate::entities::tower::TowerDataInner;
 use bevy::ecs::entity::EntityHashSet;
-use bevy::math::{Rot2, Vec2};
-use bevy::prelude::{Circle, Component, Rectangle};
+use bevy::prelude::{Circle, Component, Rectangle, Vec2};
 
 #[derive(Component)]
 pub struct Enemy {
@@ -19,12 +19,7 @@ pub struct CreationTime {
 }
 
 #[derive(Component)]
-pub struct BulletEmissionData {
-    pub last_spawn_time_ms: Option<u64>,
-    pub direction: Rot2,
-    pub bullet_speed: f32,
-    pub spawn_cooldown_ms: u32,
-}
+pub struct BulletEmissionData(pub BulletEmissionDataInner);
 
 #[derive(Component, Copy, Clone)]
 pub enum ColliderShape {
