@@ -30,7 +30,7 @@ use ecs_elements::messages::{
 };
 use ecs_elements::resources::{
     CommandHistory, CommandState, DebugSettings, MapResource, PlayerSuiteResource, SelectionState,
-    TexturePackSettings, TowerRangeMap,
+    TexturePackSettings,
 };
 use entities::bullets::{
     handle_bullet_enemy_collisions, move_bullets, rotate_towers, spawn_bullets,
@@ -72,7 +72,6 @@ fn register_resources(app: &mut App) {
         .init_resource::<TexturePackSettings>()
         .init_resource::<MapResource>()
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
-        .init_resource::<TowerRangeMap>()
         .init_resource::<CommandHistory>()
         .init_resource::<PlayerSuiteResource>();
 }
@@ -96,8 +95,8 @@ fn register_systems(app: &mut App) {
                 // collision handling
                 calculate_collisions,
                 handle_bullet_enemy_collisions,
-                // rest
                 update_towers_in_range,
+                // rest
                 rotate_towers,
                 (spawn_bullets, spawn_enemies),
             )

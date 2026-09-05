@@ -1,14 +1,8 @@
 use crate::cli::command_line_state_management::PreviewCommand;
 use crate::consts;
 use crate::coordinates::GridCoordinate;
-use crate::entities::tower::TowerRangeMapInner;
 use crate::map::map_logic_parsing::GameMap;
 use bevy::prelude::Resource;
-
-#[derive(Resource, Clone)]
-pub struct Map {
-    pub enemies: usize,
-}
 
 #[derive(Resource)]
 pub struct MapResource(pub GameMap);
@@ -37,9 +31,6 @@ pub struct PlayerSuiteResource {
 pub struct TexturePackSettings {
     pub base_path: String,
 }
-
-#[derive(Resource, Default)]
-pub struct TowerRangeMap(pub TowerRangeMapInner);
 
 #[derive(Resource, Default)]
 pub struct SelectionState {

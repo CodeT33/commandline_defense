@@ -1,5 +1,5 @@
 use crate::consts;
-use crate::ecs_elements::resources::{Map, MapResource};
+use crate::ecs_elements::resources::MapResource;
 use crate::map::map_logic_parsing::GameMap;
 use macros::dir_structure_as_enum_absolute_paths;
 
@@ -7,12 +7,6 @@ pub mod map_logic_parsing;
 pub mod map_rendering;
 
 dir_structure_as_enum_absolute_paths!(MapLogicLayers, "assets/map_logic_layers");
-
-impl Default for Map {
-    fn default() -> Self {
-        Self { enemies: consts::ENEMY_COUNT }
-    }
-}
 
 impl Default for MapResource {
     fn default() -> Self {

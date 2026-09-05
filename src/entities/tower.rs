@@ -1,17 +1,19 @@
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
-use crate::ecs_elements::components::{BulletEmissionData, Tower, TowerData};
+use crate::ecs_elements::components::{
+    BulletEmissionData, ColliderShape, ColliderTypeB, Tower, TowerData,
+};
 use crate::ecs_elements::messages::PlaceTowerMessage;
 
-use crate::ecs_elements::resources::{PlayerSuiteResource, TexturePackSettings, TowerRangeMap};
+use crate::ecs_elements::resources::{PlayerSuiteResource, TexturePackSettings};
 
 use crate::player_suite::TransactionReturnStatus;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::math::{Rot2, U16Vec2, Vec2};
 use bevy::prelude::{
-    Commands, Entity, MessageReader, Res, ResMut, Sprite, SpriteImageMode, SpriteScalingMode,
-    Transform, default,
+    Circle, Commands, Entity, MessageReader, Res, ResMut, Sprite, SpriteImageMode,
+    SpriteScalingMode, Transform, default,
 };
 
 pub struct TowerDataInner {
@@ -68,8 +70,8 @@ impl Default for TowerRangeMapInner {
 
 pub fn handle_tower_placing_events(
     mut messages: MessageReader<PlaceTowerMessage>, mut commands: Commands,
-    asset_server: Res<AssetServer>, mut tower_range_map: ResMut<TowerRangeMap>,
-    mut player_suite: ResMut<PlayerSuiteResource>, texture_pack_settings: Res<TexturePackSettings>,
+    asset_server: Res<AssetServer>, mut player_suite: ResMut<PlayerSuiteResource>,
+    texture_pack_settings: Res<TexturePackSettings>,
 ) {
     for message in messages.read() {
         let attributes: TowerAttributes = match message.tower_type {
@@ -108,28 +110,23 @@ pub fn handle_tower_placing_events(
             effects: vec![],
         });
 
-        Tower::spawn(
-            &mut commands,
-            sprite,
-            tower_pos,
-            tower_data,
-            bullet_emission_data,
-            &mut tower_range_map,
-        );
+        Tower::spawn(&mut commands, sprite, tower_pos, tower_data, bullet_emission_data);
     }
 }
 
 impl Tower {
     pub fn spawn(
         commands: &mut Commands, sprite: Sprite, tower_pos: GridCoordinate, tower_data: TowerData,
-        bullet_emission_data: BulletEmissionData, tower_range_map: &mut ResMut<TowerRangeMap>,
+        bullet_emission_data: BulletEmissionData,
     ) {
-        let entity = commands
+        _ = commands
             .spawn((
                 Tower::default(),
                 tower_data,
                 sprite,
                 bullet_emission_data,
+                ColliderShape::Circle(Circle::new(consts::TOWER_RANGE_TILES as f32)),
+                ColliderTypeB,
                 Transform::from_xyz(
                     tower_pos.position.x as f32 + 0.5,
                     tower_pos.position.y as f32 + 0.5,
@@ -137,7 +134,6 @@ impl Tower {
                 ),
             ))
             .id();
-        tower_range_map.0.add_range_rect(tower_pos, consts::TOWER_RANGE_TILES, entity);
     }
 }
 

@@ -1,12 +1,11 @@
+use crate::collision::CollisionPair;
 use crate::consts;
-use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::components::{ColliderShape, ColliderTypeA, CreationTime, Enemy, Tower};
-use crate::ecs_elements::resources::{
-    DebugSettings, MapResource, TexturePackSettings, TowerRangeMap,
-};
+use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted};
+use crate::ecs_elements::resources::{DebugSettings, MapResource, TexturePackSettings};
 use crate::map::map_logic_parsing::EnemyPath;
 use crate::texture_packs::TexturePackAssets;
-use bevy::math::U16Vec2;
+use bevy::ecs::relationship::RelationshipSourceCollection;
 use bevy::prelude::*;
 use std::f32;
 use std::time::Duration;
@@ -71,39 +70,22 @@ pub fn move_enemies(
 }
 
 pub fn update_towers_in_range(
-    tower_range_map: Res<TowerRangeMap>, enemy: Query<(Entity, &Transform), With<Enemy>>,
-    mut towers: Query<&mut Tower>,
+    enemies: Query<Entity, With<Enemy>>, mut towers: Query<(Entity, &mut Tower)>,
+    mut collision_started: MessageReader<CollisionStarted>,
+    mut collision_ended: MessageReader<CollisionEnded>,
 ) {
-    for mut tower in &mut towers {
-        tower.enemies_in_range.clear();
+    for CollisionStarted(CollisionPair { type_a, type_b }) in collision_started.read() {
+        let Some(Ok(mut tower)) = enemies.contains(*type_a).then(|| towers.get_mut(*type_b)) else {
+            continue;
+        };
+        tower.1.enemies_in_range.insert(*type_a);
     }
-
-    for (entity, transform) in &enemy {
-        for tile in enemy_covered_tiles(
-            transform.translation.truncate(),
-            consts::ENEMY_SIZE_TILES,
-            tower_range_map.0.size,
-        ) {
-            for &tower_entity in
-                tower_range_map.0.towers_in_range_at(GridCoordinate { position: tile })
-            {
-                towers.get_mut(tower_entity).unwrap().enemies_in_range.insert(entity);
-            }
-        }
+    for CollisionEnded(CollisionPair { type_a, type_b }) in collision_ended.read() {
+        let Ok(mut tower) = towers.get_mut(*type_b) else {
+            continue;
+        };
+        tower.1.enemies_in_range.remove(*type_a);
     }
-}
-
-fn enemy_covered_tiles(
-    center: Vec2, size: Vec2, map_size: U16Vec2,
-) -> impl Iterator<Item = U16Vec2> {
-    let min = (center - size / 2.0).floor().max(Vec2::ZERO);
-    let max = ((center + size / 2.0).ceil() - Vec2::ONE)
-        .max(Vec2::ZERO)
-        .min(map_size.as_vec2() - Vec2::ONE);
-
-    let min = min.as_u16vec2();
-    let max = max.as_u16vec2();
-    (min.y..=max.y).flat_map(move |y| (min.x..=max.x).map(move |x| U16Vec2::new(x, y)))
 }
 
 pub fn spawn_enemies(

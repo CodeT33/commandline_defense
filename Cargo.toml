@@ -19,7 +19,7 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy = { version = "0.19", default-features = false, features = ["2d", "ui", "jpeg"] }
+bevy = { version = "0.19", default-features = false, features = ["2d", "ui", "jpeg", "system_clipboard"] }
 macros = { path = "./macros" }
 image = "0.25.10"
 
