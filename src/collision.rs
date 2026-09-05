@@ -1,10 +1,10 @@
 use crate::ecs_elements::components::{ColliderShape, ColliderTypeA, ColliderTypeB};
 use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted, CollisionSustained};
 use bevy::math::bounding::{Aabb2d, BoundingCircle, IntersectsVolume};
+use bevy::platform::collections::HashSet;
 use bevy::prelude::{
     Circle, Entity, Local, MessageWriter, Query, Rectangle, Transform, Vec2, With,
 };
-use std::collections::HashSet;
 
 enum Collider {
     Aabb(Aabb2d),
