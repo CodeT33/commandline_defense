@@ -66,7 +66,7 @@ impl BulletEmissionDataInner {
 
 pub fn move_bullets(mut q: Query<(&mut Transform, &Bullet, &CreationTime)>, time: Res<Time>) {
     for (mut tf, bullet, creation_time) in &mut q {
-        let velocity = bullet.velocity * 1.0 / consts::PHYSICS_FRAME_RATE as f32;
+        let velocity = bullet.velocity * time.delta_secs();
         tf.translation.x += velocity.x;
         tf.translation.y += velocity.y;
 
