@@ -1,7 +1,7 @@
 use crate::coordinates::GridCoordinate;
+use crate::ecs_elements::messages::{CommandEvent, PlaceTowerMessage};
+use crate::ecs_elements::resources::{MapResource, PlayerSuiteResource, SelectionState};
 use crate::game_map::map_logic_parsing::TileType;
-use crate::messages::{CommandEvent, PlaceTowerMessage};
-use crate::resources::{MapResource, PlayerSuiteResource, SelectionState};
 use crate::tower::TowerType;
 use bevy::prelude::{MessageReader, MessageWriter, Res, ResMut};
 

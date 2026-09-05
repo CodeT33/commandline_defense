@@ -1,10 +1,10 @@
-use crate::components::{GridLine, GridOverlay, GridPositionLabel};
 use crate::consts::ui::grid::GRID_LINE_THICKNESS;
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
+use crate::ecs_elements::components::{GridLine, GridOverlay, GridPositionLabel};
+use crate::ecs_elements::resources::{CommandState, MapResource};
 use crate::game_cli::command_line_state_management::PreviewCommand;
 use crate::game_map::map_logic_parsing::TileType;
-use crate::resources::{CommandState, MapResource};
 use bevy::color::Color;
 use bevy::prelude::{
     Commands, Query, Res, Sprite, Text2d, Transform, Vec2, Vec3, Visibility, With, default,

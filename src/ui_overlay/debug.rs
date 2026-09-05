@@ -1,5 +1,5 @@
-use crate::components::ColliderShape;
 use crate::consts;
+use crate::ecs_elements::components::ColliderShape;
 use bevy::math::Isometry2d;
 use bevy::prelude::{Gizmos, Query, Transform};
 

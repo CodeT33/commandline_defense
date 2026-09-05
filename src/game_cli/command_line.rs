@@ -1,4 +1,4 @@
-use crate::resources::CommandHistory;
+use crate::ecs_elements::resources::CommandHistory;
 use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
 use bevy::input_focus::{AutoFocus, InputFocus};
 use bevy::prelude::*;

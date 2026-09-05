@@ -1,6 +1,6 @@
+use crate::ecs_elements::messages::CommandEvent;
 use crate::game_cli::command_line::spawn_command_line;
 use crate::game_cli::command_line_state_management::Command;
-use crate::messages::CommandEvent;
 use bevy::prelude::{Commands, MessageWriter};
 
 pub mod command_event_handling;

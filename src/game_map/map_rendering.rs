@@ -1,5 +1,5 @@
 use crate::consts;
-use crate::resources::{MapResource, TexturePackSettings};
+use crate::ecs_elements::resources::{MapResource, TexturePackSettings};
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::prelude::{

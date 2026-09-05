@@ -1,5 +1,5 @@
 use crate::consts;
-use crate::resources::{MapResource, TexturePackSettings};
+use crate::ecs_elements::resources::{MapResource, TexturePackSettings};
 use crate::texture_packs::TexturePackAssets;
 use crate::ui_overlay::grid::{spawn_contrast_overlay, spawn_grid, spawn_grid_positions};
 use crate::ui_overlay::selection::spawn_tile_highlight;

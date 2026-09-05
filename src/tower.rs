@@ -1,9 +1,9 @@
-use crate::components::{BulletEmissionData, Tower, TowerData};
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
-use crate::messages::PlaceTowerMessage;
+use crate::ecs_elements::components::{BulletEmissionData, Tower, TowerData};
+use crate::ecs_elements::messages::PlaceTowerMessage;
 
-use crate::resources::{PlayerSuiteResource, TexturePackSettings, TowerRangeMap};
+use crate::ecs_elements::resources::{PlayerSuiteResource, TexturePackSettings, TowerRangeMap};
 
 use crate::player_suite::TransactionReturnStatus;
 use crate::texture_packs::TexturePackAssets;

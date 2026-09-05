@@ -1,15 +1,13 @@
 mod bullets;
 mod camera;
 pub mod collision;
-pub mod components;
 pub mod consts;
 pub mod coordinates;
+pub mod ecs_elements;
 pub mod enemy;
 pub mod game_cli;
 pub mod game_map;
-pub mod messages;
 pub mod player_suite;
-pub mod resources;
 pub mod scheduling;
 pub mod texture_packs;
 pub mod tower;
@@ -24,13 +22,6 @@ use crate::game_cli::command_line::navigate_command_history;
 use crate::game_cli::command_line_state_management::handle_command_line_state;
 use crate::game_cli::spawn_game_cli;
 use crate::game_map::map_rendering::spawn_map_visual_layer;
-use crate::messages::{
-    CollisionEnded, CollisionStarted, CollisionSustained, CommandEvent, PlaceTowerMessage,
-};
-use crate::resources::{
-    CommandHistory, CommandState, DebugSettings, MapResource, PlayerSuiteResource, SelectionState,
-    TexturePackSettings, TowerRangeMap,
-};
 use crate::tower::handle_tower_placing_events;
 use crate::ui_overlay::debug::draw_bounding_boxes;
 use crate::ui_overlay::grid::update_grid_preview;
@@ -39,6 +30,13 @@ use crate::ui_overlay::spawn_ui_overlay;
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
+use ecs_elements::messages::{
+    CollisionEnded, CollisionStarted, CollisionSustained, CommandEvent, PlaceTowerMessage,
+};
+use ecs_elements::resources::{
+    CommandHistory, CommandState, DebugSettings, MapResource, PlayerSuiteResource, SelectionState,
+    TexturePackSettings, TowerRangeMap,
+};
 
 fn main() {
     let mut app = App::new();

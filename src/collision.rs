@@ -1,5 +1,5 @@
-use crate::components::{ColliderShape, ColliderTypeA, ColliderTypeB};
-use crate::messages::{CollisionEnded, CollisionStarted, CollisionSustained};
+use crate::ecs_elements::components::{ColliderShape, ColliderTypeA, ColliderTypeB};
+use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted, CollisionSustained};
 use bevy::math::bounding::{Aabb2d, BoundingCircle, IntersectsVolume};
 use bevy::prelude::{
     Circle, Entity, Local, MessageWriter, Query, Rectangle, Transform, Vec2, With,

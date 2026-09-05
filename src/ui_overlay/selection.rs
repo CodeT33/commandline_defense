@@ -1,8 +1,8 @@
 use crate::consts::{self, TILE_SIZE};
 
-use crate::components::TileHighlight;
+use crate::ecs_elements::components::TileHighlight;
+use crate::ecs_elements::resources::{CommandState, SelectionState, TexturePackSettings};
 use crate::game_cli::command_line_state_management::PreviewCommand;
-use crate::resources::{CommandState, SelectionState, TexturePackSettings};
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::math::Vec2;

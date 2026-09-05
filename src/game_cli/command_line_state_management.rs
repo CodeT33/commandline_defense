@@ -1,7 +1,7 @@
 use crate::coordinates::GridCoordinate;
+use crate::ecs_elements::messages::CommandEvent;
+use crate::ecs_elements::resources::{CommandHistory, CommandState, SelectionState};
 use crate::game_cli::send_command_event;
-use crate::messages::CommandEvent;
-use crate::resources::{CommandHistory, CommandState, SelectionState};
 use crate::tower::TowerType;
 use crate::ui_overlay::grid::get_number_from_letter;
 use bevy::input::ButtonInput;

@@ -1,4 +1,4 @@
-use crate::components::CreationTime;
+use crate::ecs_elements::components::CreationTime;
 use bevy::prelude::Time;
 
 impl CreationTime {

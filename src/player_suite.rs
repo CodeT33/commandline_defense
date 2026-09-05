@@ -1,4 +1,4 @@
-use crate::resources::PlayerSuiteResource;
+use crate::ecs_elements::resources::PlayerSuiteResource;
 
 impl Default for PlayerSuiteResource {
     fn default() -> Self {

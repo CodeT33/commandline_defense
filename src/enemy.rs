@@ -1,8 +1,10 @@
-use crate::components::{ColliderShape, ColliderTypeA, CreationTime, Enemy, Tower};
 use crate::consts;
 use crate::coordinates::GridCoordinate;
+use crate::ecs_elements::components::{ColliderShape, ColliderTypeA, CreationTime, Enemy, Tower};
+use crate::ecs_elements::resources::{
+    DebugSettings, MapResource, TexturePackSettings, TowerRangeMap,
+};
 use crate::game_map::map_logic_parsing::EnemyPath;
-use crate::resources::{DebugSettings, MapResource, TexturePackSettings, TowerRangeMap};
 use crate::texture_packs::TexturePackAssets;
 use bevy::math::U16Vec2;
 use bevy::prelude::*;

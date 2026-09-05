@@ -1,10 +1,10 @@
 use crate::collision::CollisionPair;
-use crate::components::{
+use crate::consts;
+use crate::ecs_elements::components::{
     Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, Tower,
 };
-use crate::consts;
-use crate::messages::CollisionStarted;
-use crate::resources::TexturePackSettings;
+use crate::ecs_elements::messages::CollisionStarted;
+use crate::ecs_elements::resources::TexturePackSettings;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;

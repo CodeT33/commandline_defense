@@ -1,7 +1,7 @@
 use crate::consts;
+use crate::ecs_elements::resources::{Map, MapResource};
 use crate::game_map::MapLogicLayers;
 use crate::game_map::map_logic_parsing::GameMap;
-use crate::resources::{Map, MapResource};
 
 impl Default for Map {
     fn default() -> Self {

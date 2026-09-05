@@ -1,5 +1,5 @@
 use crate::consts;
-use crate::resources::TexturePackSettings;
+use crate::ecs_elements::resources::TexturePackSettings;
 use macros::dir_structure_as_enum;
 
 impl Default for TexturePackSettings {

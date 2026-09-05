@@ -1,5 +1,5 @@
 use crate::consts;
-use crate::resources::MapResource;
+use crate::ecs_elements::resources::MapResource;
 use bevy::input::mouse::{MouseMotion, MouseWheel};
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;

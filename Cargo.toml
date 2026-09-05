@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["macros", "map_parsing"]
+members = ["macros"]
 
 [package]
 name = "towerdefense"
@@ -20,8 +20,6 @@ opt-level = 3
 
 [dependencies]
 bevy = { version = "0.19", default-features = false, features = ["2d", "ui", "jpeg"] }
-rand = "0.10.2"
-map_parsing = { path = "./map_parsing" }
 macros = { path = "./macros" }
 image = "0.25.10"
 
