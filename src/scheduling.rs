@@ -1,8 +1,11 @@
-use crate::ecs_elements::components::CreationTime;
 use bevy::prelude::Time;
 
-impl CreationTime {
-    pub fn new(time: &Time) -> Self {
+pub struct TimePoint {
+    ms: u64,
+}
+
+impl TimePoint {
+    pub fn now(time: &Time) -> Self {
         Self { ms: time.elapsed().as_millis() as u64 }
     }
 

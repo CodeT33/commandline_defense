@@ -1,5 +1,6 @@
 use crate::entities::bullets::BulletEmissionDataInner;
 use crate::entities::tower::TowerDataInner;
+use crate::scheduling::TimePoint;
 use bevy::ecs::entity::EntityHashSet;
 use bevy::prelude::{Circle, Component, Rectangle, Vec2};
 
@@ -14,9 +15,7 @@ pub struct Bullet {
 }
 
 #[derive(Component)]
-pub struct CreationTime {
-    pub ms: u64,
-}
+pub struct CreationTime(pub TimePoint);
 
 #[derive(Component)]
 pub struct BulletEmissionData(pub BulletEmissionDataInner);

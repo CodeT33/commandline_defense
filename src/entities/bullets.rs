@@ -5,6 +5,7 @@ use crate::ecs_elements::components::{
 };
 use crate::ecs_elements::messages::CollisionStarted;
 use crate::ecs_elements::resources::TexturePackSettings;
+use crate::scheduling::TimePoint;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
@@ -37,7 +38,8 @@ impl BulletEmissionDataInner {
 
     /// Call this function in a loop until it returns None to ensure no bullets are dropped.\
     /// When a shot is available, the function returns the time at which the shot was fired. Otherwise, it returns None.
-    pub fn shoot_if_ready(&mut self, current_time_ms: u64) -> Option<u64> {
+    pub fn shoot_if_ready(&mut self, time: &Time) -> Option<TimePoint> {
+        let current_time_ms = time.elapsed().as_millis() as u64;
         let was_paused = self.paused;
         self.paused = false;
         if let Some(last_spawn_time_ms) = &mut self.last_spawn_time_ms {
@@ -47,13 +49,13 @@ impl BulletEmissionDataInner {
                 } else {
                     *last_spawn_time_ms += self.spawn_cooldown_ms as u64;
                 }
-                Some(*last_spawn_time_ms)
+                Some(TimePoint::from_ms(*last_spawn_time_ms))
             } else {
                 None
             }
         } else {
             self.last_spawn_time_ms = Some(current_time_ms);
-            Some(current_time_ms)
+            Some(TimePoint::from_ms(current_time_ms))
         }
     }
 
@@ -69,7 +71,7 @@ pub fn move_bullets(mut q: Query<(&mut Transform, &Bullet, &CreationTime)>, time
         tf.translation.y += velocity.y;
 
         tf.rotation = Quat::from_rotation_z(
-            (creation_time.elapsed_ms(&time) % consts::BULLET_ROTATION_DURATION_MS) as f32
+            (creation_time.0.elapsed_ms(&time) % consts::BULLET_ROTATION_DURATION_MS) as f32
                 / consts::BULLET_ROTATION_DURATION_MS as f32
                 * PI
                 * 2.0,
@@ -107,13 +109,12 @@ pub fn spawn_bullets(
             emission_data.pause();
             continue;
         }
-        while let Some(shoot_time) = emission_data.shoot_if_ready(time.elapsed().as_millis() as u64)
-        {
+        while let Some(shoot_time) = emission_data.shoot_if_ready(&time) {
             commands.spawn((
                 Bullet {
                     velocity: emission_data.direction * Vec2::X * emission_data.bullet_speed_tps,
                 },
-                CreationTime::from_ms(shoot_time),
+                CreationTime(shoot_time),
                 ColliderTypeB,
                 ColliderShape::circle(consts::PROJECTILE_RADIUS),
                 Transform::from_xyz(

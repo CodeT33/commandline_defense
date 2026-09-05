@@ -4,6 +4,7 @@ use crate::ecs_elements::components::{ColliderShape, ColliderTypeA, CreationTime
 use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted};
 use crate::ecs_elements::resources::{DebugSettings, MapResource, TexturePackSettings};
 use crate::map::map_logic_parsing::EnemyPath;
+use crate::scheduling::TimePoint;
 use crate::texture_packs::TexturePackAssets;
 use bevy::ecs::relationship::RelationshipSourceCollection;
 use bevy::prelude::*;
@@ -62,7 +63,7 @@ pub fn move_enemies(
     let path_duration_ms = (path_duration_secs * 1000.0).round() as u64;
 
     for (mut transform, mut enemy, creation_time) in &mut enemy {
-        let elapsed_ms = creation_time.elapsed_ms(&time);
+        let elapsed_ms = creation_time.0.elapsed_ms(&time);
         let progress = elapsed_ms.min(path_duration_ms) as f32 / path_duration_ms as f32;
         enemy.path_progress = progress;
         *transform = get_enemy_transform(progress, map_resource.0.enemy_path());
@@ -108,7 +109,7 @@ pub fn spawn_enemies(
     }
     commands.spawn((
         Enemy { path_progress: 0.0 },
-        CreationTime::new(&time),
+        CreationTime(TimePoint::now(&time)),
         ColliderTypeA,
         ColliderShape::circle(consts::ENEMY_BOUNDING_CIRCLE_RADIUS),
         Sprite {
