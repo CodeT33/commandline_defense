@@ -1,7 +1,10 @@
 use crate::consts;
-use crate::ecs_elements::components::{ColliderShape, ColliderTypeA, CreationTime, Enemy};
+use crate::ecs_elements::components::{
+    ColliderShape, ColliderTypeA, CreationTime, Enemy, HealthStats,
+};
 use crate::ecs_elements::messages::SpawnEnemy;
 use crate::ecs_elements::resources::{DebugSettings, MapResource, TexturePackSettings};
+use crate::entities::health::HealthStatsInner;
 use crate::map::map_logic_parsing::EnemyPath;
 use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
@@ -18,12 +21,11 @@ pub enum EnemyType {
 pub struct EnemyData {
     enemy_type: EnemyType,
     path_progress: f32,
-    current_health: f32,
 }
 
 #[derive(Copy, Clone, Debug)]
 pub struct EnemyStats {
-    pub lives: f32,
+    pub health: f32,
     pub speed_tps: f32,
     pub asset: TexturePackAssets,
 }
@@ -75,6 +77,7 @@ pub fn handle_enemy_spawns(
     for message in enemy_spawns.read() {
         commands.spawn((
             Enemy(EnemyData::new(message.enemy_type)),
+            HealthStats(HealthStatsInner::new(message.enemy_type.get_stats().health)),
             CreationTime(message.time),
             ColliderTypeA,
             ColliderShape::circle(consts::ENEMY_BOUNDING_CIRCLE_RADIUS),
@@ -136,8 +139,7 @@ fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
 
 impl EnemyData {
     pub fn new(enemy_type: EnemyType) -> Self {
-        let stats = enemy_type.get_stats();
-        Self { current_health: stats.lives, enemy_type, path_progress: 0.0 }
+        Self { enemy_type, path_progress: 0.0 }
     }
 
     pub fn get_path_progress(&self) -> f32 {

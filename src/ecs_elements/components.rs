@@ -1,6 +1,7 @@
 use crate::entities::bullets::BulletData;
 use crate::entities::bullets::BulletEmissionDataInner;
 use crate::entities::enemies::EnemyData;
+use crate::entities::health::HealthStatsInner;
 use crate::entities::tower::TowerDataInner;
 use crate::scheduling::TimePoint;
 use bevy::ecs::entity::EntityHashSet;
@@ -11,6 +12,9 @@ pub struct Enemy(pub EnemyData);
 
 #[derive(Component)]
 pub struct Bullet(pub BulletData);
+
+#[derive(Component)]
+pub struct HealthStats(pub HealthStatsInner);
 
 #[derive(Component)]
 pub struct CreationTime(pub TimePoint);

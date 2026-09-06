@@ -26,11 +26,13 @@ use crate::map::spawn_map_bounds;
 use crate::movement::delete_out_of_map_entities;
 use crate::ui_overlay::debug::draw_bounding_boxes;
 use crate::ui_overlay::grid::update_grid_preview;
+use crate::ui_overlay::health_bars::draw_health_bars;
 use crate::ui_overlay::selection::update_selected_tile;
 use crate::ui_overlay::spawn_ui_overlay;
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
+use bevy_vector_shapes::prelude::*;
 use ecs_elements::messages::{
     CollisionEnded, CollisionStarted, CollisionSustained, CommandEvent, PlaceTowerMessage,
     SpawnBullet, SpawnEnemy,
@@ -70,6 +72,7 @@ fn register_plugins(app: &mut App) {
             .set(ImagePlugin::default_nearest())
             .set(AssetPlugin { file_path: "./".to_owned(), ..default() }),
         TabNavigationPlugin,
+        Shape2dPlugin::default(),
     ));
     #[cfg(feature = "determinism")]
     app.add_plugins(crate::determinism_harness::DeterminismHarnessPlugin);
@@ -123,6 +126,7 @@ fn register_systems(app: &mut App) {
                 draw_bounding_boxes.run_if(|debug_settings: Res<DebugSettings>| {
                     debug_settings.enable_bounding_boxes
                 }),
+                draw_health_bars,
                 camera_zoom_and_pan,
                 update_grid_preview,
                 update_selected_tile,

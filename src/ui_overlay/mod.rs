@@ -10,6 +10,7 @@ use bevy::prelude::{
 
 pub mod debug;
 pub mod grid;
+pub mod health_bars;
 pub mod selection;
 
 pub fn spawn_ui_overlay(

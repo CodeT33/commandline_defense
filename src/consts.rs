@@ -133,9 +133,12 @@ pub mod enemies {
     use crate::texture_packs::TexturePackAssets;
 
     pub const ENEMY_TYPE_WIDE_BIRB: EnemyStats =
-        EnemyStats { lives: 4.0, speed_tps: 1.0, asset: TexturePackAssets::WipSprites_Enemy };
-    pub const ENEMY_TYPE_MAUS_MEISTER: EnemyStats =
-        EnemyStats { lives: 0.5, speed_tps: 4.0, asset: TexturePackAssets::WipSprites_MausMeister };
+        EnemyStats { health: 4.0, speed_tps: 1.0, asset: TexturePackAssets::WipSprites_Enemy };
+    pub const ENEMY_TYPE_MAUS_MEISTER: EnemyStats = EnemyStats {
+        health: 0.5,
+        speed_tps: 4.0,
+        asset: TexturePackAssets::WipSprites_MausMeister,
+    };
 }
 
 // ui
@@ -143,6 +146,16 @@ pub mod ui {
     use bevy::prelude::Color;
 
     pub const BOUNDING_BOX_DEBUG_COLOR: Color = Color::hsv(0.3, 1.0, 1.0);
+
+    pub mod health_bars {
+        use bevy::prelude::Color;
+
+        pub const HEALTH_BAR_BACKGROUND_COLOR: Color = Color::srgb(0.12, 0.12, 0.12);
+        pub const HEALTH_BAR_FILL_COLOR: Color = Color::srgb(0.2, 0.8, 0.3);
+        pub const HEALTH_BAR_WIDTH_TILES: f32 = 1.0;
+        pub const HEALTH_BAR_HEIGHT_TILES: f32 = 0.07;
+        pub const HEALTH_BAR_OFFSET_TILES: f32 = 0.7;
+    }
 
     pub mod grid {
         use crate::ui_overlay::grid::{FontSettings, GridTileColors};
@@ -204,6 +217,7 @@ pub mod rendering_layers {
     pub const ENTITY: f32 = 5.0;
     pub const GRID: f32 = 10.0;
     pub const GRID_LABEL: f32 = 11.0;
+    pub const HEALTH_BARS: f32 = 15.0;
     pub const HIGHLIGHT: f32 = 20.0;
 }
 

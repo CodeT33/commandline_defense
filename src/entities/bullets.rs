@@ -2,10 +2,11 @@ use crate::collision::CollisionPair;
 use crate::consts;
 use crate::ecs_elements::components::{
     Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, DeleteWhenOutOfMap,
-    Enemy, Tower,
+    Enemy, HealthStats, Tower,
 };
 use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted, SpawnBullet};
 use crate::ecs_elements::resources::TexturePackSettings;
+use crate::entities::health::HealthStatsInner;
 use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
@@ -31,7 +32,6 @@ pub struct BulletStats {
 pub struct BulletData {
     bullet_type: BulletType,
     rotation: Rot2,
-    current_health: f32,
 }
 
 impl BulletType {
@@ -149,6 +149,7 @@ pub fn handle_bullet_spawns(
         let stats = message.bullet_type.get_stats();
         commands.spawn((
             Bullet(BulletData::new(message.bullet_type, message.direction)),
+            HealthStats(HealthStatsInner::new(stats.health)),
             CreationTime(message.time),
             ColliderTypeB,
             ColliderShape::circle(stats.collider_radius),
@@ -180,7 +181,6 @@ pub fn handle_bullet_enemy_collisions(
 
 impl BulletData {
     pub fn new(bullet_type: BulletType, rotation: Rot2) -> Self {
-        let stats = bullet_type.get_stats();
-        Self { bullet_type, rotation, current_health: stats.health }
+        Self { bullet_type, rotation }
     }
 }
