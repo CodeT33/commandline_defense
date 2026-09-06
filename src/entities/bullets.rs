@@ -4,7 +4,7 @@ use crate::ecs_elements::components::{
     Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, DeleteWhenOutOfMap,
     Enemy, Tower,
 };
-use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted};
+use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted, SpawnBullet};
 use crate::ecs_elements::resources::TexturePackSettings;
 use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
@@ -12,29 +12,51 @@ use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::f32::consts::PI;
 
-pub struct BulletEmissionDataInner {
-    pub timer: IntervalTimer,
-    direction: Rot2,
-    bullet_speed_tps: f32,
+#[derive(Copy, Clone, Debug)]
+pub enum BulletType {
+    Ball,
+    Apple,
 }
 
-impl Default for BulletEmissionDataInner {
-    fn default() -> Self {
-        Self {
-            timer: IntervalTimer::new(consts::TOWER_COOLDOWN_MS),
-            direction: Rot2::degrees(0.0),
-            bullet_speed_tps: consts::PROJECTILE_SPEED_TILES_PER_SECOND,
+pub struct BulletStats {
+    pub bullet_speed_tps: f32,
+    pub damage: f32,
+    pub health: f32,
+    pub collider_radius: f32,
+    pub texture_size_tiles: Vec2,
+    pub asset: TexturePackAssets,
+}
+
+#[allow(unused)]
+pub struct BulletData {
+    bullet_type: BulletType,
+    rotation: Rot2,
+    current_health: f32,
+}
+
+impl BulletType {
+    pub fn get_stats(self) -> BulletStats {
+        match self {
+            BulletType::Ball => consts::bullets::BULLET_TYPE_BALL,
+            BulletType::Apple => consts::bullets::BULLET_TYPE_APPLE,
         }
     }
 }
 
+pub struct BulletEmissionDataInner {
+    pub timer: IntervalTimer,
+    direction: Rot2,
+}
+
+impl Default for BulletEmissionDataInner {
+    fn default() -> Self {
+        Self { timer: IntervalTimer::new(consts::TOWER_COOLDOWN_MS), direction: Rot2::degrees(0.0) }
+    }
+}
+
 impl BulletEmissionDataInner {
-    pub fn new(spawn_cooldown_ms: u32, bullet_speed_tps: f32) -> Self {
-        Self {
-            timer: IntervalTimer::new(spawn_cooldown_ms),
-            bullet_speed_tps,
-            ..Default::default()
-        }
+    pub fn new(spawn_cooldown_ms: u32) -> Self {
+        Self { timer: IntervalTimer::new(spawn_cooldown_ms), ..Default::default() }
     }
 }
 
@@ -45,9 +67,11 @@ pub fn move_bullets(mut q: Query<(&mut Transform, Ref<Bullet>, &CreationTime)>, 
         } else {
             time.delta_secs()
         };
-        let velocity = bullet.velocity * delta_time;
-        tf.translation.x += velocity.x;
-        tf.translation.y += velocity.y;
+        let velocity = bullet.0.rotation
+            * Vec2::X
+            * bullet.0.bullet_type.get_stats().bullet_speed_tps
+            * delta_time;
+        tf.translation += velocity.extend(0.0);
 
         tf.rotation = Quat::from_rotation_z(
             (creation_time.0.elapsed_ms(&time) % consts::BULLET_ROTATION_DURATION_MS) as f32
@@ -95,10 +119,9 @@ pub fn update_towers_in_range_and_rotate(
     }
 }
 
-pub fn spawn_bullets(
-    mut commands: Commands,
+pub fn request_bullet_spawns(
+    mut bullet_spawns: MessageWriter<SpawnBullet>,
     mut q: Query<(&Transform, &Tower, &mut BulletEmissionData), With<Tower>>, time: Res<Time>,
-    asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
 ) {
     for (transform, tower, mut data) in &mut q {
         let emission_data = &mut data.0;
@@ -107,29 +130,37 @@ pub fn spawn_bullets(
             continue;
         }
         while let Some(shoot_time) = emission_data.timer.tick_if_ready(&time) {
-            commands.spawn((
-                Bullet {
-                    velocity: emission_data.direction * Vec2::X * emission_data.bullet_speed_tps,
-                },
-                CreationTime(shoot_time),
-                ColliderTypeB,
-                ColliderShape::circle(consts::PROJECTILE_RADIUS),
-                DeleteWhenOutOfMap,
-                Transform::from_xyz(
-                    transform.translation.x,
-                    transform.translation.y,
-                    consts::rendering_layers::ENTITY,
-                ),
-                Sprite {
-                    image: asset_server.load(
-                        texture_pack_settings
-                            .get_asset_path(TexturePackAssets::Projectiles_MetalBall),
-                    ),
-                    custom_size: consts::PROJECTILE_SIZE_TILES.into(),
-                    ..default()
-                },
-            ));
+            let bullet_type = BulletType::Ball;
+            bullet_spawns.write(SpawnBullet {
+                bullet_type,
+                time: shoot_time,
+                position: transform.translation.truncate(),
+                direction: emission_data.direction,
+            });
         }
+    }
+}
+
+pub fn handle_bullet_spawns(
+    mut bullet_spawns: MessageReader<SpawnBullet>, mut commands: Commands,
+    asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
+) {
+    for message in bullet_spawns.read() {
+        let stats = message.bullet_type.get_stats();
+        commands.spawn((
+            Bullet(BulletData::new(message.bullet_type, message.direction)),
+            CreationTime(message.time),
+            ColliderTypeB,
+            ColliderShape::circle(stats.collider_radius),
+            DeleteWhenOutOfMap,
+            Transform::from_translation(message.position.extend(consts::rendering_layers::ENTITY)),
+            Sprite {
+                image: asset_server.load(texture_pack_settings.get_asset_path(stats.asset)),
+                custom_size: stats.texture_size_tiles.into(),
+                image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
+                ..default()
+            },
+        ));
     }
 }
 
@@ -144,5 +175,12 @@ pub fn handle_bullet_enemy_collisions(
 
         commands.entity(type_a).try_despawn();
         commands.entity(type_b).try_despawn();
+    }
+}
+
+impl BulletData {
+    pub fn new(bullet_type: BulletType, rotation: Rot2) -> Self {
+        let stats = bullet_type.get_stats();
+        Self { bullet_type, rotation, current_health: stats.health }
     }
 }

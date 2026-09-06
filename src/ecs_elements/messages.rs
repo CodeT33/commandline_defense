@@ -1,15 +1,24 @@
 use crate::cli::command_line_state_management::TogglableSettings;
 use crate::collision::CollisionPair;
 use crate::coordinates::GridCoordinate;
+use crate::entities::bullets::BulletType;
 use crate::entities::enemies::EnemyType;
 use crate::entities::tower::TowerType;
 use crate::scheduling::TimePoint;
-use bevy::prelude::Message;
+use bevy::prelude::{Message, Rot2, Vec2};
 
 #[derive(Message)]
 pub struct SpawnEnemy {
     pub enemy_type: EnemyType,
     pub time: TimePoint,
+}
+
+#[derive(Message)]
+pub struct SpawnBullet {
+    pub bullet_type: BulletType,
+    pub time: TimePoint,
+    pub position: Vec2,
+    pub direction: Rot2,
 }
 
 #[derive(Message)]

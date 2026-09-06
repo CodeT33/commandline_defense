@@ -103,9 +103,8 @@ pub fn handle_tower_placing_events(
 
         let tower_pos =
             GridCoordinate::new(message.tower_pos.position.x, message.tower_pos.position.y);
-        let bullet_emission_data: BulletEmissionData = BulletEmissionData(
-            BulletEmissionDataInner::new(attributes.cooldown_ms, attributes.bullet_speed),
-        );
+        let bullet_emission_data: BulletEmissionData =
+            BulletEmissionData(BulletEmissionDataInner::new(attributes.cooldown_ms));
         let sprite: Sprite = Sprite {
             image: asset_server.load(texture_pack_settings.get_asset_path(attributes.sprites[0])),
             custom_size: attributes.size_tiles.into(),

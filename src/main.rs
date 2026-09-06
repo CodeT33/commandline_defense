@@ -33,14 +33,15 @@ use bevy::prelude::*;
 use bevy::window::PresentMode;
 use ecs_elements::messages::{
     CollisionEnded, CollisionStarted, CollisionSustained, CommandEvent, PlaceTowerMessage,
-    SpawnEnemy,
+    SpawnBullet, SpawnEnemy,
 };
 use ecs_elements::resources::{
     CommandHistory, CommandState, DebugSettings, MapResource, PlayerSuiteResource, SelectionState,
     TexturePackSettings,
 };
 use entities::bullets::{
-    handle_bullet_enemy_collisions, move_bullets, spawn_bullets, update_towers_in_range_and_rotate,
+    handle_bullet_enemy_collisions, handle_bullet_spawns, move_bullets, request_bullet_spawns,
+    update_towers_in_range_and_rotate,
 };
 use entities::enemies::{move_enemies, request_enemy_spawns};
 use entities::tower::handle_tower_placing_events;
@@ -88,6 +89,7 @@ fn register_resources(app: &mut App) {
 fn register_messages(app: &mut App) {
     app.add_message::<CommandEvent>()
         .add_message::<SpawnEnemy>()
+        .add_message::<SpawnBullet>()
         .add_message::<PlaceTowerMessage>()
         .add_message::<CollisionStarted>()
         .add_message::<CollisionSustained>()
@@ -107,7 +109,10 @@ fn register_systems(app: &mut App) {
                 calculate_collisions,
                 handle_bullet_enemy_collisions,
                 update_towers_in_range_and_rotate,
-                (spawn_bullets, (request_enemy_spawns, handle_enemy_spawns).chain()),
+                (
+                    (request_bullet_spawns, handle_bullet_spawns).chain(),
+                    (request_enemy_spawns, handle_enemy_spawns).chain(),
+                ),
             )
                 .chain(),
         )
