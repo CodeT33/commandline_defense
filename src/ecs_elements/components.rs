@@ -27,6 +27,12 @@ pub enum ColliderShape {
 }
 
 #[derive(Component)]
+pub struct DeleteWhenOutOfMap;
+
+#[derive(Component)]
+pub struct Map;
+
+#[derive(Component)]
 pub struct ColliderTypeA;
 
 #[derive(Component)]

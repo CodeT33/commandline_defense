@@ -8,6 +8,7 @@ pub mod determinism_harness;
 pub mod ecs_elements;
 pub mod entities;
 pub mod map;
+pub mod movement;
 pub mod player_suite;
 pub mod scheduling;
 pub mod texture_packs;
@@ -20,6 +21,8 @@ use crate::cli::command_line_state_management::handle_command_line_state;
 use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
 use crate::map::map_rendering::spawn_map_visual_layer;
+use crate::map::spawn_map_bounds;
+use crate::movement::delete_out_of_map_entities;
 use crate::ui_overlay::debug::draw_bounding_boxes;
 use crate::ui_overlay::grid::update_grid_preview;
 use crate::ui_overlay::selection::update_selected_tile;
@@ -97,6 +100,7 @@ fn register_systems(app: &mut App) {
                 // movement
                 (move_enemies, move_bullets),
                 // collision handling
+                delete_out_of_map_entities,
                 calculate_collisions,
                 handle_bullet_enemy_collisions,
                 update_towers_in_range,
@@ -132,4 +136,5 @@ fn setup(
     spawn_game_cli(&mut commands);
     spawn_map_visual_layer(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
     commands.spawn((Camera2d, IsDefaultUiCamera));
+    spawn_map_bounds(&mut commands, &map_resource);
 }

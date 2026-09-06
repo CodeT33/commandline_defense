@@ -6,7 +6,7 @@ use bevy::prelude::{
     Circle, Entity, Local, MessageWriter, Query, Rectangle, Transform, Vec2, With,
 };
 
-enum Collider {
+pub enum Collider {
     Aabb(Aabb2d),
     Circle(BoundingCircle),
 }
@@ -31,7 +31,7 @@ impl ColliderShape {
         ColliderShape::Rectangle(Rectangle::from_size(size))
     }
 
-    fn to_collider(self, position: Vec2) -> Collider {
+    pub fn to_collider(self, position: Vec2) -> Collider {
         match self {
             ColliderShape::Rectangle(rect) => Collider::Aabb(Aabb2d::new(position, rect.half_size)),
             ColliderShape::Circle(circle) => {
@@ -43,7 +43,7 @@ impl ColliderShape {
 
 impl Collider {
     #[inline]
-    fn intersects(&self, other: &Self) -> bool {
+    pub fn intersects(&self, other: &Self) -> bool {
         match (self, other) {
             (Collider::Aabb(a), Collider::Aabb(b)) => a.intersects(b),
             (Collider::Circle(a), Collider::Circle(b)) => a.intersects(b),

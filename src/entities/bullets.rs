@@ -1,7 +1,8 @@
 use crate::collision::CollisionPair;
 use crate::consts;
 use crate::ecs_elements::components::{
-    Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, Tower,
+    Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, DeleteWhenOutOfMap,
+    Enemy, Tower,
 };
 use crate::ecs_elements::messages::CollisionStarted;
 use crate::ecs_elements::resources::TexturePackSettings;
@@ -95,6 +96,7 @@ pub fn spawn_bullets(
                 CreationTime(shoot_time),
                 ColliderTypeB,
                 ColliderShape::circle(consts::PROJECTILE_RADIUS),
+                DeleteWhenOutOfMap,
                 Transform::from_xyz(
                     transform.translation.x,
                     transform.translation.y,
