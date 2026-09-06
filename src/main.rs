@@ -17,8 +17,10 @@ use crate::cli::command_line::navigate_command_history;
 use crate::cli::command_line_state_management::handle_command_line_state;
 use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
+use crate::coordinates::GridCoordinate;
+use crate::entities::tower::TowerType;
 use crate::map::map_rendering::spawn_map_visual_layer;
-use crate::ui_overlay::debug::draw_bounding_boxes;
+use crate::ui_overlay::debug::{draw_bounding_boxes, log_entity_positions};
 use crate::ui_overlay::grid::update_grid_preview;
 use crate::ui_overlay::selection::update_selected_tile;
 use crate::ui_overlay::spawn_ui_overlay;
@@ -85,39 +87,43 @@ fn register_messages(app: &mut App) {
 }
 
 fn register_systems(app: &mut App) {
-    app.add_systems(Startup, (setup, set_camera_position).chain())
-        .add_systems(
-            // physics
-            FixedUpdate,
-            (
-                // movement
-                (move_enemies, move_bullets),
-                // collision handling
-                calculate_collisions,
-                handle_bullet_enemy_collisions,
-                update_towers_in_range,
-                // rest
-                rotate_towers,
-                (spawn_bullets, spawn_enemies),
-            )
-                .chain(),
+    let logging_run = std::env::var_os("LOGGING_RUN").is_some();
+    app.add_systems(
+        Startup,
+        (setup, set_camera_position, logging_run_setup.run_if(move || logging_run)).chain(),
+    )
+    .add_systems(
+        // physics
+        FixedUpdate,
+        (
+            // movement
+            (move_enemies, move_bullets),
+            // collision handling
+            calculate_collisions,
+            handle_bullet_enemy_collisions,
+            update_towers_in_range,
+            // rest
+            rotate_towers,
+            (spawn_bullets, spawn_enemies),
+            log_entity_positions.run_if(move || logging_run),
         )
-        .add_systems(
-            // display
-            Update,
-            (
-                draw_bounding_boxes.run_if(|debug_settings: Res<DebugSettings>| {
-                    debug_settings.enable_bounding_boxes
-                }),
-                camera_zoom_and_pan,
-                update_grid_preview,
-                update_selected_tile,
-                handle_command_events,
-                handle_command_line_state,
-                navigate_command_history,
-                handle_tower_placing_events,
-            ),
-        );
+            .chain(),
+    )
+    .add_systems(
+        // display
+        Update,
+        (
+            draw_bounding_boxes
+                .run_if(|debug_settings: Res<DebugSettings>| debug_settings.enable_bounding_boxes),
+            camera_zoom_and_pan,
+            update_grid_preview,
+            update_selected_tile,
+            handle_command_events,
+            handle_command_line_state,
+            navigate_command_history,
+            handle_tower_placing_events,
+        ),
+    );
 }
 
 fn setup(
@@ -128,4 +134,13 @@ fn setup(
     spawn_game_cli(&mut commands);
     spawn_map_visual_layer(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
     commands.spawn((Camera2d, IsDefaultUiCamera));
+}
+
+fn logging_run_setup(mut commands_writer: MessageWriter<CommandEvent>) {
+    for i in 0..10 {
+        commands_writer.write(CommandEvent::Place {
+            tower_type: TowerType::AssaultTower,
+            tower_pos: GridCoordinate::new(i, i),
+        });
+    }
 }

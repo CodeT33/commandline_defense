@@ -25,6 +25,9 @@ pub const PROJECTILE_SPEED_TILES_PER_SECOND: f32 = 10.0;
 
 pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
 
+/// Number of simulated seconds captured before the log is saved and the program is terminated.
+pub const LOG_DURATION_SECS: u64 = 15;
+
 pub mod viewports {
     use crate::camera::Viewport;
 
