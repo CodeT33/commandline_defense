@@ -17,11 +17,6 @@ pub struct Bullet {
 #[derive(Component)]
 pub struct CreationTime(pub TimePoint);
 
-#[derive(Component, Default)]
-pub struct MovementData {
-    pub already_moved: bool,
-}
-
 #[derive(Component)]
 pub struct BulletEmissionData(pub BulletEmissionDataInner);
 

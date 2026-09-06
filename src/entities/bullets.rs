@@ -1,8 +1,7 @@
 use crate::collision::CollisionPair;
 use crate::consts;
 use crate::ecs_elements::components::{
-    Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, MovementData,
-    Tower,
+    Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, Tower,
 };
 use crate::ecs_elements::messages::CollisionStarted;
 use crate::ecs_elements::resources::TexturePackSettings;
@@ -38,15 +37,12 @@ impl BulletEmissionDataInner {
     }
 }
 
-pub fn move_bullets(
-    mut q: Query<(&mut Transform, &Bullet, &CreationTime, &mut MovementData)>, time: Res<Time>,
-) {
-    for (mut tf, bullet, creation_time, mut md) in &mut q {
-        let delta_time = if md.already_moved {
-            time.delta_secs()
-        } else {
-            md.already_moved = true;
+pub fn move_bullets(mut q: Query<(&mut Transform, Ref<Bullet>, &CreationTime)>, time: Res<Time>) {
+    for (mut tf, bullet, creation_time) in &mut q {
+        let delta_time = if bullet.is_added() {
             creation_time.0.elapsed_ms(&time) as f32 / 1000.0
+        } else {
+            time.delta_secs()
         };
         let velocity = bullet.velocity * delta_time;
         tf.translation.x += velocity.x;
@@ -97,7 +93,6 @@ pub fn spawn_bullets(
                     velocity: emission_data.direction * Vec2::X * emission_data.bullet_speed_tps,
                 },
                 CreationTime(shoot_time),
-                MovementData::default(),
                 ColliderTypeB,
                 ColliderShape::circle(consts::PROJECTILE_RADIUS),
                 Transform::from_xyz(

@@ -1,8 +1,6 @@
 use crate::collision::CollisionPair;
 use crate::consts;
-use crate::ecs_elements::components::{
-    ColliderShape, ColliderTypeA, CreationTime, Enemy, MovementData, Tower,
-};
+use crate::ecs_elements::components::{ColliderShape, ColliderTypeA, CreationTime, Enemy, Tower};
 use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted};
 use crate::ecs_elements::resources::{DebugSettings, MapResource, TexturePackSettings};
 use crate::map::map_logic_parsing::EnemyPath;
@@ -105,7 +103,6 @@ pub fn spawn_enemies(
         commands.spawn((
             Enemy { path_progress: 0.0 },
             CreationTime(tick_time),
-            MovementData::default(),
             ColliderTypeA,
             ColliderShape::circle(consts::ENEMY_BOUNDING_CIRCLE_RADIUS),
             Sprite {
