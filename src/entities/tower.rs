@@ -1,20 +1,21 @@
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::components::{
-    BulletEmissionData, ColliderShape, ColliderTypeB, Tower, TowerData,
+    BulletEmissionData, ColliderShape, ColliderTypeB, Enemy, Tower, TowerData,
 };
-use crate::ecs_elements::messages::PlaceTowerMessage;
+use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted, PlaceTowerMessage};
 
 use crate::ecs_elements::resources::{PlayerSuiteResource, TexturePackSettings};
 
+use crate::collision::CollisionPair;
 use crate::entities::bullets::BulletEmissionDataInner;
 use crate::player_suite::TransactionReturnStatus;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::math::{U16Vec2, Vec2};
 use bevy::prelude::{
-    Circle, Commands, Entity, MessageReader, Res, ResMut, Sprite, SpriteImageMode,
-    SpriteScalingMode, Transform, default,
+    Circle, Commands, Entity, MessageReader, Query, Res, ResMut, Sprite, SpriteImageMode,
+    SpriteScalingMode, Transform, With, default,
 };
 
 pub struct TowerDataInner {
@@ -60,6 +61,16 @@ pub enum TowerType {
 pub struct TowerRangeMapInner {
     pub size: U16Vec2,
     towers_in_range: Vec<Vec<Entity>>,
+}
+
+pub struct TowerAttributes {
+    pub price: u16,
+    pub size_tiles: Vec2,
+    pub range_tiles: U16Vec2,
+    pub cooldown_ms: u32,
+    pub bullet_speed: f32,
+    pub sprites: [TexturePackAssets; 4],
+    pub tower_rotates: bool,
 }
 
 impl Default for TowerRangeMapInner {
@@ -165,12 +176,21 @@ impl TowerRangeMapInner {
     }
 }
 
-pub struct TowerAttributes {
-    pub price: u16,
-    pub size_tiles: Vec2,
-    pub range_tiles: U16Vec2,
-    pub cooldown_ms: u32,
-    pub bullet_speed: f32,
-    pub sprites: [TexturePackAssets; 4],
-    pub tower_rotates: bool,
+pub fn update_towers_in_range(
+    enemies: Query<Entity, With<Enemy>>, mut towers: Query<(Entity, &mut Tower)>,
+    mut collision_started: MessageReader<CollisionStarted>,
+    mut collision_ended: MessageReader<CollisionEnded>,
+) {
+    for CollisionStarted(CollisionPair { type_a, type_b }) in collision_started.read() {
+        let Some(Ok(mut tower)) = enemies.contains(*type_a).then(|| towers.get_mut(*type_b)) else {
+            continue;
+        };
+        tower.1.enemies_in_range.insert(*type_a);
+    }
+    for CollisionEnded(CollisionPair { type_a, type_b }) in collision_ended.read() {
+        let Ok(mut tower) = towers.get_mut(*type_b) else {
+            continue;
+        };
+        tower.1.enemies_in_range.remove(type_a);
+    }
 }

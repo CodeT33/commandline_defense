@@ -20,7 +20,8 @@ use crate::cli::command_line::navigate_command_history;
 use crate::cli::command_line_state_management::handle_command_line_state;
 use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
-use crate::entities::enemies::enemy_spawner;
+use crate::entities::enemies::enemy_spawn_observer;
+use crate::entities::tower::update_towers_in_range;
 use crate::map::map_rendering::spawn_map_visual_layer;
 use crate::map::spawn_map_bounds;
 use crate::movement::delete_out_of_map_entities;
@@ -41,7 +42,7 @@ use ecs_elements::resources::{
 use entities::bullets::{
     handle_bullet_enemy_collisions, move_bullets, rotate_towers, spawn_bullets,
 };
-use entities::enemies::{move_enemies, spawn_enemies, update_towers_in_range};
+use entities::enemies::{move_enemies, spawn_enemies};
 use entities::tower::handle_tower_placing_events;
 
 fn main() {
@@ -94,7 +95,7 @@ fn register_messages(app: &mut App) {
 }
 
 fn register_observers(app: &mut App) {
-    app.add_observer(enemy_spawner);
+    app.add_observer(enemy_spawn_observer);
 }
 
 fn register_systems(app: &mut App) {
