@@ -1,6 +1,7 @@
 use crate::collision::CollisionPair;
 use crate::consts;
 use crate::ecs_elements::components::{ColliderShape, ColliderTypeA, CreationTime, Enemy, Tower};
+use crate::ecs_elements::events::SpawnEnemy;
 use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted};
 use crate::ecs_elements::resources::{DebugSettings, MapResource, TexturePackSettings};
 use crate::map::map_logic_parsing::EnemyPath;
@@ -64,7 +65,7 @@ pub fn move_enemies(
     for (mut transform, mut enemy, creation_time) in &mut enemy {
         let elapsed_ms = creation_time.0.elapsed_ms(&time);
         let progress = elapsed_ms.min(path_duration_ms) as f32 / path_duration_ms as f32;
-        enemy.path_progress = progress;
+        enemy.0.path_progress = progress;
         *transform = get_enemy_transform(progress, map_resource.0.enemy_path());
     }
 }
@@ -90,7 +91,6 @@ pub fn update_towers_in_range(
 
 pub fn spawn_enemies(
     mut commands: Commands, mut timer: Local<Option<IntervalTimer>>, time: Res<Time>,
-    asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
     debug_settings: Res<DebugSettings>,
 ) {
     let t = timer
@@ -100,21 +100,66 @@ pub fn spawn_enemies(
     }
 
     while let Some(tick_time) = t.tick_if_ready(&time) {
-        commands.spawn((
-            Enemy { path_progress: 0.0 },
-            CreationTime(tick_time),
-            ColliderTypeA,
-            ColliderShape::circle(consts::ENEMY_BOUNDING_CIRCLE_RADIUS),
-            Sprite {
-                image: asset_server.load(
-                    texture_pack_settings
-                        .get_asset_path(TexturePackAssets::Towers_GatlingTower_000),
-                ),
-                custom_size: consts::ENEMY_SPRITE_SIZE_TILES.into(),
-                image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
-                ..default()
-            },
-            Transform::from_xyz(0.0, 0.0, consts::rendering_layers::ENTITY),
-        ));
+        commands.trigger(SpawnEnemy { enemy_type: EnemyType::Mausmeister, time: tick_time });
+    }
+}
+
+pub fn enemy_spawner(
+    trigger: On<SpawnEnemy>, mut commands: Commands, asset_server: Res<AssetServer>,
+    texture_pack_settings: Res<TexturePackSettings>,
+) {
+    commands.spawn((
+        Enemy(EnemyData::new(trigger.enemy_type)),
+        CreationTime(trigger.time),
+        ColliderTypeA,
+        ColliderShape::circle(consts::ENEMY_BOUNDING_CIRCLE_RADIUS),
+        Sprite {
+            image: asset_server
+                .load(texture_pack_settings.get_asset_path(trigger.enemy_type.get_stats().asset)),
+            custom_size: consts::ENEMY_SPRITE_SIZE_TILES.into(),
+            image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
+            ..default()
+        },
+        Transform::from_xyz(0.0, 0.0, consts::rendering_layers::ENTITY),
+    ));
+}
+
+#[allow(unused)]
+pub struct EnemyData {
+    enemy_type: EnemyType,
+    path_progress: f32,
+    current_health: f32,
+}
+
+impl EnemyData {
+    pub fn new(enemy_type: EnemyType) -> Self {
+        let stats = enemy_type.get_stats();
+        Self { current_health: stats.lives, enemy_type, path_progress: 0.0 }
+    }
+
+    pub fn get_path_progress(&self) -> f32 {
+        self.path_progress
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum EnemyType {
+    WideBirb,
+    Mausmeister,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct EnemyStats {
+    pub lives: f32,
+    pub speed_tps: f32,
+    pub asset: TexturePackAssets,
+}
+
+impl EnemyType {
+    pub fn get_stats(self) -> EnemyStats {
+        match self {
+            EnemyType::WideBirb => consts::enemies::ENEMY_TYPE_WIDE_BIRB,
+            EnemyType::Mausmeister => consts::enemies::ENEMY_TYPE_MAUS_MEISTER,
+        }
     }
 }

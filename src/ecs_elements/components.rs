@@ -1,13 +1,12 @@
 use crate::entities::bullets::BulletEmissionDataInner;
+use crate::entities::enemies::EnemyData;
 use crate::entities::tower::TowerDataInner;
 use crate::scheduling::TimePoint;
 use bevy::ecs::entity::EntityHashSet;
 use bevy::prelude::{Circle, Component, Rectangle, Vec2};
 
 #[derive(Component)]
-pub struct Enemy {
-    pub path_progress: f32,
-}
+pub struct Enemy(pub EnemyData);
 
 #[derive(Component)]
 pub struct Bullet {

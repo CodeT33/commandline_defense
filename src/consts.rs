@@ -128,6 +128,16 @@ pub mod towers {
     };
 }
 
+pub mod enemies {
+    use crate::entities::enemies::EnemyStats;
+    use crate::texture_packs::TexturePackAssets;
+
+    pub const ENEMY_TYPE_WIDE_BIRB: EnemyStats =
+        EnemyStats { lives: 4.0, speed_tps: 1.0, asset: TexturePackAssets::WipSprites_Enemy };
+    pub const ENEMY_TYPE_MAUS_MEISTER: EnemyStats =
+        EnemyStats { lives: 0.5, speed_tps: 4.0, asset: TexturePackAssets::WipSprites_MausMeister };
+}
+
 // ui
 pub mod ui {
     use bevy::prelude::Color;

@@ -20,6 +20,7 @@ use crate::cli::command_line::navigate_command_history;
 use crate::cli::command_line_state_management::handle_command_line_state;
 use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
+use crate::entities::enemies::enemy_spawner;
 use crate::map::map_rendering::spawn_map_visual_layer;
 use crate::map::spawn_map_bounds;
 use crate::movement::delete_out_of_map_entities;
@@ -48,6 +49,7 @@ fn main() {
     register_plugins(&mut app);
     register_resources(&mut app);
     register_messages(&mut app);
+    register_observers(&mut app);
     register_systems(&mut app);
     app.run();
 }
@@ -89,6 +91,10 @@ fn register_messages(app: &mut App) {
         .add_message::<CollisionStarted>()
         .add_message::<CollisionSustained>()
         .add_message::<CollisionEnded>();
+}
+
+fn register_observers(app: &mut App) {
+    app.add_observer(enemy_spawner);
 }
 
 fn register_systems(app: &mut App) {

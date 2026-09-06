@@ -67,7 +67,7 @@ pub fn rotate_towers(
             .enemies_in_range
             .iter()
             .flat_map(|e| enemies_q.get(*e))
-            .max_by(|a, b| a.1.path_progress.total_cmp(&b.1.path_progress));
+            .max_by(|a, b| a.1.0.get_path_progress().total_cmp(&b.1.0.get_path_progress()));
         let Some((enemy_transform, _)) = first_enemy else {
             continue;
         };
