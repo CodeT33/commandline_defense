@@ -4,7 +4,7 @@ use crate::ecs_elements::components::{
     Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, DeleteWhenOutOfMap,
     Enemy, Tower,
 };
-use crate::ecs_elements::messages::CollisionStarted;
+use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted};
 use crate::ecs_elements::resources::TexturePackSettings;
 use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
@@ -58,15 +58,33 @@ pub fn move_bullets(mut q: Query<(&mut Transform, Ref<Bullet>, &CreationTime)>, 
     }
 }
 
-pub fn rotate_towers(
-    tower_q: Query<(&mut Transform, &Tower, &mut BulletEmissionData)>,
-    enemies_q: Query<(&Transform, &Enemy), Without<Tower>>,
+pub fn update_towers_in_range_and_rotate(
+    enemies: Query<Entity, With<Enemy>>,
+    enemy_transforms: Query<(&Transform, &Enemy), Without<Tower>>,
+    mut towers: Query<(Entity, &mut Transform, &mut Tower, &mut BulletEmissionData)>,
+    mut collision_started: MessageReader<CollisionStarted>,
+    mut collision_ended: MessageReader<CollisionEnded>,
 ) {
-    for (mut t, tower, mut bullet_data) in tower_q {
+    for CollisionStarted(CollisionPair { type_a, type_b }) in collision_started.read() {
+        let Some(Ok((_, _, mut tower, _))) =
+            enemies.contains(*type_a).then(|| towers.get_mut(*type_b))
+        else {
+            continue;
+        };
+        tower.enemies_in_range.insert(*type_a);
+    }
+    for CollisionEnded(CollisionPair { type_a, type_b }) in collision_ended.read() {
+        let Ok((_, _, mut tower, _)) = towers.get_mut(*type_b) else {
+            continue;
+        };
+        tower.enemies_in_range.remove(type_a);
+    }
+
+    for (_, mut t, tower, mut bullet_data) in &mut towers {
         let first_enemy = tower
             .enemies_in_range
             .iter()
-            .flat_map(|e| enemies_q.get(*e))
+            .flat_map(|e| enemy_transforms.get(*e))
             .max_by(|a, b| a.1.0.get_path_progress().total_cmp(&b.1.0.get_path_progress()));
         let Some((enemy_transform, _)) = first_enemy else {
             continue;

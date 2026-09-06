@@ -20,8 +20,7 @@ use crate::cli::command_line::navigate_command_history;
 use crate::cli::command_line_state_management::handle_command_line_state;
 use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
-use crate::entities::enemies::enemy_spawn_observer;
-use crate::entities::tower::update_towers_in_range;
+use crate::entities::enemies::handle_enemy_spawns;
 use crate::map::map_rendering::spawn_map_visual_layer;
 use crate::map::spawn_map_bounds;
 use crate::movement::delete_out_of_map_entities;
@@ -34,15 +33,16 @@ use bevy::prelude::*;
 use bevy::window::PresentMode;
 use ecs_elements::messages::{
     CollisionEnded, CollisionStarted, CollisionSustained, CommandEvent, PlaceTowerMessage,
+    SpawnEnemy,
 };
 use ecs_elements::resources::{
     CommandHistory, CommandState, DebugSettings, MapResource, PlayerSuiteResource, SelectionState,
     TexturePackSettings,
 };
 use entities::bullets::{
-    handle_bullet_enemy_collisions, move_bullets, rotate_towers, spawn_bullets,
+    handle_bullet_enemy_collisions, move_bullets, spawn_bullets, update_towers_in_range_and_rotate,
 };
-use entities::enemies::{move_enemies, spawn_enemies};
+use entities::enemies::{move_enemies, request_enemy_spawns};
 use entities::tower::handle_tower_placing_events;
 
 fn main() {
@@ -50,7 +50,6 @@ fn main() {
     register_plugins(&mut app);
     register_resources(&mut app);
     register_messages(&mut app);
-    register_observers(&mut app);
     register_systems(&mut app);
     app.run();
 }
@@ -88,14 +87,11 @@ fn register_resources(app: &mut App) {
 
 fn register_messages(app: &mut App) {
     app.add_message::<CommandEvent>()
+        .add_message::<SpawnEnemy>()
         .add_message::<PlaceTowerMessage>()
         .add_message::<CollisionStarted>()
         .add_message::<CollisionSustained>()
         .add_message::<CollisionEnded>();
-}
-
-fn register_observers(app: &mut App) {
-    app.add_observer(enemy_spawn_observer);
 }
 
 fn register_systems(app: &mut App) {
@@ -110,10 +106,8 @@ fn register_systems(app: &mut App) {
                 delete_out_of_map_entities,
                 calculate_collisions,
                 handle_bullet_enemy_collisions,
-                update_towers_in_range,
-                // rest
-                rotate_towers,
-                (spawn_bullets, spawn_enemies),
+                update_towers_in_range_and_rotate,
+                (spawn_bullets, (request_enemy_spawns, handle_enemy_spawns).chain()),
             )
                 .chain(),
         )

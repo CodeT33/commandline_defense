@@ -1,6 +1,6 @@
 use crate::consts;
 use crate::ecs_elements::components::{ColliderShape, ColliderTypeA, CreationTime, Enemy};
-use crate::ecs_elements::events::SpawnEnemy;
+use crate::ecs_elements::messages::SpawnEnemy;
 use crate::ecs_elements::resources::{DebugSettings, MapResource, TexturePackSettings};
 use crate::map::map_logic_parsing::EnemyPath;
 use crate::scheduling::IntervalTimer;
@@ -53,9 +53,9 @@ pub fn move_enemies(
     }
 }
 
-pub fn spawn_enemies(
-    mut commands: Commands, mut timer: Local<Option<IntervalTimer>>, time: Res<Time>,
-    debug_settings: Res<DebugSettings>,
+pub fn request_enemy_spawns(
+    mut enemy_spawns: MessageWriter<SpawnEnemy>, mut timer: Local<Option<IntervalTimer>>,
+    time: Res<Time>, debug_settings: Res<DebugSettings>,
 ) {
     let t = timer
         .get_or_insert_with(|| IntervalTimer::new(debug_settings.enemy_spawn_interval_ms as u32));
@@ -64,28 +64,31 @@ pub fn spawn_enemies(
     }
 
     while let Some(tick_time) = t.tick_if_ready(&time) {
-        commands.trigger(SpawnEnemy { enemy_type: EnemyType::Mausmeister, time: tick_time });
+        enemy_spawns.write(SpawnEnemy { enemy_type: EnemyType::Mausmeister, time: tick_time });
     }
 }
 
-pub fn enemy_spawn_observer(
-    trigger: On<SpawnEnemy>, mut commands: Commands, asset_server: Res<AssetServer>,
-    texture_pack_settings: Res<TexturePackSettings>,
+pub fn handle_enemy_spawns(
+    mut enemy_spawns: MessageReader<SpawnEnemy>, mut commands: Commands,
+    asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
 ) {
-    commands.spawn((
-        Enemy(EnemyData::new(trigger.enemy_type)),
-        CreationTime(trigger.time),
-        ColliderTypeA,
-        ColliderShape::circle(consts::ENEMY_BOUNDING_CIRCLE_RADIUS),
-        Sprite {
-            image: asset_server
-                .load(texture_pack_settings.get_asset_path(trigger.enemy_type.get_stats().asset)),
-            custom_size: consts::ENEMY_SPRITE_SIZE_TILES.into(),
-            image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
-            ..default()
-        },
-        Transform::from_xyz(0.0, 0.0, consts::rendering_layers::ENTITY),
-    ));
+    for message in enemy_spawns.read() {
+        commands.spawn((
+            Enemy(EnemyData::new(message.enemy_type)),
+            CreationTime(message.time),
+            ColliderTypeA,
+            ColliderShape::circle(consts::ENEMY_BOUNDING_CIRCLE_RADIUS),
+            Sprite {
+                image: asset_server.load(
+                    texture_pack_settings.get_asset_path(message.enemy_type.get_stats().asset),
+                ),
+                custom_size: consts::ENEMY_SPRITE_SIZE_TILES.into(),
+                image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
+                ..default()
+            },
+            Transform::from_xyz(0.0, 0.0, consts::rendering_layers::ENTITY),
+        ));
+    }
 }
 
 fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
