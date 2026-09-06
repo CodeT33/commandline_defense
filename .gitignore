@@ -25,3 +25,6 @@ target
 
 /target
 /assets/.stamp
+
+# Determinism harness trace output
+/logs/

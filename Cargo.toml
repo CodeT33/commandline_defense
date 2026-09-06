@@ -11,6 +11,7 @@ edition = "2024"
 default = ["dev"]
 dev = ["bevy/dynamic_linking", "bevy/file_watcher"]
 macro_debug = ["macros/macro_debug"]
+determinism = []
 
 [profile.dev]
 opt-level = 1
