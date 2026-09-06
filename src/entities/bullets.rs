@@ -1,72 +1,54 @@
 use crate::collision::CollisionPair;
 use crate::consts;
 use crate::ecs_elements::components::{
-    Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, Tower,
+    Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, MovementData,
+    Tower,
 };
 use crate::ecs_elements::messages::CollisionStarted;
 use crate::ecs_elements::resources::TexturePackSettings;
-use crate::scheduling::TimePoint;
+use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::f32::consts::PI;
 
 pub struct BulletEmissionDataInner {
-    last_spawn_time_ms: Option<u64>,
-    paused: bool,
+    pub timer: IntervalTimer,
     direction: Rot2,
     bullet_speed_tps: f32,
-    spawn_cooldown_ms: u32,
 }
 
 impl Default for BulletEmissionDataInner {
     fn default() -> Self {
         Self {
-            last_spawn_time_ms: None,
-            paused: false,
+            timer: IntervalTimer::new(consts::TOWER_COOLDOWN_MS),
             direction: Rot2::degrees(0.0),
             bullet_speed_tps: consts::PROJECTILE_SPEED_TILES_PER_SECOND,
-            spawn_cooldown_ms: consts::TOWER_COOLDOWN_MS,
         }
     }
 }
 
 impl BulletEmissionDataInner {
     pub fn new(spawn_cooldown_ms: u32, bullet_speed_tps: f32) -> Self {
-        Self { spawn_cooldown_ms, bullet_speed_tps, ..Default::default() }
-    }
-
-    /// Call this function in a loop until it returns None to ensure no bullets are dropped.\
-    /// When a shot is available, the function returns the time at which the shot was fired. Otherwise, it returns None.
-    pub fn shoot_if_ready(&mut self, time: &Time) -> Option<TimePoint> {
-        let current_time_ms = time.elapsed().as_millis() as u64;
-        let was_paused = self.paused;
-        self.paused = false;
-        if let Some(last_spawn_time_ms) = &mut self.last_spawn_time_ms {
-            if *last_spawn_time_ms + self.spawn_cooldown_ms as u64 <= current_time_ms {
-                if was_paused {
-                    *last_spawn_time_ms = current_time_ms;
-                } else {
-                    *last_spawn_time_ms += self.spawn_cooldown_ms as u64;
-                }
-                Some(TimePoint::from_ms(*last_spawn_time_ms))
-            } else {
-                None
-            }
-        } else {
-            self.last_spawn_time_ms = Some(current_time_ms);
-            Some(TimePoint::from_ms(current_time_ms))
+        Self {
+            timer: IntervalTimer::new(spawn_cooldown_ms),
+            bullet_speed_tps,
+            ..Default::default()
         }
-    }
-
-    pub fn pause(&mut self) {
-        self.paused = true;
     }
 }
 
-pub fn move_bullets(mut q: Query<(&mut Transform, &Bullet, &CreationTime)>, time: Res<Time>) {
-    for (mut tf, bullet, creation_time) in &mut q {
-        let velocity = bullet.velocity * time.delta_secs();
+pub fn move_bullets(
+    mut q: Query<(&mut Transform, &Bullet, &CreationTime, &mut MovementData)>, time: Res<Time>,
+) {
+    for (mut tf, bullet, creation_time, mut md) in &mut q {
+        let delta_time = if md.already_moved {
+            time.delta_secs()
+        } else {
+            md.already_moved = true;
+            creation_time.0.elapsed_ms(&time) as f32 / 1000.0
+        };
+        let velocity = bullet.velocity * delta_time;
         tf.translation.x += velocity.x;
         tf.translation.y += velocity.y;
 
@@ -106,15 +88,16 @@ pub fn spawn_bullets(
     for (transform, tower, mut data) in &mut q {
         let emission_data = &mut data.0;
         if tower.enemies_in_range.is_empty() {
-            emission_data.pause();
+            emission_data.timer.pause();
             continue;
         }
-        while let Some(shoot_time) = emission_data.shoot_if_ready(&time) {
+        while let Some(shoot_time) = emission_data.timer.tick_if_ready(&time) {
             commands.spawn((
                 Bullet {
                     velocity: emission_data.direction * Vec2::X * emission_data.bullet_speed_tps,
                 },
                 CreationTime(shoot_time),
+                MovementData::default(),
                 ColliderTypeB,
                 ColliderShape::circle(consts::PROJECTILE_RADIUS),
                 Transform::from_xyz(

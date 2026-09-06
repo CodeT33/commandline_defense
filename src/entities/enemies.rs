@@ -1,15 +1,16 @@
 use crate::collision::CollisionPair;
 use crate::consts;
-use crate::ecs_elements::components::{ColliderShape, ColliderTypeA, CreationTime, Enemy, Tower};
+use crate::ecs_elements::components::{
+    ColliderShape, ColliderTypeA, CreationTime, Enemy, MovementData, Tower,
+};
 use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted};
 use crate::ecs_elements::resources::{DebugSettings, MapResource, TexturePackSettings};
 use crate::map::map_logic_parsing::EnemyPath;
-use crate::scheduling::TimePoint;
+use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
 use bevy::ecs::relationship::RelationshipSourceCollection;
 use bevy::prelude::*;
 use std::f32;
-use std::time::Duration;
 
 pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
     let progress = progress.clamp(0.0, 1.0);
@@ -90,36 +91,33 @@ pub fn update_towers_in_range(
 }
 
 pub fn spawn_enemies(
-    mut commands: Commands, mut timer: Local<Option<Timer>>, time: Res<Time>,
+    mut commands: Commands, mut timer: Local<Option<IntervalTimer>>, time: Res<Time>,
     asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
     debug_settings: Res<DebugSettings>,
 ) {
-    let t = timer.get_or_insert_with(|| {
-        Timer::new(
-            Duration::from_millis(debug_settings.enemy_spawn_interval_ms),
-            TimerMode::Repeating,
-        )
-    });
-    if t.duration().as_millis() as u64 != debug_settings.enemy_spawn_interval_ms {
-        t.set_duration(Duration::from_millis(debug_settings.enemy_spawn_interval_ms));
+    let t = timer
+        .get_or_insert_with(|| IntervalTimer::new(debug_settings.enemy_spawn_interval_ms as u32));
+    if t.get_interval_ms() as u64 != debug_settings.enemy_spawn_interval_ms {
+        t.set_interval_ms(debug_settings.enemy_spawn_interval_ms as u32);
     }
-    t.tick(time.delta());
-    if !t.just_finished() {
-        return;
+
+    while let Some(tick_time) = t.tick_if_ready(&time) {
+        commands.spawn((
+            Enemy { path_progress: 0.0 },
+            CreationTime(tick_time),
+            MovementData::default(),
+            ColliderTypeA,
+            ColliderShape::circle(consts::ENEMY_BOUNDING_CIRCLE_RADIUS),
+            Sprite {
+                image: asset_server.load(
+                    texture_pack_settings
+                        .get_asset_path(TexturePackAssets::Towers_GatlingTower_000),
+                ),
+                custom_size: consts::ENEMY_SPRITE_SIZE_TILES.into(),
+                image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
+                ..default()
+            },
+            Transform::from_xyz(0.0, 0.0, consts::rendering_layers::ENTITY),
+        ));
     }
-    commands.spawn((
-        Enemy { path_progress: 0.0 },
-        CreationTime(TimePoint::now(&time)),
-        ColliderTypeA,
-        ColliderShape::circle(consts::ENEMY_BOUNDING_CIRCLE_RADIUS),
-        Sprite {
-            image: asset_server.load(
-                texture_pack_settings.get_asset_path(TexturePackAssets::Towers_GatlingTower_000),
-            ),
-            custom_size: consts::ENEMY_SPRITE_SIZE_TILES.into(),
-            image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
-            ..default()
-        },
-        Transform::from_xyz(0.0, 0.0, consts::rendering_layers::ENTITY),
-    ));
 }

@@ -1,5 +1,6 @@
 use bevy::prelude::Time;
 
+#[derive(Copy, Clone)]
 pub struct TimePoint {
     ms: u64,
 }
@@ -15,5 +16,54 @@ impl TimePoint {
 
     pub fn elapsed_ms(&self, time: &Time) -> u64 {
         (time.elapsed().as_millis() as u64).saturating_sub(self.ms)
+    }
+}
+
+pub struct IntervalTimer {
+    last_occurrence_ms: Option<u64>,
+    paused: bool,
+    interval_ms: u32,
+}
+
+impl IntervalTimer {
+    pub fn new(interval_ms: u32) -> Self {
+        Self { last_occurrence_ms: None, paused: false, interval_ms: interval_ms.max(1) }
+    }
+
+    pub fn get_interval_ms(&self) -> u32 {
+        self.interval_ms
+    }
+
+    pub fn set_interval_ms(&mut self, interval_ms: u32) {
+        self.interval_ms = interval_ms.max(1);
+    }
+
+    /// Call this function in a loop until it returns None to ensure no ticks are dropped.\
+    /// When a tick is available, the function returns the time at which the tick has occurred. Otherwise, it returns None.
+    pub fn tick_if_ready(&mut self, time: &Time) -> Option<TimePoint> {
+        let now_ms = time.elapsed().as_millis() as u64;
+        let was_paused = self.paused;
+        self.paused = false;
+        if let Some(last_occurrence_ms) = &mut self.last_occurrence_ms {
+            if *last_occurrence_ms + self.interval_ms as u64 <= now_ms {
+                if was_paused {
+                    *last_occurrence_ms = now_ms;
+                } else {
+                    *last_occurrence_ms += self.interval_ms as u64;
+                }
+                Some(TimePoint::from_ms(*last_occurrence_ms))
+            } else {
+                None
+            }
+        } else {
+            self.last_occurrence_ms = Some(now_ms);
+            Some(TimePoint::from_ms(now_ms))
+        }
+    }
+
+    /// Hold the schedule. The next due tick resumes from the poll time instead
+    /// of replaying the backlog accumulated while paused.
+    pub fn pause(&mut self) {
+        self.paused = true;
     }
 }
