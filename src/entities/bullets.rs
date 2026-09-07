@@ -17,7 +17,8 @@ use std::f32::consts::PI;
 pub enum BulletType {
     Bullet,
     MetalBall,
-    Apple,
+    AppleBall,
+    OrangeBall,
 }
 
 pub struct BulletStats {

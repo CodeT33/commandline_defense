@@ -54,10 +54,10 @@ impl TowerType {
             TowerType::AssaultTower => TowerAttributes {
                 price: 100,
                 size_tiles: Vec2::splat(1.0),
-                range_tiles: U16Vec2::splat(3),
+                range: 5.0,
                 cooldown_ms: 1000,
                 bullet_speed_tps: 10.0,
-                bullet_type: BulletType::Apple,
+                bullet_type: BulletType::OrangeBall,
                 sprites: [
                     TexturePackAssets::Troops_Assault_AssaultTroopLvl1,
                     TexturePackAssets::Troops_Assault_AssaultTroopLvl2,
@@ -69,7 +69,7 @@ impl TowerType {
             TowerType::BoomTower => TowerAttributes {
                 price: 320,
                 size_tiles: Vec2::splat(1.0),
-                range_tiles: U16Vec2::splat(2),
+                range: 3.0,
                 cooldown_ms: 3000,
                 bullet_speed_tps: 6.0,
                 bullet_type: BulletType::MetalBall,
@@ -84,10 +84,10 @@ impl TowerType {
             TowerType::GatlingTower => TowerAttributes {
                 price: 210,
                 size_tiles: Vec2::splat(1.0),
-                range_tiles: U16Vec2::splat(4),
-                cooldown_ms: 300,
-                bullet_speed_tps: 8.0,
-                bullet_type: BulletType::Apple,
+                range: 2.0,
+                cooldown_ms: 100,
+                bullet_speed_tps: 16.0,
+                bullet_type: BulletType::AppleBall,
                 sprites: [
                     TexturePackAssets::Troops_Gatling_GatlingTroopLvl1,
                     TexturePackAssets::Troops_Gatling_GatlingTroopLvl2,
@@ -99,7 +99,7 @@ impl TowerType {
             TowerType::SniperTower => TowerAttributes {
                 price: 160,
                 size_tiles: Vec2::splat(1.0),
-                range_tiles: U16Vec2::splat(8),
+                range: 8.0,
                 cooldown_ms: 4000,
                 bullet_speed_tps: 100.0,
                 bullet_type: BulletType::Bullet,
@@ -114,10 +114,10 @@ impl TowerType {
             TowerType::Eitshtu => TowerAttributes {
                 price: 0,
                 size_tiles: Vec2::splat(1.0),
-                range_tiles: U16Vec2::splat(3),
+                range: 3.0,
                 cooldown_ms: 300,
                 bullet_speed_tps: 10.0,
-                bullet_type: BulletType::MetalBall,
+                bullet_type: BulletType::Bullet,
                 sprites: [
                     TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl1,
                     TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl2,
@@ -137,12 +137,30 @@ impl EnemyType {
             EnemyType::WideBirb => EnemyStats {
                 health: 4.0,
                 speed_tps: 1.0,
+                relative_collider_size: 0.25,
+                texture_size_tiles: 1.0,
                 asset: TexturePackAssets::WipSprites_Enemy,
             },
             EnemyType::Mausmeister => EnemyStats {
                 health: 0.5,
                 speed_tps: 4.0,
+                relative_collider_size: 0.25,
+                texture_size_tiles: 1.0,
                 asset: TexturePackAssets::WipSprites_MausMeister,
+            },
+            EnemyType::Rocher => EnemyStats {
+                health: 10.0,
+                speed_tps:0.5,
+                relative_collider_size: 0.5,
+                texture_size_tiles: 2.0,
+                asset: TexturePackAssets::Enemies_Rocher_RocherLvl1,
+            },
+            EnemyType::Zapano => EnemyStats {
+                health: 2.0,
+                speed_tps: 1.0,
+                relative_collider_size: 0.25,
+                texture_size_tiles: 1.0,
+                asset: TexturePackAssets::Enemies_Zapano_ZapanoFrontendLvl1
             },
         }
     }
@@ -153,7 +171,7 @@ impl BulletType {
         match self {
             BulletType::Bullet => BulletStats {
                 damage: 2.0,
-                health: 1.0,
+                health: 20.0,
                 spins: false,
                 relative_collider_size: 0.25,
                 texture_size_tiles: PROJECTILE_SIZE_TILES.x,
@@ -167,13 +185,21 @@ impl BulletType {
                 texture_size_tiles: PROJECTILE_SIZE_TILES.x,
                 asset: TexturePackAssets::Projectiles_MetalBall,
             },
-            BulletType::Apple => BulletStats {
-                damage: 1.0,
+            BulletType::AppleBall => BulletStats {
+                damage: 0.1,
                 health: 1.0,
                 spins: true,
                 relative_collider_size: 1.0,
                 texture_size_tiles: 0.4,
                 asset: TexturePackAssets::WipSprites_Apple,
+            },
+            BulletType::OrangeBall => BulletStats {
+                damage: 3.0,
+                health: 1.0,
+                spins: true,
+                relative_collider_size: 1.0,
+                texture_size_tiles: 0.8,
+                asset: TexturePackAssets::WipSprites_Enemy,
             },
         }
     }
