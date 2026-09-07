@@ -5,7 +5,7 @@ use crate::texture_packs::TexturePackAssets;
 use bevy::math::U16Vec2;
 use bevy::prelude::Vec2;
 
-pub const WINDOW_TITLE: &str = "2d game";
+pub const WINDOW_TITLE: &str = "Commandline Defense";
 pub const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
 
 pub const PHYSICS_FRAME_RATE: u16 = 144 * 2;
