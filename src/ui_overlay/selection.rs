@@ -45,8 +45,8 @@ pub fn update_selected_tile(
 
     match tile {
         Some(tile) => {
-            transform.translation.x = tile.position.x as f32 + 0.5;
-            transform.translation.y = tile.position.y as f32 + 0.5;
+            transform.translation.x = tile.x as f32 + 0.5;
+            transform.translation.y = tile.y as f32 + 0.5;
 
             *visibility = Visibility::Visible
         },

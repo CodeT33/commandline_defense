@@ -1,4 +1,5 @@
 use bevy::math::{I16Vec2, U16Vec2};
+use std::ops::Deref;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 /// Logical coordinate of a tile in the game grid.
@@ -10,30 +11,28 @@ use bevy::math::{I16Vec2, U16Vec2};
 /// IMPORTANT:
 /// PNG/image coordinates are NOT the same.
 /// The conversion to a Vec index handles the vertical flip.
-pub struct GridCoordinate {
-    pub position: U16Vec2,
+pub struct GridCoordinate(pub U16Vec2);
+
+impl Deref for GridCoordinate {
+    type Target = U16Vec2;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl GridCoordinate {
     pub const fn new(x: u16, y: u16) -> Self {
-        Self { position: U16Vec2::new(x, y) }
+        Self(U16Vec2::new(x, y))
     }
 
     pub const fn from_u16vec2(position: U16Vec2) -> Self {
-        Self { position }
-    }
-
-    pub const fn x(&self) -> u16 {
-        self.position.x
-    }
-
-    pub const fn y(&self) -> u16 {
-        self.position.y
+        Self(position)
     }
 
     /// Checks whether this position is inside the given map.
     pub fn is_on_map(&self, map_size: U16Vec2) -> bool {
-        self.position.x < map_size.x && self.position.y < map_size.y
+        self.x < map_size.x && self.y < map_size.y
     }
 
     /// Checks whether a position is inside the given map.
@@ -54,8 +53,8 @@ impl GridCoordinate {
             return None;
         }
 
-        let x = self.position.x as usize;
-        let y = self.position.y as usize;
+        let x = self.x as usize;
+        let y = self.y as usize;
 
         let width = map_size.x as usize;
         let height = map_size.y as usize;
@@ -86,7 +85,7 @@ impl GridCoordinate {
     /// Returns a neighboring coordinate.
     /// Useful for pathfinding and other grid operations.
     pub fn offset(&self, offset: I16Vec2, map_size: U16Vec2) -> Option<Self> {
-        let position = self.position.checked_add_signed(offset)?;
+        let position = self.checked_add_signed(offset)?;
 
         Self::is_position_on_map(position, map_size).then_some(Self::from_u16vec2(position))
     }

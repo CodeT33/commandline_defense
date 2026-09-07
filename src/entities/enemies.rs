@@ -102,7 +102,7 @@ pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
     };
 
     if path.corners().len() < 2 {
-        let position = start.position.as_vec2() + Vec2::splat(0.5);
+        let position = start.position().0.as_vec2() + Vec2::splat(0.5);
 
         return Transform::from_translation(position.extend(consts::rendering_layers::ENTITY));
     }
@@ -116,7 +116,8 @@ pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
         let a = both[0];
         let b = both[1];
 
-        let segment_len = (a.position.max(b.position) - a.position.min(b.position)).max_element();
+        let segment_len =
+            (a.position().max(*b.position()) - a.position().min(*b.position())).max_element();
         let new_len = current_len + segment_len as f32;
 
         if (new_len) < target_distance {
@@ -124,8 +125,8 @@ pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
             continue;
         }
 
-        let normalized_diff = (b.position.as_vec2() - a.position.as_vec2()).normalize();
-        let pos = a.position.as_vec2()
+        let normalized_diff = (b.position().as_vec2() - a.position().as_vec2()).normalize();
+        let pos = a.position().as_vec2()
             + (normalized_diff * (target_distance - current_len))
             + Vec2::splat(0.5);
         return Transform::from_translation(pos.extend(consts::rendering_layers::ENTITY))
@@ -133,7 +134,7 @@ pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
                 normalized_diff.to_angle() - f32::consts::FRAC_PI_2,
             ));
     }
-    let pos = path.corners().last().unwrap().position.as_vec2() + Vec2::splat(0.5);
+    let pos = path.corners().last().unwrap().position().as_vec2() + Vec2::splat(0.5);
     Transform::from_translation(pos.extend(consts::rendering_layers::ENTITY))
 }
 

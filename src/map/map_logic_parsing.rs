@@ -51,8 +51,28 @@ fn is_path_tile(tile: TileType) -> bool {
 // EnemyPath
 
 pub struct EnemyPath {
-    path_corners: Vec<GridCoordinate>,
+    path_corners: Vec<PathCorner>,
     path_length: u32,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct PathCorner {
+    position: GridCoordinate,
+    path_length_here: u32,
+}
+
+impl PathCorner {
+    pub fn new(coordinate: GridCoordinate, path_len: u32) -> Self {
+        Self { position: coordinate, path_length_here: path_len }
+    }
+
+    pub fn position(&self) -> GridCoordinate {
+        self.position
+    }
+
+    pub fn path_length(&self) -> u32 {
+        self.path_length_here
+    }
 }
 
 impl EnemyPath {
@@ -60,7 +80,8 @@ impl EnemyPath {
         let mut position = map_tiles.find_path_start()?;
         let mut direction = Direction::Right;
 
-        let mut enemy_path = Self { path_corners: vec![position], path_length: 0 };
+        let mut enemy_path =
+            Self { path_corners: vec![PathCorner::new(position, 0)], path_length: 0 };
 
         println!("The path starts at: {:?}", position);
         println!("Start to follow path\n");
@@ -86,8 +107,8 @@ impl EnemyPath {
             println!("No path in front of: {:?}. Checking for corners.", position);
 
             // Don't add the same corner twice.
-            if enemy_path.path_corners.last() != Some(&position) {
-                enemy_path.path_corners.push(position);
+            if enemy_path.path_corners.last().is_none_or(|p| p.position != position) {
+                enemy_path.path_corners.push(PathCorner::new(position, enemy_path.path_length));
             };
 
             // Try right
@@ -124,7 +145,7 @@ impl EnemyPath {
         self.path_length
     }
 
-    pub fn corners(&self) -> &[GridCoordinate] {
+    pub fn corners(&self) -> &[PathCorner] {
         &self.path_corners
     }
 }

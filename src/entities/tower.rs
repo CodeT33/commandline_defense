@@ -102,8 +102,7 @@ pub fn handle_tower_placing_events(
         }
         println!("Performing transaction of {:?}", attributes.price);
 
-        let tower_pos =
-            GridCoordinate::new(message.tower_pos.position.x, message.tower_pos.position.y);
+        let tower_pos = GridCoordinate::new(message.tower_pos.x, message.tower_pos.y);
         let bullet_emission_data: BulletEmissionData =
             BulletEmissionData(BulletEmissionDataInner::new(attributes.cooldown_ms));
         let sprite: Sprite = Sprite {
@@ -138,8 +137,8 @@ impl Tower {
                 ColliderShape::Circle(Circle::new(consts::TOWER_RANGE_TILES as f32)),
                 ColliderTypeB,
                 Transform::from_xyz(
-                    tower_pos.position.x as f32 + 0.5,
-                    tower_pos.position.y as f32 + 0.5,
+                    tower_pos.x as f32 + 0.5,
+                    tower_pos.y as f32 + 0.5,
                     consts::rendering_layers::ENTITY,
                 ),
             ))
@@ -155,7 +154,7 @@ impl TowerRangeMapInner {
     }
 
     pub fn range_bounds(&self, pos_tiles: GridCoordinate, range_tiles: u16) -> (U16Vec2, U16Vec2) {
-        let center = pos_tiles.position;
+        let center = pos_tiles;
         let range = U16Vec2::splat(range_tiles);
         let min = center.saturating_sub(range);
         let max = center.saturating_add(range).min(self.size.saturating_sub(U16Vec2::ONE));
@@ -172,7 +171,7 @@ impl TowerRangeMapInner {
     }
 
     pub fn towers_in_range_at(&self, tile: GridCoordinate) -> &[Entity] {
-        let index = tile.position.y as usize * self.size.x as usize + tile.position.x as usize;
+        let index = tile.y as usize * self.size.x as usize + tile.x as usize;
         &self.towers_in_range[index]
     }
 }
@@ -254,5 +253,12 @@ fn calculate_target_position(
     current_path_progress: f32, enemy_creation_time: TimePoint, bullet_creation_time: TimePoint,
     bullet_position: Vec2, path: &EnemyPath,
 ) -> Vec2 {
+    for corner in path.corners() {
+        // 1. Determine next corner
+    }
+    // 2. Calculate Enemy and Bullet Time for hit
+    // 3. If bullet arrives earlier than enemy, then range is this corner and the one before that
+    // 4. Else increase corner idx by 1
+
     Vec2::ZERO
 }
