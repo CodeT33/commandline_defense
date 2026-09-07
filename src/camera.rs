@@ -33,7 +33,7 @@ pub fn set_camera_position(
 pub fn camera_zoom_and_pan(
     mut camera: Query<(&mut Transform, &mut Projection), With<Camera2d>>,
     windows: Query<&Window, With<PrimaryWindow>>, buttons: Res<ButtonInput<MouseButton>>,
-    mut mouse_motion: MessageReader<CursorMoved>, mut mouse_wheel: MessageReader<MouseWheel>,
+    mut mouse_wheel: MessageReader<MouseWheel>, mut last_cursor_pos: Local<Option<Vec2>>,
 ) {
     let Ok((mut camera_transform, mut projection)) = camera.single_mut() else {
         return;
@@ -50,10 +50,14 @@ pub fn camera_zoom_and_pan(
     let settings = consts::viewports::BASIC_CAMERA;
 
     // Pan
+    let Some(current_cursor_pos) = window.cursor_position() else {
+        *last_cursor_pos = None;
+        return;
+    };
+    let mouse_delta = last_cursor_pos.map(|p| current_cursor_pos - p).unwrap_or(Vec2::ZERO);
+    *last_cursor_pos = Some(current_cursor_pos);
 
     if buttons.pressed(MouseButton::Right) {
-        let mouse_delta: Vec2 = mouse_motion.read().flat_map(|e| e.delta).sum();
-
         let movement = mouse_delta * projection.scale;
 
         camera_transform.translation.x -= movement.x;
