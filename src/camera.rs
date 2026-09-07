@@ -1,6 +1,6 @@
 use crate::consts;
 use crate::ecs_elements::resources::MapResource;
-use bevy::input::mouse::{MouseMotion, MouseWheel};
+use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
@@ -33,7 +33,7 @@ pub fn set_camera_position(
 pub fn camera_zoom_and_pan(
     mut camera: Query<(&mut Transform, &mut Projection), With<Camera2d>>,
     windows: Query<&Window, With<PrimaryWindow>>, buttons: Res<ButtonInput<MouseButton>>,
-    mut mouse_motion: MessageReader<MouseMotion>, mut mouse_wheel: MessageReader<MouseWheel>,
+    mut mouse_motion: MessageReader<CursorMoved>, mut mouse_wheel: MessageReader<MouseWheel>,
 ) {
     let Ok((mut camera_transform, mut projection)) = camera.single_mut() else {
         return;
@@ -52,11 +52,7 @@ pub fn camera_zoom_and_pan(
     // Pan
 
     if buttons.pressed(MouseButton::Right) {
-        let mut mouse_delta = Vec2::ZERO;
-
-        for event in mouse_motion.read() {
-            mouse_delta += event.delta;
-        }
+        let mouse_delta: Vec2 = mouse_motion.read().flat_map(|e| e.delta).sum();
 
         let movement = mouse_delta * projection.scale;
 
