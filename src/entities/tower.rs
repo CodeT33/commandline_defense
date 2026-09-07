@@ -231,6 +231,8 @@ pub fn request_bullet_spawns(
                 shoot_time,
                 tower_transform.translation.truncate(),
                 map.0.enemy_path(),
+                tower_data.0.bullet_speed_tps,
+                target_enemy.0.get_type().get_stats().speed_tps,
             );
 
             let angle = (target_pos - tower_transform.translation.truncate()).to_angle();
@@ -251,14 +253,19 @@ pub fn request_bullet_spawns(
 #[allow(unused)]
 fn calculate_target_position(
     current_path_progress: f32, enemy_creation_time: TimePoint, bullet_creation_time: TimePoint,
-    bullet_position: Vec2, path: &EnemyPath,
+    bullet_position: Vec2, path: &EnemyPath, bullet_speed_tps: f32, enemy_speed_tps: f32,
 ) -> Vec2 {
     for corner in path.corners() {
         // 1. Determine next corner
+
+        // 2. Calculate Enemy and Bullet Time for hit
+        let corner_pos = corner.position().as_vec2() + Vec2::splat(0.5);
+
+        let bullet_duration = corner_pos.distance(bullet_position) / bullet_speed_tps;
     }
-    // 2. Calculate Enemy and Bullet Time for hit
+
     // 3. If bullet arrives earlier than enemy, then range is this corner and the one before that
     // 4. Else increase corner idx by 1
 
-    Vec2::ZERO
+    todo!()
 }

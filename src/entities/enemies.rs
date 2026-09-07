@@ -146,6 +146,10 @@ impl EnemyData {
     pub fn get_path_progress(&self) -> f32 {
         self.path_progress
     }
+
+    pub fn get_type(&self) -> EnemyType {
+        self.enemy_type
+    }
 }
 
 pub fn handle_enemies_reaching_end(
