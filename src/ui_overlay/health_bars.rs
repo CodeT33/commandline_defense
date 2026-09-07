@@ -3,11 +3,13 @@ use crate::consts::ui::health_bars::{
     HEALTH_BAR_BACKGROUND_COLOR, HEALTH_BAR_FILL_COLOR, HEALTH_BAR_HEIGHT_TILES,
     HEALTH_BAR_OFFSET_TILES, HEALTH_BAR_WIDTH_TILES,
 };
-use crate::ecs_elements::components::HealthStats;
+use crate::ecs_elements::components::{Bullet, HealthStats};
 use bevy::prelude::*;
 use bevy_vector_shapes::prelude::*;
 
-pub fn draw_health_bars(mut painter: ShapePainter, query: Query<(&Transform, &HealthStats)>) {
+pub fn draw_health_bars(
+    mut painter: ShapePainter, query: Query<(&Transform, &HealthStats), Without<Bullet>>,
+) {
     for (transform, health) in &query {
         let ratio = health.0.ratio();
         let base_pos = transform
