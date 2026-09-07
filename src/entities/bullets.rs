@@ -35,16 +35,6 @@ pub struct BulletData {
     speed_tps: f32,
 }
 
-impl BulletType {
-    pub fn get_stats(self) -> BulletStats {
-        match self {
-            BulletType::Bullet => consts::bullets::BULLET_TYPE_BULLET,
-            BulletType::MetalBall => consts::bullets::BULLET_TYPE_BALL,
-            BulletType::Apple => consts::bullets::BULLET_TYPE_APPLE,
-        }
-    }
-}
-
 pub struct BulletEmissionDataInner {
     pub timer: IntervalTimer,
     direction: Rot2,

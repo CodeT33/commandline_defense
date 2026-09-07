@@ -30,15 +30,6 @@ pub struct EnemyStats {
     pub asset: TexturePackAssets,
 }
 
-impl EnemyType {
-    pub fn get_stats(self) -> EnemyStats {
-        match self {
-            EnemyType::WideBirb => consts::enemies::ENEMY_TYPE_WIDE_BIRB,
-            EnemyType::Mausmeister => consts::enemies::ENEMY_TYPE_MAUS_MEISTER,
-        }
-    }
-}
-
 pub fn move_enemies(
     map_resource: Res<MapResource>, mut enemy: Query<(&mut Transform, &mut Enemy, &CreationTime)>,
     time: Res<Time>,

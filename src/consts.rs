@@ -133,44 +133,59 @@ pub mod towers {
 }
 
 pub mod enemies {
-    use crate::entities::enemies::EnemyStats;
+    use crate::entities::enemies::{EnemyStats, EnemyType};
     use crate::texture_packs::TexturePackAssets;
 
-    pub const ENEMY_TYPE_WIDE_BIRB: EnemyStats =
-        EnemyStats { health: 4.0, speed_tps: 1.0, asset: TexturePackAssets::WipSprites_Enemy };
-    pub const ENEMY_TYPE_MAUS_MEISTER: EnemyStats = EnemyStats {
-        health: 0.5,
-        speed_tps: 4.0,
-        asset: TexturePackAssets::WipSprites_MausMeister,
-    };
+    impl EnemyType {
+        pub fn get_stats(self) -> EnemyStats {
+            match self {
+                EnemyType::WideBirb => EnemyStats {
+                    health: 4.0,
+                    speed_tps: 1.0,
+                    asset: TexturePackAssets::WipSprites_Enemy,
+                },
+                EnemyType::Mausmeister => EnemyStats {
+                    health: 0.5,
+                    speed_tps: 4.0,
+                    asset: TexturePackAssets::WipSprites_MausMeister,
+                },
+            }
+        }
+    }
 }
 
 pub mod bullets {
     use crate::consts;
-    use crate::entities::bullets::BulletStats;
+    use crate::entities::bullets::{BulletStats, BulletType};
     use crate::texture_packs::TexturePackAssets;
 
-    pub const BULLET_TYPE_BULLET: BulletStats = BulletStats {
-        damage: 2.0,
-        health: 1.0,
-        relative_collider_size: 0.25,
-        texture_size_tiles: consts::PROJECTILE_SIZE_TILES.x,
-        asset: TexturePackAssets::Projectiles_NormalMunition,
-    };
-    pub const BULLET_TYPE_BALL: BulletStats = BulletStats {
-        damage: 1.0,
-        health: 3.0,
-        relative_collider_size: 0.25,
-        texture_size_tiles: consts::PROJECTILE_SIZE_TILES.x,
-        asset: TexturePackAssets::Projectiles_MetalBall,
-    };
-    pub const BULLET_TYPE_APPLE: BulletStats = BulletStats {
-        damage: 1.0,
-        health: 1.0,
-        relative_collider_size: 1.0,
-        texture_size_tiles: 0.4,
-        asset: TexturePackAssets::WipSprites_Apple,
-    };
+    impl BulletType {
+        pub fn get_stats(self) -> BulletStats {
+            match self {
+                BulletType::Bullet => BulletStats {
+                    damage: 2.0,
+                    health: 1.0,
+                    relative_collider_size: 0.25,
+                    texture_size_tiles: consts::PROJECTILE_SIZE_TILES.x,
+                    asset: TexturePackAssets::Projectiles_NormalMunition,
+                },
+                BulletType::MetalBall => BulletStats {
+                    damage: 1.0,
+                    health: 3.0,
+                    relative_collider_size: 0.25,
+                    texture_size_tiles: consts::PROJECTILE_SIZE_TILES.x,
+                    asset: TexturePackAssets::Projectiles_MetalBall,
+                },
+                BulletType::Apple => BulletStats {
+                    damage: 1.0,
+                    health: 1.0,
+                    relative_collider_size: 1.0,
+                    texture_size_tiles: 0.4,
+                    asset: TexturePackAssets::WipSprites_Apple,
+                },
+            }
+        }
+    }
 }
 
 // ui
