@@ -1,4 +1,4 @@
-use crate::cli::command_line_state_management::TogglableSettings;
+use crate::cli::command_line_state_management::Settings;
 use crate::collision::CollisionPair;
 use crate::coordinates::GridCoordinate;
 use crate::entities::bullets::BulletType;
@@ -19,6 +19,7 @@ pub struct SpawnBullet {
     pub time: TimePoint,
     pub position: Vec2,
     pub direction: Rot2,
+    pub speed_tps: f32,
 }
 
 #[derive(Message)]
@@ -44,5 +45,5 @@ pub enum CommandEvent {
     Clear,
     Balance,
     ExitGame,
-    Toggle(TogglableSettings),
+    Set { setting: Settings, value: f32 },
 }

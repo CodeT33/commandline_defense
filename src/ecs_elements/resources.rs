@@ -41,6 +41,7 @@ pub struct SelectionState {
 pub struct DebugSettings {
     pub enable_bounding_boxes: bool,
     pub enemy_spawn_interval_ms: u64,
+    pub sim_speed: f32,
 }
 
 impl Default for DebugSettings {
@@ -48,6 +49,7 @@ impl Default for DebugSettings {
         Self {
             enable_bounding_boxes: false,
             enemy_spawn_interval_ms: consts::ENEMY_SPAWN_INTERVAL_MS,
+            sim_speed: 1.0,
         }
     }
 }

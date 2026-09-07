@@ -24,8 +24,10 @@ pub enum PreviewCommand {
 }
 
 #[derive(Debug)]
-pub enum TogglableSettings {
-    Balls,
+pub enum Settings {
+    BoundingBoxes,
+    SimSpeed,
+    EnemySpawnInterval,
 }
 
 pub fn handle_command_line_state(
@@ -50,7 +52,18 @@ pub fn handle_command_line_state(
 
     //Submit
     if keys.just_pressed(KeyCode::Enter) {
-        let commands = parse_command_event(&current_input, selection_state.selected_tile);
+        let output: Result<Vec<_>, _> =
+            parse_commandline_input(&current_input, selection_state.selected_tile)
+                .into_iter()
+                .collect::<Result<_, _>>();
+
+        let commands = match output {
+            Ok(commands) => commands,
+            Err(err) => {
+                println!("Failed to parse commands: {}", err);
+                return;
+            },
+        };
 
         for command in commands {
             command_events.write(command);
@@ -94,73 +107,62 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
     preview
 }
 
-fn parse_command_event(input: &str, selected_tile: Option<GridCoordinate>) -> Vec<CommandEvent> {
-    let mut commands = Vec::new();
+fn parse_commandline_input(
+    input: &str, mut selected_tile: Option<GridCoordinate>,
+) -> Vec<Result<CommandEvent, String>> {
+    input
+        .split(';')
+        .filter_map(|command_text| {
+            parse_single_command(command_text, &mut selected_tile).transpose()
+        })
+        .collect()
+}
 
-    let mut current_selected_tile = selected_tile;
+fn parse_single_command(
+    input_str: &str, current_selected_tile: &mut Option<GridCoordinate>,
+) -> Result<Option<CommandEvent>, String> {
+    let command_text = input_str.trim();
 
-    for command_text in input.split(';') {
-        let command_text = command_text.trim();
-
-        if command_text.is_empty() {
-            continue;
-        }
-
-        let tokens: Vec<&str> = command_text.split_whitespace().collect();
-
-        match tokens.as_slice() {
-            ["help"] => {
-                commands.push(CommandEvent::Help);
-            },
-            ["select", position] => {
-                let Some(tile) = parse_tile_position(position) else {
-                    println!("Invalid tile position: {:?}", position);
-                    continue;
-                };
-
-                current_selected_tile = Some(tile);
-
-                commands.push(CommandEvent::Select { tile });
-            },
-            ["place", tower_type] => {
-                let Some(tile) = current_selected_tile else {
-                    println!("Cannot place tower: no tile selected");
-                    continue;
-                };
-                let Some(tower_type) = parse_tower_type(tower_type) else {
-                    println!("Cannot place tower: unknown tower type: {:?}", tower_type);
-                    continue;
-                };
-
-                commands.push(CommandEvent::Place { tower_type, tower_pos: tile });
-            },
-            ["clear"] => {
-                current_selected_tile = None;
-                commands.push(CommandEvent::Clear);
-            },
-            ["show", "balance"] => {
-                commands.push(CommandEvent::Balance);
-            },
-            ["exit", "game"] => {
-                commands.push(CommandEvent::ExitGame);
-            },
-            #[allow(clippy::collapsible_match)]
-            ["toggle", togglable_settings] => match *togglable_settings {
-                "balls" => {
-                    commands.push(CommandEvent::Toggle(TogglableSettings::Balls));
-                },
-                _ => {
-                    println!("Unknown command: {:?}", command_text);
-                    commands.push(CommandEvent::Help);
-                },
-            },
-            _ => {
-                println!("Unknown command: {:?}", command_text);
-                commands.push(CommandEvent::Help);
-            },
-        }
+    if command_text.is_empty() {
+        return Ok(None);
     }
-    commands
+
+    let tokens: Vec<&str> = command_text.split_whitespace().collect();
+
+    Ok(Some(match tokens.as_slice() {
+        ["help"] => CommandEvent::Help,
+        ["select", position] => {
+            let tile = parse_tile_position(position)
+                .ok_or_else(|| format!("Invalid tile position: {:?}", position))?;
+            *current_selected_tile = Some(tile);
+            CommandEvent::Select { tile }
+        },
+        ["place", tower_type] => {
+            let tile = current_selected_tile
+                .ok_or_else(|| "Cannot place tower: no tile selected".to_string())?;
+            let tower_type = parse_tower_type(tower_type).ok_or_else(|| {
+                format!("Cannot place tower: unknown tower type: {:?}", tower_type)
+            })?;
+            CommandEvent::Place { tower_type, tower_pos: tile }
+        },
+        ["clear"] => {
+            *current_selected_tile = None;
+            CommandEvent::Clear
+        },
+        ["show", "balance"] => CommandEvent::Balance,
+        ["exit", "game"] => CommandEvent::ExitGame,
+        ["set", setting, value] => {
+            let value = value.parse::<f32>().map_err(|e| e.to_string())?;
+            let setting = match *setting {
+                "bounding-boxes" => Settings::BoundingBoxes,
+                "sim-speed" => Settings::SimSpeed,
+                "enemy-spawn-interval" => Settings::EnemySpawnInterval,
+                _ => return Err(format!("Unknown setting: {:?}", setting)),
+            };
+            CommandEvent::Set { setting, value }
+        },
+        _ => Err(format!("Unknown command: \"{}\"", command_text))?,
+    }))
 }
 
 fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {

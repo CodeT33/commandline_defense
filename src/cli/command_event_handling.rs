@@ -1,4 +1,4 @@
-use crate::cli::command_line_state_management::TogglableSettings;
+use crate::cli::command_line_state_management::Settings;
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::{CommandEvent, PlaceTowerMessage};
 use crate::ecs_elements::resources::{
@@ -23,9 +23,15 @@ pub fn handle_command_events(
             CommandEvent::Clear => deselect_tile(&mut selection_state),
             CommandEvent::Balance => show_balance(&player_suite),
             CommandEvent::ExitGame => exit_game(),
-            CommandEvent::Toggle(togglable) => match togglable {
-                TogglableSettings::Balls => {
-                    debug_settings.enable_bounding_boxes ^= true;
+            CommandEvent::Set { setting, value } => match setting {
+                Settings::BoundingBoxes => {
+                    debug_settings.enable_bounding_boxes = *value != 0.0;
+                },
+                Settings::SimSpeed => {
+                    debug_settings.sim_speed = *value;
+                },
+                Settings::EnemySpawnInterval => {
+                    debug_settings.enemy_spawn_interval_ms = value.round().max(0.0) as u64;
                 },
             },
         }

@@ -20,8 +20,6 @@ pub const TOWER_RANGE_TILES: u16 = 5;
 pub const TOWER_COOLDOWN_MS: u32 = 1000;
 
 pub const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
-pub const PROJECTILE_RADIUS: f32 = PROJECTILE_SIZE_TILES.x / 8.0;
-pub const PROJECTILE_SPEED_TILES_PER_SECOND: f32 = 10.0;
 
 pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
 
@@ -47,6 +45,7 @@ pub mod map_logic_parsing {
 }
 
 pub mod towers {
+    use crate::entities::bullets::BulletType;
     use crate::entities::tower::TowerAttributes;
     use crate::texture_packs::TexturePackAssets;
     use bevy::math::{U16Vec2, Vec2};
@@ -56,7 +55,8 @@ pub mod towers {
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(3),
         cooldown_ms: 1000,
-        bullet_speed: 10.0,
+        bullet_speed_tps: 10.0,
+        bullet_type: BulletType::Apple,
         sprites: [
             TexturePackAssets::Troops_Assault_AssaultTroopLvl1,
             TexturePackAssets::Troops_Assault_AssaultTroopLvl2,
@@ -71,7 +71,8 @@ pub mod towers {
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(2),
         cooldown_ms: 3000,
-        bullet_speed: 6.0,
+        bullet_speed_tps: 6.0,
+        bullet_type: BulletType::MetalBall,
         sprites: [
             TexturePackAssets::Troops_Boom_BoomTroopLvl1,
             TexturePackAssets::Troops_Boom_BoomTroopLvl2,
@@ -86,7 +87,8 @@ pub mod towers {
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(4),
         cooldown_ms: 300,
-        bullet_speed: 8.0,
+        bullet_speed_tps: 8.0,
+        bullet_type: BulletType::Apple,
         sprites: [
             TexturePackAssets::Troops_Gatling_GatlingTroopLvl1,
             TexturePackAssets::Troops_Gatling_GatlingTroopLvl2,
@@ -102,7 +104,8 @@ pub mod towers {
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(8),
         cooldown_ms: 4000,
-        bullet_speed: 100.0,
+        bullet_speed_tps: 100.0,
+        bullet_type: BulletType::Bullet,
         sprites: [
             TexturePackAssets::Troops_Sniper_SniperTroopLvl1,
             TexturePackAssets::Troops_Sniper_SniperTroopLvl2,
@@ -117,7 +120,8 @@ pub mod towers {
         size_tiles: Vec2::splat(1.0),
         range_tiles: U16Vec2::splat(3),
         cooldown_ms: 300,
-        bullet_speed: 10.0,
+        bullet_speed_tps: 10.0,
+        bullet_type: BulletType::MetalBall,
         sprites: [
             TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl1,
             TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl2,
@@ -146,20 +150,25 @@ pub mod bullets {
     use crate::entities::bullets::BulletStats;
     use crate::texture_packs::TexturePackAssets;
 
-    pub const BULLET_TYPE_BALL: BulletStats = BulletStats {
-        bullet_speed_tps: consts::PROJECTILE_SPEED_TILES_PER_SECOND,
-        damage: 1.0,
+    pub const BULLET_TYPE_BULLET: BulletStats = BulletStats {
+        damage: 2.0,
         health: 1.0,
-        collider_radius: consts::PROJECTILE_RADIUS,
-        texture_size_tiles: consts::PROJECTILE_SIZE_TILES,
+        relative_collider_size: 0.25,
+        texture_size_tiles: consts::PROJECTILE_SIZE_TILES.x,
+        asset: TexturePackAssets::Projectiles_NormalMunition,
+    };
+    pub const BULLET_TYPE_BALL: BulletStats = BulletStats {
+        damage: 1.0,
+        health: 3.0,
+        relative_collider_size: 0.25,
+        texture_size_tiles: consts::PROJECTILE_SIZE_TILES.x,
         asset: TexturePackAssets::Projectiles_MetalBall,
     };
     pub const BULLET_TYPE_APPLE: BulletStats = BulletStats {
-        bullet_speed_tps: consts::PROJECTILE_SPEED_TILES_PER_SECOND,
         damage: 1.0,
         health: 1.0,
-        collider_radius: consts::PROJECTILE_RADIUS,
-        texture_size_tiles: consts::PROJECTILE_SIZE_TILES,
+        relative_collider_size: 1.0,
+        texture_size_tiles: 0.4,
         asset: TexturePackAssets::WipSprites_Apple,
     };
 }
@@ -168,7 +177,10 @@ pub mod bullets {
 pub mod ui {
     use bevy::prelude::Color;
 
-    pub const BOUNDING_BOX_DEBUG_COLOR: Color = Color::hsv(0.3, 1.0, 1.0);
+    pub const BOUNDING_BOX_DEBUG_COLOR: Color = Color::hsv(120.0, 1.0, 1.0);
+    pub const BOUNDING_BOX_DEBUG_COLOR_ALT: Color = Color::hsv(0.0, 1.0, 1.0);
+    /// How often the debug bounding box color toggles between the two colors.
+    pub const BOUNDING_BOX_DEBUG_COLOR_TOGGLE_SECS: f32 = 0.25;
 
     pub mod health_bars {
         use bevy::prelude::Color;

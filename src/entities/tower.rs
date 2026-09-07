@@ -7,7 +7,7 @@ use crate::ecs_elements::messages::PlaceTowerMessage;
 
 use crate::ecs_elements::resources::{PlayerSuiteResource, TexturePackSettings};
 
-use crate::entities::bullets::BulletEmissionDataInner;
+use crate::entities::bullets::{BulletEmissionDataInner, BulletType};
 use crate::player_suite::TransactionReturnStatus;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
@@ -24,6 +24,8 @@ pub struct TowerDataInner {
     upgrade_level: UpgradeLevel,
     #[allow(unused)]
     effects: Vec<Effect>,
+    pub bullet_speed_tps: f32,
+    pub bullet_type: BulletType,
 }
 
 #[allow(unused)]
@@ -67,7 +69,8 @@ pub struct TowerAttributes {
     pub size_tiles: Vec2,
     pub range_tiles: U16Vec2,
     pub cooldown_ms: u32,
-    pub bullet_speed: f32,
+    pub bullet_speed_tps: f32,
+    pub bullet_type: BulletType,
     pub sprites: [TexturePackAssets; 4],
     pub tower_rotates: bool,
 }
@@ -115,6 +118,8 @@ pub fn handle_tower_placing_events(
             tower_type: message.tower_type,
             upgrade_level: UpgradeLevel::SmallSchlongKongStrong,
             effects: vec![],
+            bullet_speed_tps: attributes.bullet_speed_tps,
+            bullet_type: attributes.bullet_type,
         });
 
         Tower::spawn(&mut commands, sprite, tower_pos, tower_data, bullet_emission_data);

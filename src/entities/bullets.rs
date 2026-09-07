@@ -2,7 +2,7 @@ use crate::collision::CollisionPair;
 use crate::consts;
 use crate::ecs_elements::components::{
     Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, DeleteWhenOutOfMap,
-    Enemy, HealthStats, Tower,
+    Enemy, HealthStats, Tower, TowerData,
 };
 use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted, SpawnBullet};
 use crate::ecs_elements::resources::TexturePackSettings;
@@ -15,16 +15,16 @@ use std::f32::consts::PI;
 
 #[derive(Copy, Clone, Debug)]
 pub enum BulletType {
-    Ball,
+    Bullet,
+    MetalBall,
     Apple,
 }
 
 pub struct BulletStats {
-    pub bullet_speed_tps: f32,
     pub damage: f32,
     pub health: f32,
-    pub collider_radius: f32,
-    pub texture_size_tiles: Vec2,
+    pub relative_collider_size: f32,
+    pub texture_size_tiles: f32,
     pub asset: TexturePackAssets,
 }
 
@@ -32,12 +32,14 @@ pub struct BulletStats {
 pub struct BulletData {
     bullet_type: BulletType,
     rotation: Rot2,
+    speed_tps: f32,
 }
 
 impl BulletType {
     pub fn get_stats(self) -> BulletStats {
         match self {
-            BulletType::Ball => consts::bullets::BULLET_TYPE_BALL,
+            BulletType::Bullet => consts::bullets::BULLET_TYPE_BULLET,
+            BulletType::MetalBall => consts::bullets::BULLET_TYPE_BALL,
             BulletType::Apple => consts::bullets::BULLET_TYPE_APPLE,
         }
     }
@@ -67,10 +69,7 @@ pub fn move_bullets(mut q: Query<(&mut Transform, Ref<Bullet>, &CreationTime)>, 
         } else {
             time.delta_secs()
         };
-        let velocity = bullet.0.rotation
-            * Vec2::X
-            * bullet.0.bullet_type.get_stats().bullet_speed_tps
-            * delta_time;
+        let velocity = bullet.0.rotation * Vec2::X * bullet.0.speed_tps * delta_time;
         tf.translation += velocity.extend(0.0);
 
         tf.rotation = Quat::from_rotation_z(
@@ -121,21 +120,22 @@ pub fn update_towers_in_range_and_rotate(
 
 pub fn request_bullet_spawns(
     mut bullet_spawns: MessageWriter<SpawnBullet>,
-    mut q: Query<(&Transform, &Tower, &mut BulletEmissionData), With<Tower>>, time: Res<Time>,
+    mut q: Query<(&Transform, &Tower, &TowerData, &mut BulletEmissionData), With<Tower>>,
+    time: Res<Time>,
 ) {
-    for (transform, tower, mut data) in &mut q {
+    for (transform, tower, tower_data, mut data) in &mut q {
         let emission_data = &mut data.0;
         if tower.enemies_in_range.is_empty() {
             emission_data.timer.pause();
             continue;
         }
         while let Some(shoot_time) = emission_data.timer.tick_if_ready(&time) {
-            let bullet_type = BulletType::Ball;
             bullet_spawns.write(SpawnBullet {
-                bullet_type,
+                bullet_type: tower_data.0.bullet_type,
                 time: shoot_time,
                 position: transform.translation.truncate(),
                 direction: emission_data.direction,
+                speed_tps: tower_data.0.bullet_speed_tps,
             });
         }
     }
@@ -148,16 +148,16 @@ pub fn handle_bullet_spawns(
     for message in bullet_spawns.read() {
         let stats = message.bullet_type.get_stats();
         commands.spawn((
-            Bullet(BulletData::new(message.bullet_type, message.direction)),
+            Bullet(BulletData::new(message.bullet_type, message.direction, message.speed_tps)),
             HealthStats(HealthStatsInner::new(stats.health)),
             CreationTime(message.time),
             ColliderTypeB,
-            ColliderShape::circle(stats.collider_radius),
+            ColliderShape::circle(stats.texture_size_tiles * stats.relative_collider_size / 2.0),
             DeleteWhenOutOfMap,
             Transform::from_translation(message.position.extend(consts::rendering_layers::ENTITY)),
             Sprite {
                 image: asset_server.load(texture_pack_settings.get_asset_path(stats.asset)),
-                custom_size: stats.texture_size_tiles.into(),
+                custom_size: Some(Vec2::splat(stats.texture_size_tiles)),
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()
             },
@@ -188,7 +188,7 @@ pub fn handle_bullet_enemy_collisions(
 }
 
 impl BulletData {
-    pub fn new(bullet_type: BulletType, rotation: Rot2) -> Self {
-        Self { bullet_type, rotation }
+    pub fn new(bullet_type: BulletType, rotation: Rot2, speed_tps: f32) -> Self {
+        Self { bullet_type, rotation, speed_tps }
     }
 }
