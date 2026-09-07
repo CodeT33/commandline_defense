@@ -57,6 +57,9 @@ pub enum TowerType {
     Icebyte,
     Goldt,
     Copprina,
+
+    //meme stuff
+    DonBanano,
 }
 
 pub struct TowerRangeMapInner {

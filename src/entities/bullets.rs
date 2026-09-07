@@ -19,6 +19,7 @@ pub enum BulletType {
     MetalBall,
     AppleBall,
     OrangeBall,
+    DonsBananos,
 }
 
 pub struct BulletStats {

@@ -126,6 +126,21 @@ impl TowerType {
                 ],
                 tower_rotates: false,
             },
+            TowerType::DonBanano => TowerAttributes {
+                price: 0,
+                size_tiles: Vec2::splat(3.0),
+                range: 4.0,
+                cooldown_ms: 500,
+                bullet_speed_tps: 10.0,
+                bullet_type: BulletType::DonsBananos,
+                sprites: [
+                    TexturePackAssets::WipSprites_DonBananoCool,
+                    TexturePackAssets::WipSprites_DonBananoCool,
+                    TexturePackAssets::WipSprites_DonBananoCool,
+                    TexturePackAssets::WipSprites_DonBananoCool,
+                ],
+                tower_rotates: true,
+            },
             tt => panic!("TowerType {tt:?} not implemented yet"),
         }
     }
@@ -153,7 +168,7 @@ impl EnemyType {
                 speed_tps:0.5,
                 relative_collider_size: 0.5,
                 texture_size_tiles: 2.0,
-                asset: TexturePackAssets::Enemies_Rocher_RocherLvl1,
+                asset: TexturePackAssets::Enemies_Rocher_RocherDarkmodeLvl1,
             },
             EnemyType::Zapano => EnemyStats {
                 health: 2.0,
@@ -201,6 +216,14 @@ impl BulletType {
                 texture_size_tiles: 0.8,
                 asset: TexturePackAssets::WipSprites_Enemy,
             },
+            BulletType::DonsBananos => BulletStats {
+                damage: 3.0,
+                health: 1.0,
+                spins: true,
+                relative_collider_size: 1.0,
+                texture_size_tiles: 1.0,
+                asset: TexturePackAssets::WipSprites_Banana,
+            }
         }
     }
 }

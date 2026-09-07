@@ -184,6 +184,7 @@ fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
         "icebyte" => Some(TowerType::Icebyte),
         "goldt" => Some(TowerType::Goldt),
         "copprina" => Some(TowerType::Copprina),
+        "don-banano" => Some(TowerType::DonBanano),
         _ => {
             println!("Unknown tower type: {:?}", tower_type_string);
             None
