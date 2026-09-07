@@ -1,3 +1,7 @@
+use crate::entities::bullets::{BulletStats, BulletType};
+use crate::entities::enemies::{EnemyStats, EnemyType};
+use crate::entities::tower::{TowerAttributes, TowerType};
+use crate::texture_packs::TexturePackAssets;
 use bevy::math::U16Vec2;
 use bevy::prelude::Vec2;
 
@@ -44,146 +48,130 @@ pub mod map_logic_parsing {
     };
 }
 
-pub mod towers {
-    use crate::entities::bullets::BulletType;
-    use crate::entities::tower::TowerAttributes;
-    use crate::texture_packs::TexturePackAssets;
-    use bevy::math::{U16Vec2, Vec2};
-
-    pub const ASSAULT_TROOP_ATTRIBUTES: TowerAttributes = TowerAttributes {
-        price: 100,
-        size_tiles: Vec2::splat(1.0),
-        range_tiles: U16Vec2::splat(3),
-        cooldown_ms: 1000,
-        bullet_speed_tps: 10.0,
-        bullet_type: BulletType::Apple,
-        sprites: [
-            TexturePackAssets::Troops_Assault_AssaultTroopLvl1,
-            TexturePackAssets::Troops_Assault_AssaultTroopLvl2,
-            TexturePackAssets::Troops_Assault_AssaultTroopLvl3,
-            TexturePackAssets::Troops_Assault_AssaultTroopLvl3,
-        ],
-        tower_rotates: true,
-    };
-
-    pub const BOOM_TROOP_ATTRIBUTES: TowerAttributes = TowerAttributes {
-        price: 320,
-        size_tiles: Vec2::splat(1.0),
-        range_tiles: U16Vec2::splat(2),
-        cooldown_ms: 3000,
-        bullet_speed_tps: 6.0,
-        bullet_type: BulletType::MetalBall,
-        sprites: [
-            TexturePackAssets::Troops_Boom_BoomTroopLvl1,
-            TexturePackAssets::Troops_Boom_BoomTroopLvl2,
-            TexturePackAssets::Troops_Boom_BoomTroopLvl3,
-            TexturePackAssets::Troops_Boom_BoomTroopLvl3,
-        ],
-        tower_rotates: true,
-    };
-
-    pub const GATLING_TROOP_ATTRIBUTES: TowerAttributes = TowerAttributes {
-        price: 210,
-        size_tiles: Vec2::splat(1.0),
-        range_tiles: U16Vec2::splat(4),
-        cooldown_ms: 300,
-        bullet_speed_tps: 8.0,
-        bullet_type: BulletType::Apple,
-        sprites: [
-            TexturePackAssets::Troops_Gatling_GatlingTroopLvl1,
-            TexturePackAssets::Troops_Gatling_GatlingTroopLvl2,
-            TexturePackAssets::Troops_Gatling_GatlingTroopLvl3,
-            TexturePackAssets::Troops_Gatling_GatlingTroopLvl3,
-        ],
-
-        tower_rotates: true,
-    };
-
-    pub const SNIPER_TROOP_ATTRIBUTES: TowerAttributes = TowerAttributes {
-        price: 160,
-        size_tiles: Vec2::splat(1.0),
-        range_tiles: U16Vec2::splat(8),
-        cooldown_ms: 4000,
-        bullet_speed_tps: 100.0,
-        bullet_type: BulletType::Bullet,
-        sprites: [
-            TexturePackAssets::Troops_Sniper_SniperTroopLvl1,
-            TexturePackAssets::Troops_Sniper_SniperTroopLvl2,
-            TexturePackAssets::Troops_Sniper_SniperTroopLvl3,
-            TexturePackAssets::Troops_Sniper_SniperTroopLvl3,
-        ],
-        tower_rotates: true,
-    };
-
-    pub const EITSHTU_ATTRIBUTES: TowerAttributes = TowerAttributes {
-        price: 0,
-        size_tiles: Vec2::splat(1.0),
-        range_tiles: U16Vec2::splat(3),
-        cooldown_ms: 300,
-        bullet_speed_tps: 10.0,
-        bullet_type: BulletType::MetalBall,
-        sprites: [
-            TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl1,
-            TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl2,
-            TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl3,
-            TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl4,
-        ],
-        tower_rotates: false,
-    };
-}
-
-pub mod enemies {
-    use crate::entities::enemies::{EnemyStats, EnemyType};
-    use crate::texture_packs::TexturePackAssets;
-
-    impl EnemyType {
-        pub fn get_stats(self) -> EnemyStats {
-            match self {
-                EnemyType::WideBirb => EnemyStats {
-                    health: 4.0,
-                    speed_tps: 1.0,
-                    asset: TexturePackAssets::WipSprites_Enemy,
-                },
-                EnemyType::Mausmeister => EnemyStats {
-                    health: 0.5,
-                    speed_tps: 4.0,
-                    asset: TexturePackAssets::WipSprites_MausMeister,
-                },
-            }
+impl TowerType {
+    pub fn get_attributes(self) -> TowerAttributes {
+        match self {
+            TowerType::AssaultTower => TowerAttributes {
+                price: 100,
+                size_tiles: Vec2::splat(1.0),
+                range_tiles: U16Vec2::splat(3),
+                cooldown_ms: 1000,
+                bullet_speed_tps: 10.0,
+                bullet_type: BulletType::Apple,
+                sprites: [
+                    TexturePackAssets::Troops_Assault_AssaultTroopLvl1,
+                    TexturePackAssets::Troops_Assault_AssaultTroopLvl2,
+                    TexturePackAssets::Troops_Assault_AssaultTroopLvl3,
+                    TexturePackAssets::Troops_Assault_AssaultTroopLvl3,
+                ],
+                tower_rotates: true,
+            },
+            TowerType::BoomTower => TowerAttributes {
+                price: 320,
+                size_tiles: Vec2::splat(1.0),
+                range_tiles: U16Vec2::splat(2),
+                cooldown_ms: 3000,
+                bullet_speed_tps: 6.0,
+                bullet_type: BulletType::MetalBall,
+                sprites: [
+                    TexturePackAssets::Troops_Boom_BoomTroopLvl1,
+                    TexturePackAssets::Troops_Boom_BoomTroopLvl2,
+                    TexturePackAssets::Troops_Boom_BoomTroopLvl3,
+                    TexturePackAssets::Troops_Boom_BoomTroopLvl3,
+                ],
+                tower_rotates: true,
+            },
+            TowerType::GatlingTower => TowerAttributes {
+                price: 210,
+                size_tiles: Vec2::splat(1.0),
+                range_tiles: U16Vec2::splat(4),
+                cooldown_ms: 300,
+                bullet_speed_tps: 8.0,
+                bullet_type: BulletType::Apple,
+                sprites: [
+                    TexturePackAssets::Troops_Gatling_GatlingTroopLvl1,
+                    TexturePackAssets::Troops_Gatling_GatlingTroopLvl2,
+                    TexturePackAssets::Troops_Gatling_GatlingTroopLvl3,
+                    TexturePackAssets::Troops_Gatling_GatlingTroopLvl3,
+                ],
+                tower_rotates: true,
+            },
+            TowerType::SniperTower => TowerAttributes {
+                price: 160,
+                size_tiles: Vec2::splat(1.0),
+                range_tiles: U16Vec2::splat(8),
+                cooldown_ms: 4000,
+                bullet_speed_tps: 100.0,
+                bullet_type: BulletType::Bullet,
+                sprites: [
+                    TexturePackAssets::Troops_Sniper_SniperTroopLvl1,
+                    TexturePackAssets::Troops_Sniper_SniperTroopLvl2,
+                    TexturePackAssets::Troops_Sniper_SniperTroopLvl3,
+                    TexturePackAssets::Troops_Sniper_SniperTroopLvl3,
+                ],
+                tower_rotates: true,
+            },
+            TowerType::Eitshtu => TowerAttributes {
+                price: 0,
+                size_tiles: Vec2::splat(1.0),
+                range_tiles: U16Vec2::splat(3),
+                cooldown_ms: 300,
+                bullet_speed_tps: 10.0,
+                bullet_type: BulletType::MetalBall,
+                sprites: [
+                    TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl1,
+                    TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl2,
+                    TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl3,
+                    TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl4,
+                ],
+                tower_rotates: false,
+            },
+            tt => panic!("TowerType {tt:?} not implemented yet"),
         }
     }
 }
 
-pub mod bullets {
-    use crate::consts;
-    use crate::entities::bullets::{BulletStats, BulletType};
-    use crate::texture_packs::TexturePackAssets;
+impl EnemyType {
+    pub fn get_stats(self) -> EnemyStats {
+        match self {
+            EnemyType::WideBirb => EnemyStats {
+                health: 4.0,
+                speed_tps: 1.0,
+                asset: TexturePackAssets::WipSprites_Enemy,
+            },
+            EnemyType::Mausmeister => EnemyStats {
+                health: 0.5,
+                speed_tps: 4.0,
+                asset: TexturePackAssets::WipSprites_MausMeister,
+            },
+        }
+    }
+}
 
-    impl BulletType {
-        pub fn get_stats(self) -> BulletStats {
-            match self {
-                BulletType::Bullet => BulletStats {
-                    damage: 2.0,
-                    health: 1.0,
-                    relative_collider_size: 0.25,
-                    texture_size_tiles: consts::PROJECTILE_SIZE_TILES.x,
-                    asset: TexturePackAssets::Projectiles_NormalMunition,
-                },
-                BulletType::MetalBall => BulletStats {
-                    damage: 1.0,
-                    health: 3.0,
-                    relative_collider_size: 0.25,
-                    texture_size_tiles: consts::PROJECTILE_SIZE_TILES.x,
-                    asset: TexturePackAssets::Projectiles_MetalBall,
-                },
-                BulletType::Apple => BulletStats {
-                    damage: 1.0,
-                    health: 1.0,
-                    relative_collider_size: 1.0,
-                    texture_size_tiles: 0.4,
-                    asset: TexturePackAssets::WipSprites_Apple,
-                },
-            }
+impl BulletType {
+    pub fn get_stats(self) -> BulletStats {
+        match self {
+            BulletType::Bullet => BulletStats {
+                damage: 2.0,
+                health: 1.0,
+                relative_collider_size: 0.25,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_NormalMunition,
+            },
+            BulletType::MetalBall => BulletStats {
+                damage: 1.0,
+                health: 3.0,
+                relative_collider_size: 0.25,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_MetalBall,
+            },
+            BulletType::Apple => BulletStats {
+                damage: 1.0,
+                health: 1.0,
+                relative_collider_size: 1.0,
+                texture_size_tiles: 0.4,
+                asset: TexturePackAssets::WipSprites_Apple,
+            },
         }
     }
 }

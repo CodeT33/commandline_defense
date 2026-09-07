@@ -88,13 +88,7 @@ pub fn handle_tower_placing_events(
     texture_pack_settings: Res<TexturePackSettings>,
 ) {
     for message in messages.read() {
-        let attributes: TowerAttributes = match message.tower_type {
-            TowerType::AssaultTower => consts::towers::ASSAULT_TROOP_ATTRIBUTES,
-            TowerType::BoomTower => consts::towers::BOOM_TROOP_ATTRIBUTES,
-            TowerType::GatlingTower => consts::towers::GATLING_TROOP_ATTRIBUTES,
-            TowerType::SniperTower => consts::towers::SNIPER_TROOP_ATTRIBUTES,
-            tt => panic!("TowerType {tt:?} not implemented yet"),
-        };
+        let attributes: TowerAttributes = message.tower_type.get_attributes();
 
         if player_suite.perform_transaction(attributes.price)
             == TransactionReturnStatus::NotEnoughMoney
