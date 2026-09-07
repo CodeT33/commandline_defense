@@ -283,3 +283,27 @@ fn calculate_target_position(
 
     todo!()
 }
+
+/// - `vb` = bullet velocity
+/// - `ve` = enemy velocity
+/// - `d` = enemy_pos - tower_pos
+pub fn calculate_collision_time(vb: f32, ve: Vec2, d: Vec2) -> Option<f32> {
+    // a = ||ve||^2 - vb^2
+    let a = (-vb).mul_add(vb, ve.length_squared());
+    let h = d.dot(ve);
+    let c = d.length_squared();
+
+    // disc = h^2 - a * c
+    let disc = (-a).mul_add(c, h * h);
+
+    // Target cannot be intercepted
+    if disc < 0.0 {
+        return None;
+    }
+
+    // Stable formulation: t = c / (sqrt(disc) - h)
+    // Works seamlessly across a < 0, a == 0, and a > 0
+    let denom = disc.sqrt() - h;
+
+    if denom > 0.0 { Some(c / denom) } else { None }
+}
