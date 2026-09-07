@@ -26,7 +26,7 @@ use crate::entities::tower::TowerType;
 use crate::map::map_rendering::spawn_map_visual_layer;
 use crate::map::spawn_map_bounds;
 use crate::movement::delete_out_of_map_entities;
-use crate::ui_overlay::debug::draw_bounding_boxes;
+use crate::ui_overlay::debug::{draw_bounding_boxes, set_simulation_speed};
 use crate::ui_overlay::grid::update_grid_preview;
 use crate::ui_overlay::health_bars::draw_health_bars;
 use crate::ui_overlay::selection::update_selected_tile;
@@ -136,6 +136,7 @@ fn register_systems(app: &mut App) {
                 handle_command_line_state,
                 navigate_command_history,
                 handle_tower_placing_events,
+                set_simulation_speed,
             ),
         );
 }

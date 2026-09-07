@@ -1,10 +1,11 @@
 use crate::consts;
 use crate::ecs_elements::components::ColliderShape;
+use crate::ecs_elements::resources::DebugSettings;
 use bevy::math::Isometry2d;
-use bevy::prelude::{Gizmos, Query, Res, Time, Transform};
+use bevy::prelude::{Gizmos, Query, Real, Res, ResMut, Time, Transform, Virtual};
 
 pub fn draw_bounding_boxes(
-    q: Query<(&ColliderShape, &Transform)>, mut gizmos: Gizmos, time: Res<Time>,
+    q: Query<(&ColliderShape, &Transform)>, mut gizmos: Gizmos, time: Res<Time<Real>>,
 ) {
     let toggle_index =
         (time.elapsed_secs() / consts::ui::BOUNDING_BOX_DEBUG_COLOR_TOGGLE_SECS) as u64;
@@ -29,4 +30,8 @@ pub fn draw_bounding_boxes(
             },
         }
     }
+}
+
+pub fn set_simulation_speed(mut time: ResMut<Time<Virtual>>, debug_settings: Res<DebugSettings>) {
+    time.set_relative_speed(debug_settings.sim_speed);
 }
