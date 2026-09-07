@@ -5,7 +5,7 @@ use crate::entities::bullets::BulletType;
 use crate::entities::enemies::EnemyType;
 use crate::entities::tower::TowerType;
 use crate::scheduling::TimePoint;
-use bevy::prelude::{Message, Rot2, Vec2};
+use bevy::prelude::{Entity, Message, Rot2, Vec2};
 
 #[derive(Message)]
 pub struct SpawnEnemy {
@@ -47,3 +47,6 @@ pub enum CommandEvent {
     ExitGame,
     Set { setting: Settings, value: f32 },
 }
+
+#[derive(Message)]
+pub struct EnemyReachedEnd(pub Entity);

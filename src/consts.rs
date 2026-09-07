@@ -5,7 +5,7 @@ use crate::texture_packs::TexturePackAssets;
 use bevy::math::U16Vec2;
 use bevy::prelude::Vec2;
 
-pub const WINDOW_TITLE: &str = "2d game";
+pub const WINDOW_TITLE: &str = "Commandline Defense";
 pub const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
 
 pub const PHYSICS_FRAME_RATE: u16 = 144 * 2;
@@ -151,6 +151,7 @@ impl EnemyType {
         match self {
             EnemyType::WideBirb => EnemyStats {
                 health: 4.0,
+                player_health_penalty: 4,
                 speed_tps: 1.0,
                 relative_collider_size: 0.25,
                 texture_size_tiles: 1.0,
@@ -158,6 +159,7 @@ impl EnemyType {
             },
             EnemyType::Mausmeister => EnemyStats {
                 health: 0.5,
+                player_health_penalty: 1,
                 speed_tps: 4.0,
                 relative_collider_size: 0.25,
                 texture_size_tiles: 1.0,

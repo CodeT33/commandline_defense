@@ -1,4 +1,6 @@
+use crate::ecs_elements::events::PlayerHasDied;
 use crate::ecs_elements::resources::PlayerSuiteResource;
+use bevy::prelude::On;
 
 impl Default for PlayerSuiteResource {
     fn default() -> Self {
@@ -107,4 +109,8 @@ impl PlayerSuiteResource {
             TransactionReturnStatus::NotEnoughMoney
         }
     }
+}
+
+pub fn player_died_observer(_trigger: On<PlayerHasDied>) {
+    println!("Player is dead!");
 }

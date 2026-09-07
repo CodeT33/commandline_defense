@@ -28,7 +28,8 @@ pub fn handle_command_events(
                     debug_settings.enable_bounding_boxes = *value != 0.0;
                 },
                 Settings::SimSpeed => {
-                    debug_settings.sim_speed = *value;
+                    let used_value = if !value.is_finite() { 0.0 } else { value.clamp(0.0, 20.0) };
+                    debug_settings.sim_speed = used_value;
                 },
                 Settings::EnemySpawnInterval => {
                     debug_settings.enemy_spawn_interval_ms = value.round().max(0.0) as u64;
