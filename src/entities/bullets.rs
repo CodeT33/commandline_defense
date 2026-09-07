@@ -167,15 +167,23 @@ pub fn handle_bullet_spawns(
 
 pub fn handle_bullet_enemy_collisions(
     mut commands: Commands, mut collision_reader: MessageReader<CollisionStarted>,
-    bullet_query: Query<(), With<Bullet>>, enemy_query: Query<(), With<Enemy>>,
+    mut bullet_query: Query<(&mut HealthStats, &Bullet), Without<Enemy>>,
+    mut enemy_query: Query<&mut HealthStats, With<Enemy>>,
 ) {
     for &CollisionStarted(CollisionPair { type_a, type_b }) in collision_reader.read() {
-        if !enemy_query.contains(type_a) || !bullet_query.contains(type_b) {
+        let (Ok((mut bullet_health, bullet)), Ok(mut enemy_health)) =
+            (bullet_query.get_mut(type_b), enemy_query.get_mut(type_a))
+        else {
             continue;
+        };
+        enemy_health.0.change_health(-bullet.0.bullet_type.get_stats().damage);
+        if enemy_health.0.is_dead() {
+            commands.entity(type_a).try_despawn();
         }
-
-        commands.entity(type_a).try_despawn();
-        commands.entity(type_b).try_despawn();
+        bullet_health.0.change_health(-1.0);
+        if bullet_health.0.is_dead() {
+            commands.entity(type_b).try_despawn();
+        }
     }
 }
 

@@ -66,7 +66,7 @@ pub fn request_enemy_spawns(
     }
 
     while let Some(tick_time) = t.tick_if_ready(&time) {
-        enemy_spawns.write(SpawnEnemy { enemy_type: EnemyType::Mausmeister, time: tick_time });
+        enemy_spawns.write(SpawnEnemy { enemy_type: EnemyType::WideBirb, time: tick_time });
     }
 }
 

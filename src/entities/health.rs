@@ -11,4 +11,16 @@ impl HealthStatsInner {
     pub fn ratio(&self) -> f32 {
         self.current_health / self.max_health
     }
+
+    pub fn change_health(&mut self, amount: f32) {
+        self.current_health = (self.current_health + amount).clamp(0.0, self.max_health);
+    }
+
+    pub fn current_health(&self) -> f32 {
+        self.current_health
+    }
+
+    pub fn is_dead(&self) -> bool {
+        self.current_health == 0.0
+    }
 }
