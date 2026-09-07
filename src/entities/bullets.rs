@@ -23,6 +23,7 @@ pub enum BulletType {
 pub struct BulletStats {
     pub damage: f32,
     pub health: f32,
+    pub spins: bool,
     pub relative_collider_size: f32,
     pub texture_size_tiles: f32,
     pub asset: TexturePackAssets,
@@ -62,12 +63,16 @@ pub fn move_bullets(mut q: Query<(&mut Transform, Ref<Bullet>, &CreationTime)>, 
         let velocity = bullet.0.rotation * Vec2::X * bullet.0.speed_tps * delta_time;
         tf.translation += velocity.extend(0.0);
 
-        tf.rotation = Quat::from_rotation_z(
-            (creation_time.0.elapsed_ms(&time) % consts::BULLET_ROTATION_DURATION_MS) as f32
-                / consts::BULLET_ROTATION_DURATION_MS as f32
-                * PI
-                * 2.0,
-        )
+        tf.rotation = if bullet.0.bullet_type.get_stats().spins {
+            Quat::from_rotation_z(
+                (creation_time.0.elapsed_ms(&time) % consts::BULLET_ROTATION_DURATION_MS) as f32
+                    / consts::BULLET_ROTATION_DURATION_MS as f32
+                    * PI
+                    * 2.0,
+            )
+        } else {
+            Quat::from_rotation_z(velocity.to_angle() + PI / -2.0)
+        }
     }
 }
 

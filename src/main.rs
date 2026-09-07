@@ -17,12 +17,10 @@ mod ui_overlay;
 use crate::camera::{camera_zoom_and_pan, set_camera_position};
 use crate::cli::command_event_handling::handle_command_events;
 use crate::cli::command_line::navigate_command_history;
-use crate::cli::command_line_state_management::{Settings, handle_command_line_state};
+use crate::cli::command_line_state_management::handle_command_line_state;
 use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
-use crate::coordinates::GridCoordinate;
 use crate::entities::enemies::handle_enemy_spawns;
-use crate::entities::tower::TowerType;
 use crate::map::map_rendering::spawn_map_visual_layer;
 use crate::map::spawn_map_bounds;
 use crate::movement::delete_out_of_map_entities;
@@ -144,7 +142,6 @@ fn register_systems(app: &mut App) {
 fn setup(
     mut commands: Commands, asset_server: Res<AssetServer>, map_resource: Res<MapResource>,
     texture_pack_settings: Res<TexturePackSettings>,
-    mut command_messages: MessageWriter<CommandEvent>,
 ) {
     spawn_ui_overlay(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
     spawn_game_cli(&mut commands);
@@ -155,9 +152,4 @@ fn setup(
         Projection::Orthographic(OrthographicProjection::default_2d()),
     ));
     spawn_map_bounds(&mut commands, &map_resource);
-    command_messages.write(CommandEvent::Set { setting: Settings::BoundingBoxes, value: 1.0 });
-    command_messages.write(CommandEvent::Place {
-        tower_type: TowerType::BoomTower,
-        tower_pos: GridCoordinate::new(9, 3),
-    });
 }

@@ -8,7 +8,7 @@ use bevy::prelude::Vec2;
 pub const WINDOW_TITLE: &str = "2d game";
 pub const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
 
-pub const PHYSICS_FRAME_RATE: u16 = 144;
+pub const PHYSICS_FRAME_RATE: u16 = 144 * 2;
 
 pub const MAP_SIZE_TILES: U16Vec2 = U16Vec2 { x: 32, y: 16 };
 pub const TILE_SIZE: u16 = 16;
@@ -154,6 +154,7 @@ impl BulletType {
             BulletType::Bullet => BulletStats {
                 damage: 2.0,
                 health: 1.0,
+                spins: false,
                 relative_collider_size: 0.25,
                 texture_size_tiles: PROJECTILE_SIZE_TILES.x,
                 asset: TexturePackAssets::Projectiles_NormalMunition,
@@ -161,6 +162,7 @@ impl BulletType {
             BulletType::MetalBall => BulletStats {
                 damage: 1.0,
                 health: 3.0,
+                spins: true,
                 relative_collider_size: 0.25,
                 texture_size_tiles: PROJECTILE_SIZE_TILES.x,
                 asset: TexturePackAssets::Projectiles_MetalBall,
@@ -168,6 +170,7 @@ impl BulletType {
             BulletType::Apple => BulletStats {
                 damage: 1.0,
                 health: 1.0,
+                spins: true,
                 relative_collider_size: 1.0,
                 texture_size_tiles: 0.4,
                 asset: TexturePackAssets::WipSprites_Apple,
