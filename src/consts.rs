@@ -167,6 +167,7 @@ impl EnemyType {
             },
             EnemyType::Rocher => EnemyStats {
                 health: 10.0,
+                player_health_penalty: 1,
                 speed_tps:0.5,
                 relative_collider_size: 0.5,
                 texture_size_tiles: 2.0,
@@ -174,6 +175,7 @@ impl EnemyType {
             },
             EnemyType::Zapano => EnemyStats {
                 health: 2.0,
+                player_health_penalty: 1,
                 speed_tps: 1.0,
                 relative_collider_size: 0.25,
                 texture_size_tiles: 1.0,
