@@ -1,5 +1,5 @@
 use bevy::prelude::Time;
-use std::ops::Add;
+use std::ops::{Add, Sub};
 use std::time::Duration;
 
 #[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd, Debug)]
@@ -24,6 +24,13 @@ impl Add<Duration> for TimePoint {
 
     fn add(self, rhs: Duration) -> Self::Output {
         Self(self.0 + rhs)
+    }
+}
+
+impl Sub for TimePoint {
+    type Output = Duration;
+    fn sub(self, rhs: Self) -> Self::Output {
+        self.0 - rhs.0
     }
 }
 

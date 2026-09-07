@@ -226,14 +226,16 @@ pub fn request_bullet_spawns(
         };
 
         while let Some(shoot_time) = emission_data.timer.tick_if_ready(&time) {
-            let (target_pos, _hit_time) = calculate_target_position(
+            let Some((target_pos, _hit_time)) = calculate_target_position(
                 enemy_creation_time.0,
                 shoot_time,
                 tower_transform.translation.truncate(),
                 map.0.enemy_path(),
                 tower_data.0.bullet_speed_tps,
                 target_enemy.0.get_type().get_stats().speed_tps,
-            );
+            ) else {
+                continue;
+            };
 
             let angle = (target_pos - tower_transform.translation.truncate()).to_angle();
             tower_transform.rotation = Quat::from_rotation_z(angle - PI / 2.0);
@@ -253,7 +255,7 @@ pub fn request_bullet_spawns(
 fn calculate_target_position(
     enemy_creation_time: TimePoint, bullet_creation_time: TimePoint, bullet_position: Vec2,
     path: &EnemyPath, bullet_speed_tps: f32, enemy_speed_tps: f32,
-) -> (Vec2, TimePoint) {
+) -> Option<(Vec2, TimePoint)> {
     for corners in path.corners().windows(2) {
         // 1. Determine next corner
         let current_corner = corners[0];
@@ -276,12 +278,25 @@ fn calculate_target_position(
         }
 
         // 5. Calculate Line
-        // 6. Calculate position of enemy on the line at bullet shoot time
-        // 7. Calculate movement vector of enemy
-        // 8. Calculate t for bullet_speed, enemy_speed_v, enemy_pos, bullet_pos
+        let start = current_corner.position().as_vec2() + Vec2::splat(0.5);
+        let end = next_corner.position().as_vec2() + Vec2::splat(0.5);
+        // 6. Calculate position of enemy on the line at bullet shoot time + movement vector of enemy
+        let enemy_life_time_at_start = enemy_creation_time - bullet_creation_time;
+        let direction_line = (end - start).normalize();
+        let line_start_at_t0 = start - direction_line * current_corner.path_length() as f32;
+        let enemy_velocity = direction_line * enemy_speed_tps;
+        let line_pos_at_shoot_time =
+            line_start_at_t0 + enemy_velocity * enemy_life_time_at_start.as_secs_f32();
+
+        // 7. Calculate t for bullet_speed, enemy_speed_v, enemy_pos, bullet_pos
+        let d = line_pos_at_shoot_time - bullet_position;
+        let t = calculate_collision_time(bullet_speed_tps, enemy_velocity, d)?;
+        let hit_time_point = bullet_creation_time + Duration::from_secs_f32(t);
+        let hit_pos = line_pos_at_shoot_time + enemy_velocity * t;
+        return Some((hit_pos, hit_time_point));
     }
 
-    todo!()
+    None
 }
 
 /// - `vb` = bullet velocity
