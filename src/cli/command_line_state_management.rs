@@ -7,6 +7,8 @@ use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
 use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut};
 use bevy::text::EditableText;
+use std::str::FromStr;
+use strum::{EnumIter, EnumString, VariantNames};
 
 #[derive(Default)]
 pub enum PreviewCommand {
@@ -23,10 +25,13 @@ pub enum PreviewCommand {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, EnumIter, VariantNames, EnumString)]
 pub enum Settings {
+    #[strum(serialize = "bounding-boxes")]
     BoundingBoxes,
+    #[strum(serialize = "sim-speed")]
     SimSpeed,
+    #[strum(serialize = "enemy-spawn-interval")]
     EnemySpawnInterval,
 }
 
@@ -153,12 +158,13 @@ fn parse_single_command(
         ["exit", "game"] => CommandEvent::ExitGame,
         ["set", setting, value] => {
             let value = value.parse::<f32>().map_err(|e| e.to_string())?;
-            let setting = match *setting {
-                "bounding-boxes" => Settings::BoundingBoxes,
-                "sim-speed" => Settings::SimSpeed,
-                "enemy-spawn-interval" => Settings::EnemySpawnInterval,
-                _ => return Err(format!("Unknown setting: {:?}", setting)),
-            };
+            let setting = Settings::from_str(setting).map_err(|_| {
+                format!(
+                    "Unknown setting: \"{}\", possible options are: {}",
+                    setting,
+                    Settings::VARIANTS.join(", ")
+                )
+            })?;
             CommandEvent::Set { setting, value }
         },
         _ => Err(format!("Unknown command: \"{}\"", command_text))?,
