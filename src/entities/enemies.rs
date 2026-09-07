@@ -94,11 +94,11 @@ pub fn handle_enemy_spawns(
     }
 }
 
-fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
+pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
     let progress = progress.clamp(0.0, 1.0);
 
     let Some(start) = path.corners().first() else {
-        return Transform::IDENTITY;
+        return Transform::from_translation(Vec2::ZERO.extend(consts::rendering_layers::ENTITY));
     };
 
     if path.corners().len() < 2 {

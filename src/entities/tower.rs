@@ -1,21 +1,21 @@
+use crate::collision::CollisionPair;
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::components::{
-    BulletEmissionData, ColliderShape, ColliderTypeB, Tower, TowerData,
+    BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, Tower, TowerData,
 };
-use crate::ecs_elements::messages::PlaceTowerMessage;
-
+use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted, PlaceTowerMessage};
 use crate::ecs_elements::resources::{PlayerSuiteResource, TexturePackSettings};
-
 use crate::entities::bullets::{BulletEmissionDataInner, BulletType};
 use crate::player_suite::TransactionReturnStatus;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
-use bevy::math::{U16Vec2, Vec2};
+use bevy::math::{Quat, Rot2, U16Vec2, Vec2};
 use bevy::prelude::{
-    Circle, Commands, Entity, MessageReader, Res, ResMut, Sprite, SpriteImageMode,
-    SpriteScalingMode, Transform, default,
+    Circle, Commands, Entity, MessageReader, Query, Res, ResMut, Sprite, SpriteImageMode,
+    SpriteScalingMode, Transform, With, Without, default,
 };
+use std::f32::consts::PI;
 
 pub struct TowerDataInner {
     #[allow(unused)]
@@ -170,5 +170,46 @@ impl TowerRangeMapInner {
     pub fn towers_in_range_at(&self, tile: GridCoordinate) -> &[Entity] {
         let index = tile.position.y as usize * self.size.x as usize + tile.position.x as usize;
         &self.towers_in_range[index]
+    }
+}
+
+pub fn update_towers_in_range_and_rotate(
+    enemies: Query<Entity, With<Enemy>>,
+    enemy_transforms: Query<(&Transform, &Enemy, &CreationTime), Without<Tower>>,
+    mut towers: Query<(Entity, &mut Transform, &mut Tower, &mut BulletEmissionData)>,
+    mut collision_started: MessageReader<CollisionStarted>,
+    mut collision_ended: MessageReader<CollisionEnded>,
+) {
+    for CollisionStarted(CollisionPair { type_a, type_b }) in collision_started.read() {
+        let Some(Ok((_, _, mut tower, _))) =
+            enemies.contains(*type_a).then(|| towers.get_mut(*type_b))
+        else {
+            continue;
+        };
+        tower.enemies_in_range.insert(*type_a);
+    }
+    for CollisionEnded(CollisionPair { type_a, type_b }) in collision_ended.read() {
+        let Ok((_, _, mut tower, _)) = towers.get_mut(*type_b) else {
+            continue;
+        };
+        tower.enemies_in_range.remove(type_a);
+    }
+
+    for (_, mut t, tower, mut bullet_data) in &mut towers {
+        let first_enemy = tower
+            .enemies_in_range
+            .iter()
+            .flat_map(|e| enemy_transforms.get(*e))
+            .max_by(|a, b| a.1.0.get_path_progress().total_cmp(&b.1.0.get_path_progress()));
+        let Some((enemy_transform, _, _creation_time)) = first_enemy else {
+            continue;
+        };
+        let bullet_pos = t.translation.truncate();
+
+        let target_pos = enemy_transform.translation.truncate();
+
+        let angle = (target_pos - bullet_pos).to_angle();
+        t.rotation = Quat::from_rotation_z(angle - PI / 2.0);
+        bullet_data.0.direction = Rot2::radians(angle);
     }
 }

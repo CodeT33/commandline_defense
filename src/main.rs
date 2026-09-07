@@ -45,10 +45,9 @@ use ecs_elements::resources::{
 };
 use entities::bullets::{
     handle_bullet_enemy_collisions, handle_bullet_spawns, move_bullets, request_bullet_spawns,
-    update_towers_in_range_and_rotate,
 };
 use entities::enemies::{move_enemies, request_enemy_spawns};
-use entities::tower::handle_tower_placing_events;
+use entities::tower::{handle_tower_placing_events, update_towers_in_range_and_rotate};
 
 fn main() {
     let mut app = App::new();
