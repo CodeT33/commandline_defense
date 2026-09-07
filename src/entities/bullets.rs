@@ -1,8 +1,7 @@
 use crate::collision::CollisionPair;
 use crate::consts;
 use crate::ecs_elements::components::{
-    Bullet, BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, DeleteWhenOutOfMap,
-    Enemy, HealthStats, Tower, TowerData,
+    Bullet, ColliderShape, ColliderTypeB, CreationTime, DeleteWhenOutOfMap, Enemy, HealthStats,
 };
 use crate::ecs_elements::messages::{CollisionStarted, SpawnBullet};
 use crate::ecs_elements::resources::TexturePackSettings;
@@ -72,29 +71,6 @@ pub fn move_bullets(mut q: Query<(&mut Transform, Ref<Bullet>, &CreationTime)>, 
             )
         } else {
             Quat::from_rotation_z(velocity.to_angle() + PI / -2.0)
-        }
-    }
-}
-
-pub fn request_bullet_spawns(
-    mut bullet_spawns: MessageWriter<SpawnBullet>,
-    mut q: Query<(&Transform, &Tower, &TowerData, &mut BulletEmissionData), With<Tower>>,
-    time: Res<Time>,
-) {
-    for (transform, tower, tower_data, mut data) in &mut q {
-        let emission_data = &mut data.0;
-        if tower.enemies_in_range.is_empty() {
-            emission_data.timer.pause();
-            continue;
-        }
-        while let Some(shoot_time) = emission_data.timer.tick_if_ready(&time) {
-            bullet_spawns.write(SpawnBullet {
-                bullet_type: tower_data.0.bullet_type,
-                time: shoot_time,
-                position: transform.translation.truncate(),
-                direction: emission_data.direction,
-                speed_tps: tower_data.0.bullet_speed_tps,
-            });
         }
     }
 }

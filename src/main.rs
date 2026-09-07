@@ -22,6 +22,7 @@ use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
 use crate::ecs_elements::messages::EnemyReachedEnd;
 use crate::entities::enemies::{handle_enemies_reaching_end, handle_enemy_spawns};
+use crate::entities::tower::{request_bullet_spawns, select_tower_target_enemy};
 use crate::map::map_rendering::spawn_map_visual_layer;
 use crate::map::spawn_map_bounds;
 use crate::movement::delete_out_of_map_entities;
@@ -43,11 +44,9 @@ use ecs_elements::resources::{
     CommandHistory, CommandState, DebugSettings, MapResource, PlayerSuiteResource, SelectionState,
     TexturePackSettings,
 };
-use entities::bullets::{
-    handle_bullet_enemy_collisions, handle_bullet_spawns, move_bullets, request_bullet_spawns,
-};
+use entities::bullets::{handle_bullet_enemy_collisions, handle_bullet_spawns, move_bullets};
 use entities::enemies::{move_enemies, request_enemy_spawns};
-use entities::tower::{handle_tower_placing_events, update_towers_in_range_and_rotate};
+use entities::tower::{handle_tower_placing_events, update_enemies_in_range};
 
 fn main() {
     let mut app = App::new();
@@ -118,7 +117,8 @@ fn register_systems(app: &mut App) {
                 delete_out_of_map_entities,
                 calculate_collisions,
                 handle_bullet_enemy_collisions,
-                update_towers_in_range_and_rotate,
+                update_enemies_in_range,
+                select_tower_target_enemy,
                 (
                     (request_bullet_spawns, handle_bullet_spawns).chain(),
                     (request_enemy_spawns, handle_enemy_spawns).chain(),

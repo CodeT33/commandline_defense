@@ -5,7 +5,7 @@ use crate::entities::health::HealthStatsInner;
 use crate::entities::tower::TowerDataInner;
 use crate::scheduling::TimePoint;
 use bevy::ecs::entity::EntityHashSet;
-use bevy::prelude::{Circle, Component, Rectangle};
+use bevy::prelude::{Circle, Component, Entity, Rectangle};
 
 #[derive(Component)]
 pub struct Enemy(pub EnemyData);
@@ -43,6 +43,7 @@ pub struct ColliderTypeB;
 #[derive(Component, Default)]
 pub struct Tower {
     pub enemies_in_range: EntityHashSet,
+    pub target: Option<Entity>,
 }
 
 #[derive(Component)]

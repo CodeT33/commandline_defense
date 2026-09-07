@@ -4,16 +4,20 @@ use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::components::{
     BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, Tower, TowerData,
 };
-use crate::ecs_elements::messages::{CollisionEnded, CollisionStarted, PlaceTowerMessage};
-use crate::ecs_elements::resources::{PlayerSuiteResource, TexturePackSettings};
+use crate::ecs_elements::messages::{
+    CollisionEnded, CollisionStarted, PlaceTowerMessage, SpawnBullet,
+};
+use crate::ecs_elements::resources::{MapResource, PlayerSuiteResource, TexturePackSettings};
 use crate::entities::bullets::{BulletEmissionDataInner, BulletType};
+use crate::map::map_logic_parsing::EnemyPath;
 use crate::player_suite::TransactionReturnStatus;
+use crate::scheduling::TimePoint;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::math::{Quat, Rot2, U16Vec2, Vec2};
 use bevy::prelude::{
-    Circle, Commands, Entity, MessageReader, Query, Res, ResMut, Sprite, SpriteImageMode,
-    SpriteScalingMode, Transform, With, Without, default,
+    Circle, Commands, Entity, MessageReader, MessageWriter, Query, Res, ResMut, Sprite,
+    SpriteImageMode, SpriteScalingMode, Time, Transform, With, default,
 };
 use std::f32::consts::PI;
 
@@ -173,43 +177,82 @@ impl TowerRangeMapInner {
     }
 }
 
-pub fn update_towers_in_range_and_rotate(
-    enemies: Query<Entity, With<Enemy>>,
-    enemy_transforms: Query<(&Transform, &Enemy, &CreationTime), Without<Tower>>,
-    mut towers: Query<(Entity, &mut Transform, &mut Tower, &mut BulletEmissionData)>,
+pub fn update_enemies_in_range(
+    enemies: Query<Entity, With<Enemy>>, mut towers: Query<(Entity, &mut Tower)>,
     mut collision_started: MessageReader<CollisionStarted>,
     mut collision_ended: MessageReader<CollisionEnded>,
 ) {
     for CollisionStarted(CollisionPair { type_a, type_b }) in collision_started.read() {
-        let Some(Ok((_, _, mut tower, _))) =
-            enemies.contains(*type_a).then(|| towers.get_mut(*type_b))
+        let Some(Ok((_, mut tower))) = enemies.contains(*type_a).then(|| towers.get_mut(*type_b))
         else {
             continue;
         };
         tower.enemies_in_range.insert(*type_a);
     }
     for CollisionEnded(CollisionPair { type_a, type_b }) in collision_ended.read() {
-        let Ok((_, _, mut tower, _)) = towers.get_mut(*type_b) else {
+        let Ok((_, mut tower)) = towers.get_mut(*type_b) else {
             continue;
         };
         tower.enemies_in_range.remove(type_a);
     }
+}
 
-    for (_, mut t, tower, mut bullet_data) in &mut towers {
+pub fn select_tower_target_enemy(
+    enemy_transforms: Query<(Entity, &Enemy), With<Enemy>>, mut towers: Query<&mut Tower>,
+) {
+    for mut tower in &mut towers {
         let first_enemy = tower
             .enemies_in_range
             .iter()
             .flat_map(|e| enemy_transforms.get(*e))
             .max_by(|a, b| a.1.0.get_path_progress().total_cmp(&b.1.0.get_path_progress()));
-        let Some((enemy_transform, _, _creation_time)) = first_enemy else {
+
+        tower.target = first_enemy.map(|e| e.0);
+    }
+}
+
+pub fn request_bullet_spawns(
+    mut bullet_spawns: MessageWriter<SpawnBullet>, enemies: Query<(&Enemy, &CreationTime)>,
+    mut towers: Query<(&mut Transform, &Tower, &TowerData, &mut BulletEmissionData), With<Tower>>,
+    time: Res<Time>, map: Res<MapResource>,
+) {
+    for (mut tower_transform, tower, tower_data, mut data) in &mut towers {
+        let emission_data = &mut data.0;
+        let Some((target_enemy, enemy_creation_time)) =
+            tower.target.and_then(|entity| enemies.get(entity).ok())
+        else {
+            emission_data.timer.pause();
             continue;
         };
-        let bullet_pos = t.translation.truncate();
 
-        let target_pos = enemy_transform.translation.truncate();
+        while let Some(shoot_time) = emission_data.timer.tick_if_ready(&time) {
+            let target_pos = calculate_target_position(
+                target_enemy.0.get_path_progress(),
+                enemy_creation_time.0,
+                shoot_time,
+                tower_transform.translation.truncate(),
+                map.0.enemy_path(),
+            );
 
-        let angle = (target_pos - bullet_pos).to_angle();
-        t.rotation = Quat::from_rotation_z(angle - PI / 2.0);
-        bullet_data.0.direction = Rot2::radians(angle);
+            let angle = (target_pos - tower_transform.translation.truncate()).to_angle();
+            tower_transform.rotation = Quat::from_rotation_z(angle - PI / 2.0);
+            let shoot_direction = Rot2::radians(angle);
+
+            bullet_spawns.write(SpawnBullet {
+                bullet_type: tower_data.0.bullet_type,
+                time: shoot_time,
+                position: tower_transform.translation.truncate(),
+                direction: shoot_direction,
+                speed_tps: tower_data.0.bullet_speed_tps,
+            });
+        }
     }
+}
+
+#[allow(unused)]
+fn calculate_target_position(
+    current_path_progress: f32, enemy_creation_time: TimePoint, bullet_creation_time: TimePoint,
+    bullet_position: Vec2, path: &EnemyPath,
+) -> Vec2 {
+    Vec2::ZERO
 }
