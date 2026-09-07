@@ -20,6 +20,7 @@ use bevy::prelude::{
     SpriteImageMode, SpriteScalingMode, Time, Transform, With, default,
 };
 use std::f32::consts::PI;
+use std::time::Duration;
 
 pub struct TowerDataInner {
     #[allow(unused)]
@@ -225,8 +226,7 @@ pub fn request_bullet_spawns(
         };
 
         while let Some(shoot_time) = emission_data.timer.tick_if_ready(&time) {
-            let target_pos = calculate_target_position(
-                target_enemy.0.get_path_progress(),
+            let (target_pos, _hit_time) = calculate_target_position(
                 enemy_creation_time.0,
                 shoot_time,
                 tower_transform.translation.truncate(),
@@ -250,22 +250,36 @@ pub fn request_bullet_spawns(
     }
 }
 
-#[allow(unused)]
 fn calculate_target_position(
-    current_path_progress: f32, enemy_creation_time: TimePoint, bullet_creation_time: TimePoint,
-    bullet_position: Vec2, path: &EnemyPath, bullet_speed_tps: f32, enemy_speed_tps: f32,
-) -> Vec2 {
-    for corner in path.corners() {
+    enemy_creation_time: TimePoint, bullet_creation_time: TimePoint, bullet_position: Vec2,
+    path: &EnemyPath, bullet_speed_tps: f32, enemy_speed_tps: f32,
+) -> (Vec2, TimePoint) {
+    for corners in path.corners().windows(2) {
         // 1. Determine next corner
+        let current_corner = corners[0];
+        let next_corner = corners[1];
 
         // 2. Calculate Enemy and Bullet Time for hit
-        let corner_pos = corner.position().as_vec2() + Vec2::splat(0.5);
+        let corner_pos = next_corner.position().as_vec2() + Vec2::splat(0.5);
 
-        let bullet_duration = corner_pos.distance(bullet_position) / bullet_speed_tps;
+        let bullet_duration_secs = corner_pos.distance(bullet_position) / bullet_speed_tps;
+        let bullet_arrive_time =
+            bullet_creation_time + Duration::from_secs_f32(bullet_duration_secs);
+
+        let enemy_duration_secs = next_corner.path_length() as f32 / enemy_speed_tps;
+        let enemy_arrive_time = enemy_creation_time + Duration::from_secs_f32(enemy_duration_secs);
+
+        // 3. If bullet arrives earlier than enemy, then range is this corner and the one before that
+        // 4. Else increase corner idx by 1
+        if bullet_arrive_time > enemy_arrive_time {
+            continue;
+        }
+
+        // 5. Calculate Line
+        // 6. Calculate position of enemy on the line at bullet shoot time
+        // 7. Calculate movement vector of enemy
+        // 8. Calculate t for bullet_speed, enemy_speed_v, enemy_pos, bullet_pos
     }
-
-    // 3. If bullet arrives earlier than enemy, then range is this corner and the one before that
-    // 4. Else increase corner idx by 1
 
     todo!()
 }

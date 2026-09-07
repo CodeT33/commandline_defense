@@ -1,21 +1,29 @@
 use bevy::prelude::Time;
+use std::ops::Add;
+use std::time::Duration;
 
-#[derive(Copy, Clone)]
-pub struct TimePoint {
-    ms: u64,
-}
+#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd, Debug)]
+pub struct TimePoint(Duration);
 
 impl TimePoint {
     pub fn now(time: &Time) -> Self {
-        Self { ms: time.elapsed().as_millis() as u64 }
+        Self(time.elapsed())
     }
 
     pub fn from_ms(ms: u64) -> Self {
-        Self { ms }
+        Self(Duration::from_millis(ms))
     }
 
     pub fn elapsed_ms(&self, time: &Time) -> u64 {
-        (time.elapsed().as_millis() as u64).saturating_sub(self.ms)
+        time.elapsed().saturating_sub(self.0).as_millis() as u64
+    }
+}
+
+impl Add<Duration> for TimePoint {
+    type Output = TimePoint;
+
+    fn add(self, rhs: Duration) -> Self::Output {
+        Self(self.0 + rhs)
     }
 }
 
