@@ -47,8 +47,6 @@ pub fn camera_zoom_and_pan(
         return;
     };
 
-    let settings = consts::viewports::BASIC_CAMERA;
-
     // Pan
     let Some(current_cursor_pos) = window.cursor_position() else {
         *last_cursor_pos = None;
@@ -78,14 +76,7 @@ pub fn camera_zoom_and_pan(
 
     // Mouse position in window
 
-    let Some(cursor_position) = window.cursor_position() else {
-        return;
-    };
-
-    let window_size = window.size();
-
-    let mouse_from_center =
-        Vec2::new(cursor_position.x - window_size.x / 2.0, window_size.y / 2.0 - cursor_position.y);
+    let mouse_from_center = (current_cursor_pos - window.size() / 2.0) * Vec2::new(1.0, -1.0);
 
     // World position under mouse before zoom
 
@@ -94,6 +85,8 @@ pub fn camera_zoom_and_pan(
     let world_before = camera_transform.translation.truncate() + mouse_from_center * old_zoom;
 
     // New zoom
+
+    let settings = consts::viewports::BASIC_CAMERA;
 
     let zoom_factor = 1.0 - wheel_delta * settings.zoom_speed;
 
