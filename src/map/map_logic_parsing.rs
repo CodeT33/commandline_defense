@@ -218,8 +218,8 @@ impl MapTiles {
 // GameMap
 
 pub struct GameMap {
-    pub map_tiles: MapTiles,
-    pub enemy_path: EnemyPath,
+    map_tiles: MapTiles,
+    enemy_path: EnemyPath,
 }
 
 impl GameMap {

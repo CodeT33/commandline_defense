@@ -16,10 +16,7 @@ pub fn set_camera_position(
         return;
     };
 
-    let map_size = Vec2::new(
-        map_resource.0.map_tiles.map_size.x as f32,
-        map_resource.0.map_tiles.map_size.y as f32,
-    );
+    let map_size = map_resource.0.map_tiles().map_size.as_vec2();
 
     let window_size = window.size();
 

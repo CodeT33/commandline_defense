@@ -26,7 +26,7 @@ pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapResource)
         weight: consts::ui::grid::GRID_META_POSITION.font_weight,
         ..default()
     };
-    let map_size = map_resource.0.map_tiles.map_size;
+    let map_size = map_resource.0.map_tiles().map_size;
 
     for x in 0..map_size.x {
         commands.spawn((
@@ -93,8 +93,8 @@ pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapResource)
 }
 
 pub fn spawn_grid(commands: &mut Commands, map_resource: &MapResource) {
-    let width = map_resource.0.map_tiles.map_size.x;
-    let height = map_resource.0.map_tiles.map_size.y;
+    let width = map_resource.0.map_tiles().map_size.x;
+    let height = map_resource.0.map_tiles().map_size.y;
 
     // Vertical lines
     for x in 0..=width {
@@ -137,7 +137,7 @@ pub fn update_grid_preview(
 }
 
 pub fn spawn_contrast_overlay(commands: &mut Commands, map_resource: &MapResource) {
-    let map_size = map_resource.0.map_tiles.map_size;
+    let map_size = map_resource.0.map_tiles().map_size;
 
     commands.spawn((
         Sprite {

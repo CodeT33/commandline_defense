@@ -39,7 +39,7 @@ pub fn move_enemies(
     mut enemy: Query<(Entity, &mut Transform, &mut Enemy, &CreationTime)>,
     mut reached_end_writer: MessageWriter<EnemyReachedEnd>, time: Res<Time>,
 ) {
-    let path_len = map_resource.0.enemy_path.get_length();
+    let path_len = map_resource.0.enemy_path().get_length();
     let path_duration_secs = path_len as f32 / consts::ENEMY_SPEED_TILES_PER_SECOND;
     let path_duration_ms = (path_duration_secs * 1000.0).round() as u64;
 
@@ -72,6 +72,7 @@ pub fn request_enemy_spawns(
 pub fn handle_enemy_spawns(
     mut enemy_spawns: MessageReader<SpawnEnemy>, mut commands: Commands,
     asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
+    map_resource: Res<MapResource>,
 ) {
     for message in enemy_spawns.read() {
         commands.spawn((
@@ -88,7 +89,7 @@ pub fn handle_enemy_spawns(
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()
             },
-            Transform::from_xyz(0.0, 0.0, consts::rendering_layers::ENTITY),
+            get_enemy_transform(0.0, map_resource.0.enemy_path()),
         ));
     }
 }
