@@ -141,6 +141,29 @@ pub mod enemies {
     };
 }
 
+pub mod bullets {
+    use crate::consts;
+    use crate::entities::bullets::BulletStats;
+    use crate::texture_packs::TexturePackAssets;
+
+    pub const BULLET_TYPE_BALL: BulletStats = BulletStats {
+        bullet_speed_tps: consts::PROJECTILE_SPEED_TILES_PER_SECOND,
+        damage: 1.0,
+        health: 1.0,
+        collider_radius: consts::PROJECTILE_RADIUS,
+        texture_size_tiles: consts::PROJECTILE_SIZE_TILES,
+        asset: TexturePackAssets::Projectiles_MetalBall,
+    };
+    pub const BULLET_TYPE_APPLE: BulletStats = BulletStats {
+        bullet_speed_tps: consts::PROJECTILE_SPEED_TILES_PER_SECOND,
+        damage: 1.0,
+        health: 1.0,
+        collider_radius: consts::PROJECTILE_RADIUS,
+        texture_size_tiles: consts::PROJECTILE_SIZE_TILES,
+        asset: TexturePackAssets::WipSprites_Apple,
+    };
+}
+
 // ui
 pub mod ui {
     use bevy::prelude::Color;
@@ -186,29 +209,6 @@ pub mod ui {
         pub const GRID_LINE_COLOR: Color = Color::srgba(0.5, 1.0, 0.5, 0.2);
         pub const GRID_CONTRAST_COLOR: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
     }
-}
-
-pub mod bullets {
-    use crate::consts;
-    use crate::entities::bullets::BulletStats;
-    use crate::texture_packs::TexturePackAssets;
-
-    pub const BULLET_TYPE_BALL: BulletStats = BulletStats {
-        bullet_speed_tps: consts::PROJECTILE_SPEED_TILES_PER_SECOND,
-        damage: 1.0,
-        health: 1.0,
-        collider_radius: consts::PROJECTILE_RADIUS,
-        texture_size_tiles: consts::PROJECTILE_SIZE_TILES,
-        asset: TexturePackAssets::Projectiles_MetalBall,
-    };
-    pub const BULLET_TYPE_APPLE: BulletStats = BulletStats {
-        bullet_speed_tps: consts::PROJECTILE_SPEED_TILES_PER_SECOND,
-        damage: 1.0,
-        health: 1.0,
-        collider_radius: consts::PROJECTILE_RADIUS,
-        texture_size_tiles: consts::PROJECTILE_SIZE_TILES,
-        asset: TexturePackAssets::WipSprites_Apple,
-    };
 }
 
 pub mod rendering_layers {
