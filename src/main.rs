@@ -20,10 +20,12 @@ use crate::cli::command_line::navigate_command_history;
 use crate::cli::command_line_state_management::handle_command_line_state;
 use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
-use crate::entities::enemies::handle_enemy_spawns;
+use crate::ecs_elements::messages::EnemyReachedEnd;
+use crate::entities::enemies::{handle_enemies_reaching_end, handle_enemy_spawns};
 use crate::map::map_rendering::spawn_map_visual_layer;
 use crate::map::spawn_map_bounds;
 use crate::movement::delete_out_of_map_entities;
+use crate::player_suite::player_died_observer;
 use crate::ui_overlay::debug::{draw_bounding_boxes, set_simulation_speed};
 use crate::ui_overlay::grid::update_grid_preview;
 use crate::ui_overlay::health_bars::draw_health_bars;
@@ -53,6 +55,7 @@ fn main() {
     register_plugins(&mut app);
     register_resources(&mut app);
     register_messages(&mut app);
+    register_events(&mut app);
     register_systems(&mut app);
     app.run();
 }
@@ -96,7 +99,12 @@ fn register_messages(app: &mut App) {
         .add_message::<PlaceTowerMessage>()
         .add_message::<CollisionStarted>()
         .add_message::<CollisionSustained>()
-        .add_message::<CollisionEnded>();
+        .add_message::<CollisionEnded>()
+        .add_message::<EnemyReachedEnd>();
+}
+
+fn register_events(app: &mut App) {
+    app.add_observer(player_died_observer);
 }
 
 fn register_systems(app: &mut App) {
@@ -116,6 +124,7 @@ fn register_systems(app: &mut App) {
                     (request_bullet_spawns, handle_bullet_spawns).chain(),
                     (request_enemy_spawns, handle_enemy_spawns).chain(),
                 ),
+                handle_enemies_reaching_end,
             )
                 .chain(),
         )

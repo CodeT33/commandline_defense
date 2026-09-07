@@ -136,11 +136,13 @@ impl EnemyType {
         match self {
             EnemyType::WideBirb => EnemyStats {
                 health: 4.0,
+                player_health_penalty: 4,
                 speed_tps: 1.0,
                 asset: TexturePackAssets::WipSprites_Enemy,
             },
             EnemyType::Mausmeister => EnemyStats {
                 health: 0.5,
+                player_health_penalty: 1,
                 speed_tps: 4.0,
                 asset: TexturePackAssets::WipSprites_MausMeister,
             },
