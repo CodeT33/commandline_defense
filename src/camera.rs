@@ -5,14 +5,14 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
 pub fn set_camera_position(
-    mut camera: Query<&mut Transform, With<Camera2d>>,
+    mut camera: Query<(&mut Transform, &mut Projection), With<Camera2d>>,
     windows: Query<&Window, With<PrimaryWindow>>, map_resource: Res<MapResource>,
 ) {
     let Ok(window) = windows.single() else {
         return;
     };
 
-    let Ok(mut camera_transform) = camera.single_mut() else {
+    let Ok((mut camera_transform, mut projection)) = camera.single_mut() else {
         return;
     };
 
@@ -25,16 +25,21 @@ pub fn set_camera_position(
 
     camera_transform.translation = Vec3::new(map_size.x / 2.0, map_size.y / 2.0, 0.0);
 
-    camera_transform.scale =
-        Vec3::splat((map_size / (window_size + Vec2::splat(0.005))).max_element());
+    if let Projection::Orthographic(ref mut projection) = *projection {
+        projection.scale = (map_size / window_size).max_element();
+    }
 }
 
 pub fn camera_zoom_and_pan(
-    mut camera: Query<&mut Transform, With<Camera2d>>,
+    mut camera: Query<(&mut Transform, &mut Projection), With<Camera2d>>,
     windows: Query<&Window, With<PrimaryWindow>>, buttons: Res<ButtonInput<MouseButton>>,
     mut mouse_motion: MessageReader<MouseMotion>, mut mouse_wheel: MessageReader<MouseWheel>,
 ) {
-    let Ok(mut camera_transform) = camera.single_mut() else {
+    let Ok((mut camera_transform, mut projection)) = camera.single_mut() else {
+        return;
+    };
+
+    let Projection::Orthographic(ref mut projection) = *projection else {
         return;
     };
 
@@ -53,7 +58,7 @@ pub fn camera_zoom_and_pan(
             mouse_delta += event.delta;
         }
 
-        let movement = mouse_delta * camera_transform.scale.x;
+        let movement = mouse_delta * projection.scale;
 
         camera_transform.translation.x -= movement.x;
         camera_transform.translation.y += movement.y;
@@ -84,7 +89,7 @@ pub fn camera_zoom_and_pan(
 
     // World position under mouse before zoom
 
-    let old_zoom = camera_transform.scale.x;
+    let old_zoom = projection.scale;
 
     let world_before = camera_transform.translation.truncate() + mouse_from_center * old_zoom;
 
@@ -98,7 +103,9 @@ pub fn camera_zoom_and_pan(
         return;
     }
 
-    camera_transform.scale = Vec3::splat(new_zoom);
+    projection.scale = new_zoom;
+
+    // camera_transform.scale = Vec3::splat(new_zoom);
 
     // World position under mouse after zoom
 

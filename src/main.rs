@@ -145,6 +145,10 @@ fn setup(
     spawn_ui_overlay(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
     spawn_game_cli(&mut commands);
     spawn_map_visual_layer(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
-    commands.spawn((Camera2d, IsDefaultUiCamera));
+    commands.spawn((
+        Camera2d,
+        IsDefaultUiCamera,
+        Projection::Orthographic(OrthographicProjection::default_2d()),
+    ));
     spawn_map_bounds(&mut commands, &map_resource);
 }
