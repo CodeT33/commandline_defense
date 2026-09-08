@@ -1,6 +1,6 @@
 use crate::entities::bullets::{BulletStats, BulletType};
 use crate::entities::enemies::{EnemyStats, EnemyType};
-use crate::entities::tower::{TowerAttributes, TowerType};
+use crate::entities::tower::{TargetingType, TowerAttributes, TowerType};
 use crate::texture_packs::TexturePackAssets;
 use bevy::math::U16Vec2;
 use bevy::prelude::Vec2;
@@ -57,7 +57,7 @@ impl TowerType {
                     TexturePackAssets::Troops_Assault_AssaultTroopLvl3,
                 ],
                 tower_rotates: true,
-                predictive_targeting: true,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
             TowerType::BoomTower => TowerAttributes {
                 price: 320,
@@ -73,7 +73,7 @@ impl TowerType {
                     TexturePackAssets::Troops_Boom_BoomTroopLvl3,
                 ],
                 tower_rotates: true,
-                predictive_targeting: true,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
             TowerType::GatlingTower => TowerAttributes {
                 price: 210,
@@ -89,7 +89,7 @@ impl TowerType {
                     TexturePackAssets::Troops_Gatling_GatlingTroopLvl3,
                 ],
                 tower_rotates: true,
-                predictive_targeting: true,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
             TowerType::SniperTower => TowerAttributes {
                 price: 160,
@@ -105,7 +105,7 @@ impl TowerType {
                     TexturePackAssets::Troops_Sniper_SniperTroopLvl3,
                 ],
                 tower_rotates: true,
-                predictive_targeting: true,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
             TowerType::Eitshtu => TowerAttributes {
                 price: 0,
@@ -121,7 +121,7 @@ impl TowerType {
                     TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl4,
                 ],
                 tower_rotates: false,
-                predictive_targeting: true,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
             TowerType::DonBanano => TowerAttributes {
                 price: 0,
@@ -137,7 +137,7 @@ impl TowerType {
                     TexturePackAssets::WipSprites_DonBananoCool,
                 ],
                 tower_rotates: true,
-                predictive_targeting: true,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
             TowerType::RocketTroop => TowerAttributes {
                 price: 0,
@@ -153,7 +153,7 @@ impl TowerType {
                     TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
                 ],
                 tower_rotates: true,
-                predictive_targeting: true,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
             tt => panic!("TowerType {tt:?} not implemented yet"),
         }

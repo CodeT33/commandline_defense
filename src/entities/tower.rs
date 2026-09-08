@@ -1,7 +1,7 @@
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::components::{
-    BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, TowerData,
+    BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, HealthStats, TowerData,
 };
 use crate::ecs_elements::messages::{
     CollisionEnded, CollisionStarted, PlaceTowerMessage, SpawnBullet,
@@ -80,6 +80,15 @@ pub(crate) enum TowerType {
     RocketTroop,
 }
 
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub(crate) enum TargetingType {
+    #[allow(unused)]
+    Basic,
+    #[allow(unused)]
+    Predictive,
+    PredictiveWithLoadBalancing,
+}
+
 pub(crate) struct TowerAttributes {
     pub(crate) price: u16,
     pub(crate) size_tiles: Vec2,
@@ -89,7 +98,7 @@ pub(crate) struct TowerAttributes {
     pub(crate) bullet_type: BulletType,
     pub(crate) sprites: [TexturePackAssets; 4],
     pub(crate) tower_rotates: bool,
-    pub(crate) predictive_targeting: bool,
+    pub(crate) targeting_type: TargetingType,
 }
 
 pub(crate) fn handle_tower_placing_events(
@@ -197,7 +206,7 @@ pub(crate) fn select_tower_target_enemy(
 
 pub(crate) fn shoot_bullets(
     mut bullet_spawns: MessageWriter<SpawnBullet>,
-    enemies: Query<(&Enemy, &CreationTime, &Transform), Without<TowerData>>,
+    enemies: Query<(&Enemy, &CreationTime, &Transform, &HealthStats), Without<TowerData>>,
     mut towers: Query<(&mut Transform, &TowerData, &mut BulletEmissionData)>, time: Res<Time>,
     map: Res<MapResource>,
 ) {
@@ -208,22 +217,35 @@ pub(crate) fn shoot_bullets(
             continue;
         }
 
+        let tower_attributes = tower_data.tower_type.get_attributes();
+
         // 1. get next tick time -> if none available continue
         // 2. go through the enemies and if a target_pos is acquired, apply the tick and go back to 1.
         // 3. if not tick anyways
         while let Some(shoot_time) = data.timer.tick_if_ready(&time) {
-            for (target_entity, target_enemy, enemy_creation_time, enemy_transform) in
+            for (target_entity, target_enemy, enemy_creation_time, enemy_transform, enemy_health) in
                 tower_data.target.iter().filter_map(|e| {
-                    enemies.get(*e).ok().map(|(enemy, ect, trfm)| (e, enemy, ect, trfm))
+                    enemies
+                        .get(*e)
+                        .ok()
+                        .map(|(enemy, ect, trfm, health)| (e, enemy, ect, trfm, health))
                 })
             {
-                let target_pos = if tower_data.tower_type.get_attributes().predictive_targeting {
+                let target_pos = if matches!(
+                    tower_attributes.targeting_type,
+                    TargetingType::Predictive | TargetingType::PredictiveWithLoadBalancing
+                ) {
+                    if tower_attributes.targeting_type == TargetingType::PredictiveWithLoadBalancing
+                        && target_enemy.get_planned_bullet_damage() >= enemy_health.current_health()
+                    {
+                        continue;
+                    }
                     let Some((target_pos, _hit_time)) = calculate_target_position(
                         enemy_creation_time.0,
                         shoot_time,
                         tower_transform.translation.truncate(),
                         map.enemy_path(),
-                        tower_data.tower_type.get_attributes().bullet_speed_tps,
+                        tower_attributes.bullet_speed_tps,
                         target_enemy.get_type().get_stats().speed_tps,
                     ) else {
                         continue;
@@ -235,23 +257,23 @@ pub(crate) fn shoot_bullets(
 
                 let angle = (target_pos - tower_transform.translation.truncate()).to_angle();
 
-                if tower_data.tower_type.get_attributes().tower_rotates {
+                if tower_attributes.tower_rotates {
                     tower_transform.rotation = Quat::from_rotation_z(angle - PI / 2.0);
                 }
 
                 let shoot_direction = Rot2::radians(angle);
 
                 bullet_spawns.write(SpawnBullet {
-                    bullet_type: tower_data.tower_type.get_attributes().bullet_type,
+                    bullet_type: tower_attributes.bullet_type,
                     time: shoot_time,
                     position: tower_transform.translation.truncate(),
                     direction: shoot_direction,
-                    speed_tps: tower_data.tower_type.get_attributes().bullet_speed_tps,
-                    target_entity: tower_data
-                        .tower_type
-                        .get_attributes()
-                        .predictive_targeting
-                        .then_some(*target_entity),
+                    speed_tps: tower_attributes.bullet_speed_tps,
+                    target_entity: matches!(
+                        tower_attributes.targeting_type,
+                        TargetingType::PredictiveWithLoadBalancing
+                    )
+                    .then_some(*target_entity),
                 });
                 break;
             }

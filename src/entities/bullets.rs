@@ -144,7 +144,7 @@ pub(crate) fn bullet_spawn_observer(
 }
 
 pub(crate) fn bullet_despawn_observer(
-    trigger: On<Despawn>, target_enemy_query: Query<&TargetEnemy, With<Bullet>>,
+    trigger: On<Despawn, Bullet>, target_enemy_query: Query<&TargetEnemy, With<Bullet>>,
     mut enemy_query: Query<&mut Enemy>,
 ) {
     let bullet_entity = trigger.entity;

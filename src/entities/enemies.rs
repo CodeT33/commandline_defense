@@ -163,6 +163,10 @@ impl EnemyData {
     pub(crate) fn add_target_from_bullet(&mut self, bullet: Entity, damage: f32) {
         self.targeted_by.insert(bullet, damage);
     }
+
+    pub(crate) fn get_planned_bullet_damage(&self) -> f32 {
+        self.targeted_by.values().sum()
+    }
 }
 
 pub(crate) fn handle_enemies_reaching_end(
