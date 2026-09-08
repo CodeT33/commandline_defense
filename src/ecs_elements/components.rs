@@ -43,7 +43,7 @@ pub struct ColliderTypeB;
 #[derive(Component, Default)]
 pub struct Tower {
     pub enemies_in_range: EntityHashSet,
-    pub target: Option<Entity>,
+    pub target: Vec<Entity>,
 }
 
 #[derive(Component)]

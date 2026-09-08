@@ -201,13 +201,14 @@ pub fn select_tower_target_enemy(
     enemy_transforms: Query<(Entity, &Enemy), With<Enemy>>, mut towers: Query<&mut Tower>,
 ) {
     for mut tower in &mut towers {
-        let first_enemy = tower
-            .enemies_in_range
-            .iter()
-            .flat_map(|e| enemy_transforms.get(*e))
-            .max_by(|a, b| a.1.0.get_path_progress().total_cmp(&b.1.0.get_path_progress()));
+        let mut enemies: Vec<_> =
+            tower.enemies_in_range.iter().flat_map(|e| enemy_transforms.get(*e)).collect();
+        // highest progress first
+        enemies.sort_by(|a, b| {
+            a.1.0.get_path_progress().total_cmp(&b.1.0.get_path_progress()).reverse()
+        });
 
-        tower.target = first_enemy.map(|e| e.0);
+        tower.target = enemies.iter().map(|e| e.0).collect();
     }
 }
 
@@ -218,36 +219,44 @@ pub fn request_bullet_spawns(
 ) {
     for (mut tower_transform, tower, tower_data, mut data) in &mut towers {
         let emission_data = &mut data.0;
-        let Some((target_enemy, enemy_creation_time)) =
-            tower.target.and_then(|entity| enemies.get(entity).ok())
-        else {
+
+        // 0. if there are no enemies, pause and continue
+        if tower.target.is_empty() {
             emission_data.timer.pause();
             continue;
-        };
+        }
 
+        // 1. get next tick time -> if none available continue
+        // 2. go through the enemies and if a target_pos is acquired, apply the tick and go back to 1.
+        // 3. if not tick anyways
         while let Some(shoot_time) = emission_data.timer.tick_if_ready(&time) {
-            let Some((target_pos, _hit_time)) = calculate_target_position(
-                enemy_creation_time.0,
-                shoot_time,
-                tower_transform.translation.truncate(),
-                map.0.enemy_path(),
-                tower_data.0.bullet_speed_tps,
-                target_enemy.0.get_type().get_stats().speed_tps,
-            ) else {
-                continue;
-            };
+            for (target_enemy, enemy_creation_time) in
+                tower.target.iter().filter_map(|e| enemies.get(*e).ok())
+            {
+                let Some((target_pos, _hit_time)) = calculate_target_position(
+                    enemy_creation_time.0,
+                    shoot_time,
+                    tower_transform.translation.truncate(),
+                    map.0.enemy_path(),
+                    tower_data.0.bullet_speed_tps,
+                    target_enemy.0.get_type().get_stats().speed_tps,
+                ) else {
+                    continue;
+                };
 
-            let angle = (target_pos - tower_transform.translation.truncate()).to_angle();
-            tower_transform.rotation = Quat::from_rotation_z(angle - PI / 2.0);
-            let shoot_direction = Rot2::radians(angle);
+                let angle = (target_pos - tower_transform.translation.truncate()).to_angle();
+                tower_transform.rotation = Quat::from_rotation_z(angle - PI / 2.0);
+                let shoot_direction = Rot2::radians(angle);
 
-            bullet_spawns.write(SpawnBullet {
-                bullet_type: tower_data.0.bullet_type,
-                time: shoot_time,
-                position: tower_transform.translation.truncate(),
-                direction: shoot_direction,
-                speed_tps: tower_data.0.bullet_speed_tps,
-            });
+                bullet_spawns.write(SpawnBullet {
+                    bullet_type: tower_data.0.bullet_type,
+                    time: shoot_time,
+                    position: tower_transform.translation.truncate(),
+                    direction: shoot_direction,
+                    speed_tps: tower_data.0.bullet_speed_tps,
+                });
+                break;
+            }
         }
     }
 }
