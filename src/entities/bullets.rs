@@ -1,6 +1,7 @@
 use crate::consts;
 use crate::ecs_elements::components::{
     Bullet, ColliderShape, ColliderTypeB, CreationTime, DeleteWhenOutOfMap, Enemy, HealthStats,
+    TargetEnemy,
 };
 use crate::ecs_elements::messages::{CollisionStarted, SpawnBullet};
 use crate::ecs_elements::resources::TexturePackSettings;
@@ -10,6 +11,7 @@ use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::f32::consts::PI;
+use std::ops::Deref;
 
 #[derive(Copy, Clone, Debug)]
 pub(crate) enum BulletType {
@@ -84,7 +86,7 @@ pub(crate) fn handle_bullet_spawns(
 ) {
     for message in bullet_spawns.read() {
         let stats = message.bullet_type.get_stats();
-        commands.spawn((
+        let mut bullet_entity = commands.spawn((
             Bullet(BulletData::new(message.bullet_type, message.direction, message.speed_tps)),
             HealthStats(HealthStatsInner::new(stats.health)),
             CreationTime(message.time),
@@ -99,6 +101,9 @@ pub(crate) fn handle_bullet_spawns(
                 ..default()
             },
         ));
+        if let Some(entity) = message.target_entity {
+            bullet_entity.insert(TargetEnemy(entity));
+        }
     }
 }
 
@@ -122,6 +127,34 @@ pub(crate) fn handle_bullet_enemy_collisions(
             commands.entity(pair.type_b).try_despawn();
         }
     }
+}
+
+pub(crate) fn bullet_spawn_observer(
+    trigger: On<Add, TargetEnemy>, target_enemy_query: Query<(&TargetEnemy, &Bullet)>,
+    mut enemy_query: Query<&mut Enemy>,
+) {
+    let bullet_entity = trigger.entity;
+    let Ok((target_enemy, bullet_data)) = target_enemy_query.get(bullet_entity) else {
+        return;
+    };
+    let Ok(mut enemy) = enemy_query.get_mut(*target_enemy.deref()) else {
+        return;
+    };
+    enemy.add_target_from_bullet(bullet_entity, bullet_data.bullet_type.get_stats().damage);
+}
+
+pub(crate) fn bullet_despawn_observer(
+    trigger: On<Despawn>, target_enemy_query: Query<&TargetEnemy, With<Bullet>>,
+    mut enemy_query: Query<&mut Enemy>,
+) {
+    let bullet_entity = trigger.entity;
+    let Ok(target_enemy) = target_enemy_query.get(bullet_entity) else {
+        return;
+    };
+    let Ok(mut enemy) = enemy_query.get_mut(*target_enemy.deref()) else {
+        return;
+    };
+    enemy.remove_target_from(bullet_entity);
 }
 
 impl BulletData {

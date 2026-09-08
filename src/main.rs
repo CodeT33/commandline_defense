@@ -21,6 +21,7 @@ use crate::cli::command_line_state_management::handle_command_line_state;
 use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
 use crate::ecs_elements::messages::EnemyReachedEnd;
+use crate::entities::bullets::{bullet_despawn_observer, bullet_spawn_observer};
 use crate::entities::enemies::{handle_enemies_reaching_end, handle_enemy_spawns};
 use crate::entities::tower::{select_tower_target_enemy, shoot_bullets};
 use crate::map::map_rendering::spawn_map_visual_layer;
@@ -102,7 +103,9 @@ fn register_messages(app: &mut App) {
 }
 
 fn register_events(app: &mut App) {
-    app.add_observer(player_died_observer);
+    app.add_observer(player_died_observer)
+        .add_observer(bullet_spawn_observer)
+        .add_observer(bullet_despawn_observer);
 }
 
 fn register_systems(app: &mut App) {

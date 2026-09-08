@@ -212,8 +212,10 @@ pub(crate) fn shoot_bullets(
         // 2. go through the enemies and if a target_pos is acquired, apply the tick and go back to 1.
         // 3. if not tick anyways
         while let Some(shoot_time) = data.timer.tick_if_ready(&time) {
-            for (target_enemy, enemy_creation_time, enemy_transform) in
-                tower_data.target.iter().filter_map(|e| enemies.get(*e).ok())
+            for (target_entity, target_enemy, enemy_creation_time, enemy_transform) in
+                tower_data.target.iter().filter_map(|e| {
+                    enemies.get(*e).ok().map(|(enemy, ect, trfm)| (e, enemy, ect, trfm))
+                })
             {
                 let target_pos = if tower_data.tower_type.get_attributes().predictive_targeting {
                     let Some((target_pos, _hit_time)) = calculate_target_position(
@@ -245,6 +247,11 @@ pub(crate) fn shoot_bullets(
                     position: tower_transform.translation.truncate(),
                     direction: shoot_direction,
                     speed_tps: tower_data.tower_type.get_attributes().bullet_speed_tps,
+                    target_entity: tower_data
+                        .tower_type
+                        .get_attributes()
+                        .predictive_targeting
+                        .then_some(*target_entity),
                 });
                 break;
             }

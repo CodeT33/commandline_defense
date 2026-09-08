@@ -4,13 +4,16 @@ use crate::entities::enemies::EnemyData;
 use crate::entities::health::HealthStatsInner;
 use crate::entities::tower::TowerDataInner;
 use crate::scheduling::TimePoint;
-use bevy::prelude::{Circle, Component, Deref, DerefMut, Rectangle};
+use bevy::prelude::{Circle, Component, Deref, DerefMut, Entity, Rectangle};
 
 #[derive(Component, Deref, DerefMut)]
 pub(crate) struct Enemy(pub(crate) EnemyData);
 
 #[derive(Component, Deref, DerefMut)]
 pub(crate) struct Bullet(pub(crate) BulletData);
+
+#[derive(Component, Deref, DerefMut)]
+pub(crate) struct TargetEnemy(pub(crate) Entity);
 
 #[derive(Component, Deref, DerefMut)]
 pub(crate) struct HealthStats(pub(crate) HealthStatsInner);

@@ -11,6 +11,7 @@ use crate::entities::health::HealthStatsInner;
 use crate::map::map_logic_parsing::EnemyPath;
 use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
+use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
 use std::f32;
 
@@ -26,6 +27,7 @@ pub(crate) enum EnemyType {
 pub(crate) struct EnemyData {
     enemy_type: EnemyType,
     path_progress: f32,
+    targeted_by: EntityHashMap<f32>,
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -143,7 +145,7 @@ pub(crate) fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform 
 
 impl EnemyData {
     pub(crate) fn new(enemy_type: EnemyType) -> Self {
-        Self { enemy_type, path_progress: 0.0 }
+        Self { enemy_type, path_progress: 0.0, targeted_by: Default::default() }
     }
 
     pub(crate) fn get_path_progress(&self) -> f32 {
@@ -152,6 +154,14 @@ impl EnemyData {
 
     pub(crate) fn get_type(&self) -> EnemyType {
         self.enemy_type
+    }
+
+    pub(crate) fn remove_target_from(&mut self, bullet: Entity) {
+        self.targeted_by.remove(&bullet);
+    }
+
+    pub(crate) fn add_target_from_bullet(&mut self, bullet: Entity, damage: f32) {
+        self.targeted_by.insert(bullet, damage);
     }
 }
 

@@ -20,6 +20,7 @@ pub(crate) struct SpawnBullet {
     pub(crate) position: Vec2,
     pub(crate) direction: Rot2,
     pub(crate) speed_tps: f32,
+    pub(crate) target_entity: Option<Entity>,
 }
 
 #[derive(Message)]
