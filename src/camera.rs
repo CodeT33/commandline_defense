@@ -4,7 +4,7 @@ use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
-pub fn set_camera_position(
+pub(crate) fn set_camera_position(
     mut camera: Query<(&mut Transform, &mut Projection), With<Camera2d>>,
     windows: Query<&Window, With<PrimaryWindow>>, map_resource: Res<MapResource>,
 ) {
@@ -27,7 +27,7 @@ pub fn set_camera_position(
     }
 }
 
-pub fn camera_zoom_and_pan(
+pub(crate) fn camera_zoom_and_pan(
     mut camera: Query<(&mut Transform, &mut Projection), With<Camera2d>>,
     windows: Query<&Window, With<PrimaryWindow>>, buttons: Res<ButtonInput<MouseButton>>,
     mut mouse_wheel: MessageReader<MouseWheel>, mut last_cursor_pos: Local<Option<Vec2>>,
@@ -108,8 +108,8 @@ pub fn camera_zoom_and_pan(
     camera_transform.translation += correction.extend(0.0);
 }
 
-pub struct Viewport {
-    pub min_zoom: f32,
-    pub max_zoom: f32,
-    pub zoom_speed: f32,
+pub(crate) struct Viewport {
+    pub(crate) min_zoom: f32,
+    pub(crate) max_zoom: f32,
+    pub(crate) zoom_speed: f32,
 }

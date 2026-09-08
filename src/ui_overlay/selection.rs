@@ -11,7 +11,7 @@ use bevy::prelude::{
     default,
 };
 
-pub fn spawn_tile_highlight(
+pub(crate) fn spawn_tile_highlight(
     commands: &mut Commands, asset_server: &AssetServer,
     texture_pack_settings: &TexturePackSettings,
 ) {
@@ -30,7 +30,7 @@ pub fn spawn_tile_highlight(
     ));
 }
 
-pub fn update_selected_tile(
+pub(crate) fn update_selected_tile(
     command_state: Res<CommandState>, selection_state: Res<SelectionState>,
     mut highlight: Query<(&mut Transform, &mut Visibility), With<TileHighlight>>,
 ) {

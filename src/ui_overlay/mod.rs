@@ -8,12 +8,12 @@ use bevy::prelude::{
     Commands, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
 };
 
-pub mod debug;
-pub mod grid;
-pub mod health_bars;
-pub mod selection;
+pub(crate) mod debug;
+pub(crate) mod grid;
+pub(crate) mod health_bars;
+pub(crate) mod selection;
 
-pub fn spawn_ui_overlay(
+pub(crate) fn spawn_ui_overlay(
     commands: &mut Commands, asset_server: &AssetServer, map_resource: &MapResource,
     texture_pack_settings: &TexturePackSettings,
 ) {
@@ -24,7 +24,7 @@ pub fn spawn_ui_overlay(
     spawn_map_border(commands, asset_server, texture_pack_settings);
 }
 
-pub fn spawn_map_border(
+pub(crate) fn spawn_map_border(
     commands: &mut Commands, asset_server: &AssetServer,
     texture_pack_settings: &TexturePackSettings,
 ) {

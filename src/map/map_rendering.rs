@@ -6,7 +6,7 @@ use bevy::prelude::{
     Commands, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
 };
 
-pub fn spawn_map_visual_layer(
+pub(crate) fn spawn_map_visual_layer(
     commands: &mut Commands, asset_server: &AssetServer, map_resource: &MapResource,
     texture_pack_settings: &TexturePackSettings,
 ) {

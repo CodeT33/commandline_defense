@@ -23,15 +23,15 @@ use std::f32::consts::PI;
 use std::time::Duration;
 use strum::{EnumString, VariantNames};
 
-pub struct TowerDataInner {
+pub(crate) struct TowerDataInner {
     #[allow(unused)]
     tower_type: TowerType,
     #[allow(unused)]
     upgrade_level: UpgradeLevel,
     #[allow(unused)]
     effects: Vec<Effect>,
-    pub bullet_speed_tps: f32,
-    pub bullet_type: BulletType,
+    pub(crate) bullet_speed_tps: f32,
+    pub(crate) bullet_type: BulletType,
 }
 
 #[allow(unused)]
@@ -50,7 +50,7 @@ enum Effect {
 }
 
 #[derive(Debug, Clone, Copy, VariantNames, EnumString)]
-pub enum TowerType {
+pub(crate) enum TowerType {
     #[strum(serialize = "assault-bober")]
     AssaultTower,
     #[strum(serialize = "boom-bober")]
@@ -81,21 +81,21 @@ pub enum TowerType {
     RocketTroop,
 }
 
-pub struct TowerRangeMapInner {
-    pub size: U16Vec2,
+pub(crate) struct TowerRangeMapInner {
+    pub(crate) size: U16Vec2,
     towers_in_range: Vec<Vec<Entity>>,
 }
 
-pub struct TowerAttributes {
-    pub price: u16,
-    pub size_tiles: Vec2,
-    pub range: f32,
-    pub cooldown_ms: u32,
-    pub bullet_speed_tps: f32,
-    pub bullet_type: BulletType,
-    pub sprites: [TexturePackAssets; 4],
-    pub tower_rotates: bool,
-    pub predictive_targeting: bool,
+pub(crate) struct TowerAttributes {
+    pub(crate) price: u16,
+    pub(crate) size_tiles: Vec2,
+    pub(crate) range: f32,
+    pub(crate) cooldown_ms: u32,
+    pub(crate) bullet_speed_tps: f32,
+    pub(crate) bullet_type: BulletType,
+    pub(crate) sprites: [TexturePackAssets; 4],
+    pub(crate) tower_rotates: bool,
+    pub(crate) predictive_targeting: bool,
 }
 
 impl Default for TowerRangeMapInner {
@@ -105,7 +105,7 @@ impl Default for TowerRangeMapInner {
     }
 }
 
-pub fn handle_tower_placing_events(
+pub(crate) fn handle_tower_placing_events(
     mut messages: MessageReader<PlaceTowerMessage>, mut commands: Commands,
     asset_server: Res<AssetServer>, mut player_suite: ResMut<PlayerSuiteResource>,
     texture_pack_settings: Res<TexturePackSettings>,
@@ -151,7 +151,7 @@ pub fn handle_tower_placing_events(
 }
 
 impl Tower {
-    pub fn spawn(
+    pub(crate) fn spawn(
         commands: &mut Commands, sprite: Sprite, tower_pos: GridCoordinate, tower_data: TowerData,
         bullet_emission_data: BulletEmissionData, collider_shape: ColliderShape,
     ) {
@@ -174,13 +174,15 @@ impl Tower {
 }
 
 impl TowerRangeMapInner {
-    pub fn clear(&mut self) {
+    pub(crate) fn clear(&mut self) {
         for x in &mut self.towers_in_range {
             x.clear();
         }
     }
 
-    pub fn range_bounds(&self, pos_tiles: GridCoordinate, range_tiles: u16) -> (U16Vec2, U16Vec2) {
+    pub(crate) fn range_bounds(
+        &self, pos_tiles: GridCoordinate, range_tiles: u16,
+    ) -> (U16Vec2, U16Vec2) {
         let center = pos_tiles;
         let range = U16Vec2::splat(range_tiles);
         let min = center.saturating_sub(range);
@@ -188,7 +190,9 @@ impl TowerRangeMapInner {
         (min, max)
     }
 
-    pub fn add_range_rect(&mut self, pos_tiles: GridCoordinate, range_tiles: u16, entity: Entity) {
+    pub(crate) fn add_range_rect(
+        &mut self, pos_tiles: GridCoordinate, range_tiles: u16, entity: Entity,
+    ) {
         let (min, max) = self.range_bounds(pos_tiles, range_tiles);
         for y in min.y..=max.y {
             for x in min.x..=max.x {
@@ -197,13 +201,13 @@ impl TowerRangeMapInner {
         }
     }
 
-    pub fn towers_in_range_at(&self, tile: GridCoordinate) -> &[Entity] {
+    pub(crate) fn towers_in_range_at(&self, tile: GridCoordinate) -> &[Entity] {
         let index = tile.y as usize * self.size.x as usize + tile.x as usize;
         &self.towers_in_range[index]
     }
 }
 
-pub fn update_enemies_in_range(
+pub(crate) fn update_enemies_in_range(
     enemies: Query<Entity, With<Enemy>>, mut towers: Query<(Entity, &mut Tower)>,
     mut collision_started: MessageReader<CollisionStarted>,
     mut collision_ended: MessageReader<CollisionEnded>,
@@ -223,7 +227,7 @@ pub fn update_enemies_in_range(
     }
 }
 
-pub fn select_tower_target_enemy(
+pub(crate) fn select_tower_target_enemy(
     enemy_transforms: Query<(Entity, &Enemy), With<Enemy>>, mut towers: Query<&mut Tower>,
 ) {
     for mut tower in &mut towers {
@@ -238,7 +242,7 @@ pub fn select_tower_target_enemy(
     }
 }
 
-pub fn request_bullet_spawns(
+pub(crate) fn request_bullet_spawns(
     mut bullet_spawns: MessageWriter<SpawnBullet>,
     enemies: Query<(&Enemy, &CreationTime, &Transform), Without<Tower>>,
     mut towers: Query<(&mut Transform, &Tower, &TowerData, &mut BulletEmissionData), With<Tower>>,
@@ -343,7 +347,7 @@ fn calculate_target_position(
 /// - `vb` = bullet velocity
 /// - `ve` = enemy velocity
 /// - `d` = enemy_pos - tower_pos
-pub fn calculate_collision_time(vb: f32, ve: Vec2, d: Vec2) -> Option<f32> {
+pub(crate) fn calculate_collision_time(vb: f32, ve: Vec2, d: Vec2) -> Option<f32> {
     // a = ||ve||^2 - vb^2
     let a = (-vb).mul_add(vb, ve.length_squared());
     let h = d.dot(ve);

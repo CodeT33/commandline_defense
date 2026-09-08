@@ -8,55 +8,55 @@ use bevy::ecs::entity::EntityHashSet;
 use bevy::prelude::{Circle, Component, Entity, Rectangle};
 
 #[derive(Component)]
-pub struct Enemy(pub EnemyData);
+pub(crate) struct Enemy(pub(crate) EnemyData);
 
 #[derive(Component)]
-pub struct Bullet(pub BulletData);
+pub(crate) struct Bullet(pub(crate) BulletData);
 
 #[derive(Component)]
-pub struct HealthStats(pub HealthStatsInner);
+pub(crate) struct HealthStats(pub(crate) HealthStatsInner);
 
 #[derive(Component)]
-pub struct CreationTime(pub TimePoint);
+pub(crate) struct CreationTime(pub(crate) TimePoint);
 
 #[derive(Component)]
-pub struct BulletEmissionData(pub BulletEmissionDataInner);
+pub(crate) struct BulletEmissionData(pub(crate) BulletEmissionDataInner);
 
 #[derive(Component, Copy, Clone)]
-pub enum ColliderShape {
+pub(crate) enum ColliderShape {
     Rectangle(Rectangle),
     Circle(Circle),
 }
 
 #[derive(Component)]
-pub struct DeleteWhenOutOfMap;
+pub(crate) struct DeleteWhenOutOfMap;
 
 #[derive(Component)]
-pub struct Map;
+pub(crate) struct Map;
 
 #[derive(Component)]
-pub struct ColliderTypeA;
+pub(crate) struct ColliderTypeA;
 
 #[derive(Component)]
-pub struct ColliderTypeB;
+pub(crate) struct ColliderTypeB;
 
 #[derive(Component, Default)]
-pub struct Tower {
-    pub enemies_in_range: EntityHashSet,
-    pub target: Vec<Entity>,
+pub(crate) struct Tower {
+    pub(crate) enemies_in_range: EntityHashSet,
+    pub(crate) target: Vec<Entity>,
 }
 
 #[derive(Component)]
-pub struct TowerData(pub TowerDataInner);
+pub(crate) struct TowerData(pub(crate) TowerDataInner);
 
 #[derive(Component)]
-pub struct GridOverlay;
+pub(crate) struct GridOverlay;
 
 #[derive(Component)]
-pub struct GridLine;
+pub(crate) struct GridLine;
 
 #[derive(Component)]
-pub struct GridPositionLabel;
+pub(crate) struct GridPositionLabel;
 
 #[derive(Component)]
-pub struct TileHighlight;
+pub(crate) struct TileHighlight;

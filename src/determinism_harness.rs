@@ -11,7 +11,7 @@ use bevy::prelude::{
 use std::fs;
 use std::process::exit;
 
-pub struct DeterminismHarnessPlugin;
+pub(crate) struct DeterminismHarnessPlugin;
 
 impl Plugin for DeterminismHarnessPlugin {
     fn build(&self, app: &mut App) {

@@ -1,17 +1,17 @@
 mod camera;
-pub mod cli;
-pub mod collision;
-pub mod consts;
-pub mod coordinates;
+pub(crate) mod cli;
+pub(crate) mod collision;
+pub(crate) mod consts;
+pub(crate) mod coordinates;
 #[cfg(feature = "determinism")]
-pub mod determinism_harness;
-pub mod ecs_elements;
-pub mod entities;
-pub mod map;
-pub mod movement;
-pub mod player_suite;
-pub mod scheduling;
-pub mod texture_packs;
+pub(crate) mod determinism_harness;
+pub(crate) mod ecs_elements;
+pub(crate) mod entities;
+pub(crate) mod map;
+pub(crate) mod movement;
+pub(crate) mod player_suite;
+pub(crate) mod scheduling;
+pub(crate) mod texture_packs;
 mod ui_overlay;
 
 use crate::camera::{camera_zoom_and_pan, set_camera_position};

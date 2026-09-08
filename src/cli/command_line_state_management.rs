@@ -11,7 +11,7 @@ use std::str::FromStr;
 use strum::{EnumString, VariantNames};
 
 #[derive(Default)]
-pub enum PreviewCommand {
+pub(crate) enum PreviewCommand {
     #[default]
     None,
     ShowGrid,
@@ -26,7 +26,7 @@ pub enum PreviewCommand {
 }
 
 #[derive(Debug, VariantNames, EnumString)]
-pub enum Settings {
+pub(crate) enum Settings {
     #[strum(serialize = "bounding-boxes")]
     BoundingBoxes,
     #[strum(serialize = "sim-speed")]
@@ -35,7 +35,7 @@ pub enum Settings {
     EnemySpawnInterval,
 }
 
-pub fn handle_command_line_state(
+pub(crate) fn handle_command_line_state(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
     mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
     mut history: ResMut<CommandHistory>, selection_state: ResMut<SelectionState>,

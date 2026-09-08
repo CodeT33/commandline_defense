@@ -5,41 +5,42 @@ use crate::texture_packs::TexturePackAssets;
 use bevy::math::U16Vec2;
 use bevy::prelude::Vec2;
 
-pub const WINDOW_TITLE: &str = "Commandline Defense";
-pub const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
+pub(crate) const WINDOW_TITLE: &str = "Commandline Defense";
+pub(crate) const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
 
-pub const PHYSICS_FRAME_RATE: u16 = 144 * 2;
+pub(crate) const PHYSICS_FRAME_RATE: u16 = 144 * 2;
 
-pub const MAP_SIZE_TILES: U16Vec2 = U16Vec2 { x: 32, y: 16 };
-pub const TILE_SIZE: u16 = 16;
+pub(crate) const MAP_SIZE_TILES: U16Vec2 = U16Vec2 { x: 32, y: 16 };
+pub(crate) const TILE_SIZE: u16 = 16;
 
-pub const ENEMY_COUNT: usize = 40;
-pub const ENEMY_SPRITE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
-pub const ENEMY_BOUNDING_CIRCLE_RADIUS: f32 = ENEMY_SPRITE_SIZE_TILES.x * 0.3;
-pub const ENEMY_SPEED_TILES_PER_SECOND: f32 = 3.0;
-pub const ENEMY_SPAWN_INTERVAL_MS: u64 = 2000;
+pub(crate) const ENEMY_COUNT: usize = 40;
+pub(crate) const ENEMY_SPRITE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
+pub(crate) const ENEMY_BOUNDING_CIRCLE_RADIUS: f32 = ENEMY_SPRITE_SIZE_TILES.x * 0.3;
+pub(crate) const ENEMY_SPEED_TILES_PER_SECOND: f32 = 3.0;
+pub(crate) const ENEMY_SPAWN_INTERVAL_MS: u64 = 2000;
 
-pub const TOWER_SIZE_TILES: Vec2 = Vec2::splat(1.0);
-pub const TOWER_RANGE_TILES: u16 = 5;
-pub const TOWER_COOLDOWN_MS: u32 = 1000;
+pub(crate) const TOWER_SIZE_TILES: Vec2 = Vec2::splat(1.0);
+pub(crate) const TOWER_RANGE_TILES: u16 = 5;
+pub(crate) const TOWER_COOLDOWN_MS: u32 = 1000;
 
-pub const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
+pub(crate) const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 
-pub const BULLET_ROTATION_DURATION_MS: u64 = 234;
+pub(crate) const BULLET_ROTATION_DURATION_MS: u64 = 234;
 
 /// Number of simulated seconds captured before the log is saved and the program is terminated.
-pub const LOG_DURATION_SECS: u64 = 15;
+pub(crate) const LOG_DURATION_SECS: u64 = 15;
 
-pub mod viewports {
+pub(crate) mod viewports {
     use crate::camera::Viewport;
 
-    pub const BASIC_CAMERA: Viewport = Viewport { min_zoom: 0.01, max_zoom: 0.5, zoom_speed: 0.1 };
+    pub(crate) const BASIC_CAMERA: Viewport =
+        Viewport { min_zoom: 0.01, max_zoom: 0.5, zoom_speed: 0.1 };
 }
 
-pub mod map_logic_parsing {
+pub(crate) mod map_logic_parsing {
     use crate::ui_overlay::grid::LogicGridTileColors;
 
-    pub const LOGIC_GRID_TILE_COLORS: LogicGridTileColors = LogicGridTileColors {
+    pub(crate) const LOGIC_GRID_TILE_COLORS: LogicGridTileColors = LogicGridTileColors {
         path_start: 0xff00ff,
         path: 0xffff00,
         restricted: 0xff0000,
@@ -49,7 +50,7 @@ pub mod map_logic_parsing {
 }
 
 impl TowerType {
-    pub fn get_attributes(self) -> TowerAttributes {
+    pub(crate) fn get_attributes(self) -> TowerAttributes {
         match self {
             TowerType::AssaultTower => TowerAttributes {
                 price: 100,
@@ -169,7 +170,7 @@ impl TowerType {
 }
 
 impl EnemyType {
-    pub fn get_stats(self) -> EnemyStats {
+    pub(crate) fn get_stats(self) -> EnemyStats {
         match self {
             EnemyType::WideBirb => EnemyStats {
                 health: 4.0,
@@ -208,7 +209,7 @@ impl EnemyType {
 }
 
 impl BulletType {
-    pub fn get_stats(self) -> BulletStats {
+    pub(crate) fn get_stats(self) -> BulletStats {
         match self {
             BulletType::Bullet => BulletStats {
                 damage: 2.0,
@@ -263,41 +264,41 @@ impl BulletType {
 }
 
 // ui
-pub mod ui {
+pub(crate) mod ui {
     use bevy::prelude::Color;
 
-    pub const BOUNDING_BOX_DEBUG_COLOR: Color = Color::hsv(120.0, 1.0, 1.0);
-    pub const BOUNDING_BOX_DEBUG_COLOR_ALT: Color = Color::hsv(0.0, 1.0, 1.0);
+    pub(crate) const BOUNDING_BOX_DEBUG_COLOR: Color = Color::hsv(120.0, 1.0, 1.0);
+    pub(crate) const BOUNDING_BOX_DEBUG_COLOR_ALT: Color = Color::hsv(0.0, 1.0, 1.0);
     /// How often the debug bounding box color toggles between the two colors.
-    pub const BOUNDING_BOX_DEBUG_COLOR_TOGGLE_SECS: f32 = 0.25;
+    pub(crate) const BOUNDING_BOX_DEBUG_COLOR_TOGGLE_SECS: f32 = 0.25;
 
-    pub mod health_bars {
+    pub(crate) mod health_bars {
         use bevy::prelude::Color;
 
-        pub const HEALTH_BAR_BACKGROUND_COLOR: Color = Color::srgb(0.12, 0.12, 0.12);
-        pub const HEALTH_BAR_FILL_COLOR: Color = Color::srgb(0.2, 0.8, 0.3);
-        pub const HEALTH_BAR_WIDTH_TILES: f32 = 1.0;
-        pub const HEALTH_BAR_HEIGHT_TILES: f32 = 0.07;
-        pub const HEALTH_BAR_OFFSET_TILES: f32 = 0.7;
+        pub(crate) const HEALTH_BAR_BACKGROUND_COLOR: Color = Color::srgb(0.12, 0.12, 0.12);
+        pub(crate) const HEALTH_BAR_FILL_COLOR: Color = Color::srgb(0.2, 0.8, 0.3);
+        pub(crate) const HEALTH_BAR_WIDTH_TILES: f32 = 1.0;
+        pub(crate) const HEALTH_BAR_HEIGHT_TILES: f32 = 0.07;
+        pub(crate) const HEALTH_BAR_OFFSET_TILES: f32 = 0.7;
     }
 
-    pub mod grid {
+    pub(crate) mod grid {
         use crate::ui_overlay::grid::{FontSettings, GridTileColors};
         use bevy::prelude::{Color, FontWeight};
 
-        pub const GRID_POSITION: FontSettings = FontSettings {
+        pub(crate) const GRID_POSITION: FontSettings = FontSettings {
             font_size: 12.0,
             font_weight: FontWeight(160),
             color: Color::srgba(0.5, 1.0, 0.5, 0.5),
         };
 
-        pub const GRID_META_POSITION: FontSettings = FontSettings {
+        pub(crate) const GRID_META_POSITION: FontSettings = FontSettings {
             font_size: 18.0,
             font_weight: FontWeight(240),
             color: Color::srgba(1.0, 1.0, 1.0, 1.0),
         };
 
-        pub const GRID_POSITION_TILE_COLORS: GridTileColors = GridTileColors {
+        pub(crate) const GRID_POSITION_TILE_COLORS: GridTileColors = GridTileColors {
             none: Color::srgba(0.0, 0.0, 0.0, 0.0),
             path_start: Color::srgba(1.0, 0.5, 1.0, 0.9),
             path: Color::srgba(1.0, 1.0, 0.5, 0.9),
@@ -306,20 +307,20 @@ pub mod ui {
             water: Color::srgba(0.5, 0.5, 1.0, 0.9),
         };
 
-        pub const GRID_LINE_THICKNESS: f32 = 0.025;
-        pub const GRID_LINE_COLOR: Color = Color::srgba(0.5, 1.0, 0.5, 0.2);
-        pub const GRID_CONTRAST_COLOR: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
+        pub(crate) const GRID_LINE_THICKNESS: f32 = 0.025;
+        pub(crate) const GRID_LINE_COLOR: Color = Color::srgba(0.5, 1.0, 0.5, 0.2);
+        pub(crate) const GRID_CONTRAST_COLOR: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
     }
 }
 
-pub mod rendering_layers {
-    pub const MAP: f32 = 0.0;
-    pub const CONTRAST: f32 = 1.0;
-    pub const ENTITY: f32 = 5.0;
-    pub const GRID: f32 = 10.0;
-    pub const GRID_LABEL: f32 = 11.0;
-    pub const HEALTH_BARS: f32 = 15.0;
-    pub const HIGHLIGHT: f32 = 20.0;
+pub(crate) mod rendering_layers {
+    pub(crate) const MAP: f32 = 0.0;
+    pub(crate) const CONTRAST: f32 = 1.0;
+    pub(crate) const ENTITY: f32 = 5.0;
+    pub(crate) const GRID: f32 = 10.0;
+    pub(crate) const GRID_LABEL: f32 = 11.0;
+    pub(crate) const HEALTH_BARS: f32 = 15.0;
+    pub(crate) const HIGHLIGHT: f32 = 20.0;
 }
 
-pub const BASE_TEXTURE_PACK_PATH: &str = "assets/texture_packs/default";
+pub(crate) const BASE_TEXTURE_PACK_PATH: &str = "assets/texture_packs/default";

@@ -6,32 +6,32 @@ use bevy::prelude::{
     Circle, Entity, Local, MessageWriter, Query, Rectangle, Transform, Vec2, With,
 };
 
-pub enum Collider {
+pub(crate) enum Collider {
     Aabb(Aabb2d),
     Circle(BoundingCircle),
 }
 
-pub struct CollisionPair {
-    pub type_a: Entity,
-    pub type_b: Entity,
+pub(crate) struct CollisionPair {
+    pub(crate) type_a: Entity,
+    pub(crate) type_b: Entity,
 }
 
 impl CollisionPair {
-    pub fn new(type_a: Entity, type_b: Entity) -> Self {
+    pub(crate) fn new(type_a: Entity, type_b: Entity) -> Self {
         Self { type_a, type_b }
     }
 }
 
 impl ColliderShape {
-    pub fn circle(radius: f32) -> Self {
+    pub(crate) fn circle(radius: f32) -> Self {
         ColliderShape::Circle(Circle::new(radius))
     }
 
-    pub fn rect(size: Vec2) -> Self {
+    pub(crate) fn rect(size: Vec2) -> Self {
         ColliderShape::Rectangle(Rectangle::from_size(size))
     }
 
-    pub fn to_collider(self, position: Vec2) -> Collider {
+    pub(crate) fn to_collider(self, position: Vec2) -> Collider {
         match self {
             ColliderShape::Rectangle(rect) => Collider::Aabb(Aabb2d::new(position, rect.half_size)),
             ColliderShape::Circle(circle) => {
@@ -43,7 +43,7 @@ impl ColliderShape {
 
 impl Collider {
     #[inline]
-    pub fn intersects(&self, other: &Self) -> bool {
+    pub(crate) fn intersects(&self, other: &Self) -> bool {
         match (self, other) {
             (Collider::Aabb(a), Collider::Aabb(b)) => a.intersects(b),
             (Collider::Circle(a), Collider::Circle(b)) => a.intersects(b),
@@ -53,7 +53,7 @@ impl Collider {
     }
 }
 
-pub fn calculate_collisions(
+pub(crate) fn calculate_collisions(
     type_a: Query<(Entity, &ColliderShape, &Transform), With<ColliderTypeA>>,
     type_b: Query<(Entity, &ColliderShape, &Transform), With<ColliderTypeB>>,
     mut old_collisions: Local<HashSet<(Entity, Entity)>>,

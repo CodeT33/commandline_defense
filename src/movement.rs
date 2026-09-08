@@ -1,7 +1,7 @@
 use crate::ecs_elements::components::{ColliderShape, DeleteWhenOutOfMap, Map};
 use bevy::prelude::{Commands, Entity, Query, Transform, With};
 
-pub fn delete_out_of_map_entities(
+pub(crate) fn delete_out_of_map_entities(
     entities: Query<(Entity, &ColliderShape, &Transform), With<DeleteWhenOutOfMap>>,
     map: Query<(&ColliderShape, &Transform), With<Map>>, mut commands: Commands,
 ) {

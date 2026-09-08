@@ -1,4 +1,4 @@
-pub mod bullets;
-pub mod enemies;
-pub mod health;
-pub mod tower;
+pub(crate) mod bullets;
+pub(crate) mod enemies;
+pub(crate) mod health;
+pub(crate) mod tower;

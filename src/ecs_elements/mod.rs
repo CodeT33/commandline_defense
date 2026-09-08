@@ -1,4 +1,4 @@
-pub mod components;
-pub mod events;
-pub mod messages;
-pub mod resources;
+pub(crate) mod components;
+pub(crate) mod events;
+pub(crate) mod messages;
+pub(crate) mod resources;

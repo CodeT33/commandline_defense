@@ -7,7 +7,7 @@ use crate::ecs_elements::components::{Bullet, HealthStats};
 use bevy::prelude::*;
 use bevy_vector_shapes::prelude::*;
 
-pub fn draw_health_bars(
+pub(crate) fn draw_health_bars(
     mut painter: ShapePainter, query: Query<(&Transform, &HealthStats), Without<Bullet>>,
 ) {
     for (transform, health) in &query {

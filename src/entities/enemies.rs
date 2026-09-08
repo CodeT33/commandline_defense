@@ -15,7 +15,7 @@ use bevy::prelude::*;
 use std::f32;
 
 #[derive(Copy, Clone, Debug)]
-pub enum EnemyType {
+pub(crate) enum EnemyType {
     WideBirb,
     Mausmeister,
     Zapano,
@@ -23,22 +23,22 @@ pub enum EnemyType {
 }
 
 #[allow(unused)]
-pub struct EnemyData {
+pub(crate) struct EnemyData {
     enemy_type: EnemyType,
     path_progress: f32,
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct EnemyStats {
-    pub health: f32,
-    pub player_health_penalty: u16,
-    pub speed_tps: f32,
+pub(crate) struct EnemyStats {
+    pub(crate) health: f32,
+    pub(crate) player_health_penalty: u16,
+    pub(crate) speed_tps: f32,
     pub(crate) relative_collider_size: f32,
     pub(crate) texture_size_tiles: f32,
-    pub asset: TexturePackAssets,
+    pub(crate) asset: TexturePackAssets,
 }
 
-pub fn move_enemies(
+pub(crate) fn move_enemies(
     map_resource: Res<MapResource>,
     mut enemy: Query<(Entity, &mut Transform, &mut Enemy, &CreationTime)>,
     mut reached_end_writer: MessageWriter<EnemyReachedEnd>, time: Res<Time>,
@@ -58,7 +58,7 @@ pub fn move_enemies(
     }
 }
 
-pub fn request_enemy_spawns(
+pub(crate) fn request_enemy_spawns(
     mut enemy_spawns: MessageWriter<SpawnEnemy>, mut timer: Local<Option<IntervalTimer>>,
     time: Res<Time>, debug_settings: Res<DebugSettings>,
 ) {
@@ -73,7 +73,7 @@ pub fn request_enemy_spawns(
     }
 }
 
-pub fn handle_enemy_spawns(
+pub(crate) fn handle_enemy_spawns(
     mut enemy_spawns: MessageReader<SpawnEnemy>, mut commands: Commands,
     asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
     map_resource: Res<MapResource>,
@@ -97,7 +97,7 @@ pub fn handle_enemy_spawns(
     }
 }
 
-pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
+pub(crate) fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
     let progress = progress.clamp(0.0, 1.0);
 
     let Some(start) = path.corners().first() else {
@@ -142,20 +142,20 @@ pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
 }
 
 impl EnemyData {
-    pub fn new(enemy_type: EnemyType) -> Self {
+    pub(crate) fn new(enemy_type: EnemyType) -> Self {
         Self { enemy_type, path_progress: 0.0 }
     }
 
-    pub fn get_path_progress(&self) -> f32 {
+    pub(crate) fn get_path_progress(&self) -> f32 {
         self.path_progress
     }
 
-    pub fn get_type(&self) -> EnemyType {
+    pub(crate) fn get_type(&self) -> EnemyType {
         self.enemy_type
     }
 }
 
-pub fn handle_enemies_reaching_end(
+pub(crate) fn handle_enemies_reaching_end(
     mut reached_end: MessageReader<EnemyReachedEnd>, enemies: Query<&Enemy>,
     mut player: ResMut<PlayerSuiteResource>, mut commands: Commands,
 ) {

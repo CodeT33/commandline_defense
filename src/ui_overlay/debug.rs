@@ -4,7 +4,7 @@ use crate::ecs_elements::resources::DebugSettings;
 use bevy::math::Isometry2d;
 use bevy::prelude::{Gizmos, Query, Real, Res, ResMut, Time, Transform, Virtual};
 
-pub fn draw_bounding_boxes(
+pub(crate) fn draw_bounding_boxes(
     q: Query<(&ColliderShape, &Transform)>, mut gizmos: Gizmos, time: Res<Time<Real>>,
 ) {
     let toggle_index =
@@ -32,6 +32,8 @@ pub fn draw_bounding_boxes(
     }
 }
 
-pub fn set_simulation_speed(mut time: ResMut<Time<Virtual>>, debug_settings: Res<DebugSettings>) {
+pub(crate) fn set_simulation_speed(
+    mut time: ResMut<Time<Virtual>>, debug_settings: Res<DebugSettings>,
+) {
     time.set_relative_speed(debug_settings.sim_speed);
 }

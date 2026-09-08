@@ -13,7 +13,7 @@ use bevy::prelude::*;
 use std::f32::consts::PI;
 
 #[derive(Copy, Clone, Debug)]
-pub enum BulletType {
+pub(crate) enum BulletType {
     // meme stuff
     Bullet,
     MetalBall,
@@ -23,25 +23,25 @@ pub enum BulletType {
     Rocket,
 }
 
-pub struct BulletStats {
-    pub damage: f32,
-    pub health: f32,
-    pub spins: bool,
-    pub relative_collider_size: f32,
-    pub texture_size_tiles: f32,
-    pub asset: TexturePackAssets,
+pub(crate) struct BulletStats {
+    pub(crate) damage: f32,
+    pub(crate) health: f32,
+    pub(crate) spins: bool,
+    pub(crate) relative_collider_size: f32,
+    pub(crate) texture_size_tiles: f32,
+    pub(crate) asset: TexturePackAssets,
 }
 
 #[allow(unused)]
-pub struct BulletData {
+pub(crate) struct BulletData {
     bullet_type: BulletType,
     rotation: Rot2,
     speed_tps: f32,
 }
 
-pub struct BulletEmissionDataInner {
-    pub timer: IntervalTimer,
-    pub direction: Rot2,
+pub(crate) struct BulletEmissionDataInner {
+    pub(crate) timer: IntervalTimer,
+    pub(crate) direction: Rot2,
 }
 
 impl Default for BulletEmissionDataInner {
@@ -51,12 +51,14 @@ impl Default for BulletEmissionDataInner {
 }
 
 impl BulletEmissionDataInner {
-    pub fn new(spawn_cooldown_ms: u32) -> Self {
+    pub(crate) fn new(spawn_cooldown_ms: u32) -> Self {
         Self { timer: IntervalTimer::new(spawn_cooldown_ms), ..Default::default() }
     }
 }
 
-pub fn move_bullets(mut q: Query<(&mut Transform, Ref<Bullet>, &CreationTime)>, time: Res<Time>) {
+pub(crate) fn move_bullets(
+    mut q: Query<(&mut Transform, Ref<Bullet>, &CreationTime)>, time: Res<Time>,
+) {
     for (mut tf, bullet, creation_time) in &mut q {
         let delta_time = if bullet.is_added() {
             creation_time.0.elapsed_ms(&time) as f32 / 1000.0
@@ -79,7 +81,7 @@ pub fn move_bullets(mut q: Query<(&mut Transform, Ref<Bullet>, &CreationTime)>, 
     }
 }
 
-pub fn handle_bullet_spawns(
+pub(crate) fn handle_bullet_spawns(
     mut bullet_spawns: MessageReader<SpawnBullet>, mut commands: Commands,
     asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
 ) {
@@ -103,7 +105,7 @@ pub fn handle_bullet_spawns(
     }
 }
 
-pub fn handle_bullet_enemy_collisions(
+pub(crate) fn handle_bullet_enemy_collisions(
     mut commands: Commands, mut collision_reader: MessageReader<CollisionStarted>,
     mut bullet_query: Query<(&mut HealthStats, &Bullet), Without<Enemy>>,
     mut enemy_query: Query<&mut HealthStats, With<Enemy>>,
@@ -126,7 +128,7 @@ pub fn handle_bullet_enemy_collisions(
 }
 
 impl BulletData {
-    pub fn new(bullet_type: BulletType, rotation: Rot2, speed_tps: f32) -> Self {
+    pub(crate) fn new(bullet_type: BulletType, rotation: Rot2, speed_tps: f32) -> Self {
         Self { bullet_type, rotation, speed_tps }
     }
 }

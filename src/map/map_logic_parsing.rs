@@ -9,7 +9,7 @@ const PLACEABLE: u32 = 0x00ff00;
 const WATER: u32 = 0x0000ff;
 
 #[derive(PartialEq, Clone, Copy, Debug)]
-pub enum TileType {
+pub(crate) enum TileType {
     None,
     PathStart,
     Path,
@@ -50,33 +50,33 @@ fn is_path_tile(tile: TileType) -> bool {
 
 // EnemyPath
 
-pub struct EnemyPath {
+pub(crate) struct EnemyPath {
     path_corners: Vec<PathCorner>,
     path_length: u32,
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct PathCorner {
+pub(crate) struct PathCorner {
     position: GridCoordinate,
     path_length_here: u32,
 }
 
 impl PathCorner {
-    pub fn new(coordinate: GridCoordinate, path_len: u32) -> Self {
+    pub(crate) fn new(coordinate: GridCoordinate, path_len: u32) -> Self {
         Self { position: coordinate, path_length_here: path_len }
     }
 
-    pub fn position(&self) -> GridCoordinate {
+    pub(crate) fn position(&self) -> GridCoordinate {
         self.position
     }
 
-    pub fn path_length(&self) -> u32 {
+    pub(crate) fn path_length(&self) -> u32 {
         self.path_length_here
     }
 }
 
 impl EnemyPath {
-    pub fn parse_from_map_tiles(map_tiles: &MapTiles) -> Option<EnemyPath> {
+    pub(crate) fn parse_from_map_tiles(map_tiles: &MapTiles) -> Option<EnemyPath> {
         let mut position = map_tiles.find_path_start()?;
         let mut direction = Direction::Right;
 
@@ -141,49 +141,49 @@ impl EnemyPath {
         Some(enemy_path)
     }
 
-    pub fn get_length(&self) -> u32 {
+    pub(crate) fn get_length(&self) -> u32 {
         self.path_length
     }
 
-    pub fn corners(&self) -> &[PathCorner] {
+    pub(crate) fn corners(&self) -> &[PathCorner] {
         &self.path_corners
     }
 }
 
 // MapTiles
 
-pub struct MapTiles {
-    pub map_size: U16Vec2,
-    pub tiles: Vec<TileType>,
+pub(crate) struct MapTiles {
+    pub(crate) map_size: U16Vec2,
+    pub(crate) tiles: Vec<TileType>,
 }
 
 impl MapTiles {
-    pub fn load(logic_path: &str, map_size: U16Vec2) -> Option<Self> {
+    pub(crate) fn load(logic_path: &str, map_size: U16Vec2) -> Option<Self> {
         let tiles = load_map_logic(logic_path, map_size)?;
         Some(Self { map_size, tiles })
     }
 
-    pub fn map_size(&self) -> &U16Vec2 {
+    pub(crate) fn map_size(&self) -> &U16Vec2 {
         &self.map_size
     }
 
-    pub fn tiles(&self) -> &[TileType] {
+    pub(crate) fn tiles(&self) -> &[TileType] {
         &self.tiles
     }
 
-    pub fn get_tile_type(&self, coordinate: GridCoordinate) -> TileType {
+    pub(crate) fn get_tile_type(&self, coordinate: GridCoordinate) -> TileType {
         let Some(index) = coordinate.to_index(self.map_size) else {
             return TileType::None;
         };
         self.tiles[index]
     }
 
-    pub fn is_tile_type(&self, coordinate: GridCoordinate, tile_type: TileType) -> bool {
+    pub(crate) fn is_tile_type(&self, coordinate: GridCoordinate, tile_type: TileType) -> bool {
         self.get_tile_type(coordinate) == tile_type
     }
 
     /// Prints the map in the same coordinate orientation as the game: bottom-left is (0,0).
-    pub fn print_pixels(&self) {
+    pub(crate) fn print_pixels(&self) {
         for y in (0..self.map_size.y).rev() {
             for x in 0..self.map_size.x {
                 let coordinate = GridCoordinate::new(x, y);
@@ -238,13 +238,13 @@ impl MapTiles {
 
 // GameMap
 
-pub struct GameMap {
+pub(crate) struct GameMap {
     map_tiles: MapTiles,
     enemy_path: EnemyPath,
 }
 
 impl GameMap {
-    pub fn load(logic_layer: MapLogicLayers, map_size: U16Vec2) -> Option<Self> {
+    pub(crate) fn load(logic_layer: MapLogicLayers, map_size: U16Vec2) -> Option<Self> {
         let map_tiles = MapTiles::load(logic_layer.get_abs_path(), map_size)?;
 
         let enemy_path = EnemyPath::parse_from_map_tiles(&map_tiles)?;
@@ -252,26 +252,28 @@ impl GameMap {
         Some(Self { map_tiles, enemy_path })
     }
 
-    pub fn map_tiles(&self) -> &MapTiles {
+    pub(crate) fn map_tiles(&self) -> &MapTiles {
         &self.map_tiles
     }
 
-    pub fn enemy_path(&self) -> &EnemyPath {
+    pub(crate) fn enemy_path(&self) -> &EnemyPath {
         &self.enemy_path
     }
 
-    pub fn test_for_tile_type(&self, coordinate: GridCoordinate, tile_type: TileType) -> bool {
+    pub(crate) fn test_for_tile_type(
+        &self, coordinate: GridCoordinate, tile_type: TileType,
+    ) -> bool {
         self.map_tiles.is_tile_type(coordinate, tile_type)
     }
 
-    pub fn return_tile_type(&self, coordinate: GridCoordinate) -> TileType {
+    pub(crate) fn return_tile_type(&self, coordinate: GridCoordinate) -> TileType {
         self.map_tiles.get_tile_type(coordinate)
     }
 }
 
 // PNG parsing
 
-pub fn load_map_logic(path: &str, expected_size: U16Vec2) -> Option<Vec<TileType>> {
+pub(crate) fn load_map_logic(path: &str, expected_size: U16Vec2) -> Option<Vec<TileType>> {
     let image = image::open(path).ok()?.to_rgb8();
 
     if image.width() != expected_size.x as u32 || image.height() != expected_size.y as u32 {
@@ -296,7 +298,7 @@ pub fn load_map_logic(path: &str, expected_size: U16Vec2) -> Option<Vec<TileType
         .collect()
 }
 
-pub fn load_map_raw(path: &str) -> Option<Vec<u32>> {
+pub(crate) fn load_map_raw(path: &str) -> Option<Vec<u32>> {
     let image = image::open(path).ok()?.to_rgb8();
 
     Some(

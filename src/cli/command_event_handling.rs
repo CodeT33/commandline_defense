@@ -8,7 +8,7 @@ use crate::entities::tower::TowerType;
 use crate::map::map_logic_parsing::TileType;
 use bevy::prelude::{MessageReader, MessageWriter, Res, ResMut};
 
-pub fn handle_command_events(
+pub(crate) fn handle_command_events(
     mut messages: MessageWriter<PlaceTowerMessage>, mut events: MessageReader<CommandEvent>,
     mut selection_state: ResMut<SelectionState>, game_map: Res<MapResource>,
     player_suite: Res<PlayerSuiteResource>, mut debug_settings: ResMut<DebugSettings>,
