@@ -14,9 +14,13 @@ use std::f32::consts::PI;
 
 #[derive(Copy, Clone, Debug)]
 pub enum BulletType {
+    // meme stuff
     Bullet,
     MetalBall,
-    Apple,
+    AppleBall,
+    OrangeBall,
+    DonsBananos,
+    Rocket,
 }
 
 pub struct BulletStats {

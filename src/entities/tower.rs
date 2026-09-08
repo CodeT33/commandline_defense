@@ -73,6 +73,10 @@ pub enum TowerType {
     Goldt,
     #[strum(serialize = "copprina")]
     Copprina,
+
+    //meme stuff
+    DonBanano,
+    RocketTroop,
 }
 
 pub struct TowerRangeMapInner {
@@ -83,7 +87,7 @@ pub struct TowerRangeMapInner {
 pub struct TowerAttributes {
     pub price: u16,
     pub size_tiles: Vec2,
-    pub range_tiles: U16Vec2,
+    pub range: f32,
     pub cooldown_ms: u32,
     pub bullet_speed_tps: f32,
     pub bullet_type: BulletType,
@@ -131,15 +135,16 @@ pub fn handle_tower_placing_events(
             bullet_speed_tps: attributes.bullet_speed_tps,
             bullet_type: attributes.bullet_type,
         });
+        let collider_shape = ColliderShape::Circle(Circle::new(attributes.range));
 
-        Tower::spawn(&mut commands, sprite, tower_pos, tower_data, bullet_emission_data);
+        Tower::spawn(&mut commands, sprite, tower_pos, tower_data, bullet_emission_data, collider_shape);
     }
 }
 
 impl Tower {
     pub fn spawn(
         commands: &mut Commands, sprite: Sprite, tower_pos: GridCoordinate, tower_data: TowerData,
-        bullet_emission_data: BulletEmissionData,
+        bullet_emission_data: BulletEmissionData, collider_shape: ColliderShape,
     ) {
         _ = commands
             .spawn((
@@ -147,7 +152,7 @@ impl Tower {
                 tower_data,
                 sprite,
                 bullet_emission_data,
-                ColliderShape::Circle(Circle::new(consts::TOWER_RANGE_TILES as f32)),
+                collider_shape,
                 ColliderTypeB,
                 Transform::from_xyz(
                     tower_pos.x as f32 + 0.5,

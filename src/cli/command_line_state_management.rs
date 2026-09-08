@@ -175,6 +175,25 @@ fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
     TowerType::from_str(tower_type_string)
         .map_err(|_| println!("Unknown tower type: {:?}", tower_type_string))
         .ok()
+    match tower_type_string {
+        "assault-bober" => Some(TowerType::AssaultTower),
+        "boom-bober" => Some(TowerType::BoomTower),
+        "gatling-bober" => Some(TowerType::GatlingTower),
+        "sniper-bober" => Some(TowerType::SniperTower),
+        "eitshtu" => Some(TowerType::Eitshtu),
+        "acitonion" => Some(TowerType::Acitonion),
+        "strorm" => Some(TowerType::Strorm),
+        "infernon" => Some(TowerType::Infernon),
+        "icebyte" => Some(TowerType::Icebyte),
+        "goldt" => Some(TowerType::Goldt),
+        "copprina" => Some(TowerType::Copprina),
+        "don-banano" => Some(TowerType::DonBanano),
+        "rocket-bober" => Some(TowerType::RocketTroop),
+        _ => {
+            println!("Unknown tower type: {:?}", tower_type_string);
+            None
+        },
+    }
 }
 
 fn parse_tile_position(position: &str) -> Option<GridCoordinate> {
