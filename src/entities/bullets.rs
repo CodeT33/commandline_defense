@@ -31,7 +31,6 @@ pub(crate) struct BulletStats {
     pub(crate) asset: TexturePackAssets,
 }
 
-#[allow(unused)]
 pub(crate) struct BulletData {
     bullet_type: BulletType,
     rotation: Rot2,

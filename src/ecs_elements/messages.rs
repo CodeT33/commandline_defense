@@ -31,7 +31,6 @@ pub(crate) struct PlaceTowerMessage {
 #[derive(Message, Deref, DerefMut)]
 pub(crate) struct CollisionStarted(pub(crate) CollisionPair);
 
-#[allow(unused)]
 #[derive(Message, Deref, DerefMut)]
 pub(crate) struct CollisionSustained(pub(crate) CollisionPair);
 

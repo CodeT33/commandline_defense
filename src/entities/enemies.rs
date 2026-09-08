@@ -23,7 +23,6 @@ pub(crate) enum EnemyType {
     Rocher,
 }
 
-#[allow(unused)]
 pub(crate) struct EnemyData {
     enemy_type: EnemyType,
     path_progress: f32,
