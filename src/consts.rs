@@ -13,7 +13,7 @@ pub(crate) const PHYSICS_FRAME_RATE: u16 = 144 * 2;
 pub(crate) const MAP_SIZE_TILES: U16Vec2 = U16Vec2 { x: 32, y: 16 };
 pub(crate) const TILE_SIZE: u16 = 16;
 
-pub(crate) const ENEMY_SPAWN_INTERVAL_MS: u64 = 2000;
+pub(crate) const ENEMY_SPAWN_INTERVAL_MS: u64 = 300;
 
 pub(crate) const TOWER_COOLDOWN_MS: u32 = 1000;
 
@@ -78,9 +78,9 @@ impl TowerType {
             TowerType::GatlingTower => TowerAttributes {
                 price: 210,
                 size_tiles: Vec2::splat(1.0),
-                range: 2.0,
-                cooldown_ms: 100,
-                bullet_speed_tps: 16.0,
+                range: 40.0,
+                cooldown_ms: 50,
+                bullet_speed_tps: 3.0,
                 bullet_type: BulletType::AppleBall,
                 sprites: [
                     TexturePackAssets::Troops_Gatling_GatlingTroopLvl1,
@@ -219,7 +219,7 @@ impl BulletType {
                 asset: TexturePackAssets::Projectiles_MetalBall,
             },
             BulletType::AppleBall => BulletStats {
-                damage: 0.1,
+                damage: 10.0,
                 health: 1.0,
                 spins: true,
                 relative_collider_size: 1.0,
