@@ -17,7 +17,7 @@ use bevy::asset::AssetServer;
 use bevy::math::{Quat, Rot2, U16Vec2, Vec2};
 use bevy::prelude::{
     Circle, Commands, Entity, MessageReader, MessageWriter, Query, Res, ResMut, Sprite,
-    SpriteImageMode, SpriteScalingMode, Time, Transform, With, default,
+    SpriteImageMode, SpriteScalingMode, Time, Transform, With, Without, default,
 };
 use std::f32::consts::PI;
 use std::time::Duration;
@@ -78,6 +78,7 @@ pub struct TowerAttributes {
     pub bullet_type: BulletType,
     pub sprites: [TexturePackAssets; 4],
     pub tower_rotates: bool,
+    pub predictive_targeting: bool,
 }
 
 impl Default for TowerRangeMapInner {
@@ -213,7 +214,8 @@ pub fn select_tower_target_enemy(
 }
 
 pub fn request_bullet_spawns(
-    mut bullet_spawns: MessageWriter<SpawnBullet>, enemies: Query<(&Enemy, &CreationTime)>,
+    mut bullet_spawns: MessageWriter<SpawnBullet>,
+    enemies: Query<(&Enemy, &CreationTime, &Transform), Without<Tower>>,
     mut towers: Query<(&mut Transform, &Tower, &TowerData, &mut BulletEmissionData), With<Tower>>,
     time: Res<Time>, map: Res<MapResource>,
 ) {
@@ -230,18 +232,23 @@ pub fn request_bullet_spawns(
         // 2. go through the enemies and if a target_pos is acquired, apply the tick and go back to 1.
         // 3. if not tick anyways
         while let Some(shoot_time) = emission_data.timer.tick_if_ready(&time) {
-            for (target_enemy, enemy_creation_time) in
+            for (target_enemy, enemy_creation_time, enemy_transform) in
                 tower.target.iter().filter_map(|e| enemies.get(*e).ok())
             {
-                let Some((target_pos, _hit_time)) = calculate_target_position(
-                    enemy_creation_time.0,
-                    shoot_time,
-                    tower_transform.translation.truncate(),
-                    map.0.enemy_path(),
-                    tower_data.0.bullet_speed_tps,
-                    target_enemy.0.get_type().get_stats().speed_tps,
-                ) else {
-                    continue;
+                let target_pos = if tower_data.0.tower_type.get_attributes().predictive_targeting {
+                    let Some((target_pos, _hit_time)) = calculate_target_position(
+                        enemy_creation_time.0,
+                        shoot_time,
+                        tower_transform.translation.truncate(),
+                        map.0.enemy_path(),
+                        tower_data.0.bullet_speed_tps,
+                        target_enemy.0.get_type().get_stats().speed_tps,
+                    ) else {
+                        continue;
+                    };
+                    target_pos
+                } else {
+                    enemy_transform.translation.truncate()
                 };
 
                 let angle = (target_pos - tower_transform.translation.truncate()).to_angle();

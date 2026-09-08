@@ -65,6 +65,7 @@ impl TowerType {
                     TexturePackAssets::Troops_Assault_AssaultTroopLvl3,
                 ],
                 tower_rotates: true,
+                predictive_targeting: true,
             },
             TowerType::BoomTower => TowerAttributes {
                 price: 320,
@@ -80,6 +81,7 @@ impl TowerType {
                     TexturePackAssets::Troops_Boom_BoomTroopLvl3,
                 ],
                 tower_rotates: true,
+                predictive_targeting: true,
             },
             TowerType::GatlingTower => TowerAttributes {
                 price: 210,
@@ -95,6 +97,7 @@ impl TowerType {
                     TexturePackAssets::Troops_Gatling_GatlingTroopLvl3,
                 ],
                 tower_rotates: true,
+                predictive_targeting: true,
             },
             TowerType::SniperTower => TowerAttributes {
                 price: 160,
@@ -110,6 +113,7 @@ impl TowerType {
                     TexturePackAssets::Troops_Sniper_SniperTroopLvl3,
                 ],
                 tower_rotates: true,
+                predictive_targeting: true,
             },
             TowerType::Eitshtu => TowerAttributes {
                 price: 0,
@@ -125,6 +129,7 @@ impl TowerType {
                     TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl4,
                 ],
                 tower_rotates: false,
+                predictive_targeting: true,
             },
             tt => panic!("TowerType {tt:?} not implemented yet"),
         }
