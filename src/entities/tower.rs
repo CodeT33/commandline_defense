@@ -51,13 +51,13 @@ enum Effect {
 
 #[derive(Debug, Clone, Copy, VariantNames, EnumString)]
 pub enum TowerType {
-    #[strum(serialize = "assault-troop")]
+    #[strum(serialize = "assault-bober")]
     AssaultTower,
-    #[strum(serialize = "boom-troop")]
+    #[strum(serialize = "boom-bober")]
     BoomTower,
-    #[strum(serialize = "gatling-troop")]
+    #[strum(serialize = "gatling-bober")]
     GatlingTower,
-    #[strum(serialize = "sniper-troop")]
+    #[strum(serialize = "sniper-bober")]
     SniperTower,
     #[strum(serialize = "eitshtu")]
     Eitshtu,
@@ -75,7 +75,9 @@ pub enum TowerType {
     Copprina,
 
     //meme stuff
+    #[strum(serialize = "don-banano")]
     DonBanano,
+    #[strum(serialize = "rocket-bober")]
     RocketTroop,
 }
 
@@ -137,7 +139,14 @@ pub fn handle_tower_placing_events(
         });
         let collider_shape = ColliderShape::Circle(Circle::new(attributes.range));
 
-        Tower::spawn(&mut commands, sprite, tower_pos, tower_data, bullet_emission_data, collider_shape);
+        Tower::spawn(
+            &mut commands,
+            sprite,
+            tower_pos,
+            tower_data,
+            bullet_emission_data,
+            collider_shape,
+        );
     }
 }
 
