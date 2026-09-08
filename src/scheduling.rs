@@ -6,6 +6,7 @@ use std::time::Duration;
 pub(crate) struct TimePoint(Duration);
 
 impl TimePoint {
+    #[allow(unused)]
     pub(crate) fn now(time: &Time) -> Self {
         Self(time.elapsed())
     }
@@ -72,23 +73,6 @@ impl IntervalTimer {
             }
         } else {
             self.last_occurrence_ms = Some(now_ms);
-            Some(TimePoint::from_ms(now_ms))
-        }
-    }
-
-    pub(crate) fn get_next_tick_time(&self, time: &Time) -> Option<TimePoint> {
-        let now_ms = time.elapsed().as_millis() as u64;
-        if let Some(last_occurrence_ms) = self.last_occurrence_ms {
-            if last_occurrence_ms + self.interval_ms as u64 <= now_ms {
-                Some(TimePoint::from_ms(if self.paused {
-                    now_ms
-                } else {
-                    last_occurrence_ms + self.interval_ms as u64
-                }))
-            } else {
-                None
-            }
-        } else {
             Some(TimePoint::from_ms(now_ms))
         }
     }

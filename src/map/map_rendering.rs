@@ -10,7 +10,7 @@ pub(crate) fn spawn_map_visual_layer(
     commands: &mut Commands, asset_server: &AssetServer, map_resource: &MapResource,
     texture_pack_settings: &TexturePackSettings,
 ) {
-    let map_size = map_resource.0.map_tiles().map_size;
+    let map_size = map_resource.0.map_tiles().map_size();
 
     commands.spawn((
         Sprite {

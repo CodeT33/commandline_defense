@@ -148,8 +148,8 @@ impl EnemyPath {
 // MapTiles
 
 pub(crate) struct MapTiles {
-    pub(crate) map_size: U16Vec2,
-    pub(crate) tiles: Vec<TileType>,
+    map_size: U16Vec2,
+    tiles: Vec<TileType>,
 }
 
 impl MapTiles {
@@ -158,8 +158,8 @@ impl MapTiles {
         Some(Self { map_size, tiles })
     }
 
-    pub(crate) fn map_size(&self) -> &U16Vec2 {
-        &self.map_size
+    pub(crate) fn map_size(&self) -> U16Vec2 {
+        self.map_size
     }
 
     pub(crate) fn tiles(&self) -> &[TileType] {
@@ -255,12 +255,6 @@ impl GameMap {
         &self.enemy_path
     }
 
-    pub(crate) fn test_for_tile_type(
-        &self, coordinate: GridCoordinate, tile_type: TileType,
-    ) -> bool {
-        self.map_tiles.is_tile_type(coordinate, tile_type)
-    }
-
     pub(crate) fn return_tile_type(&self, coordinate: GridCoordinate) -> TileType {
         self.map_tiles.get_tile_type(coordinate)
     }
@@ -291,21 +285,6 @@ pub(crate) fn load_map_logic(path: &str, expected_size: U16Vec2) -> Option<Vec<T
             interpret_tile_from_rgb(color)
         })
         .collect()
-}
-
-pub(crate) fn load_map_raw(path: &str) -> Option<Vec<u32>> {
-    let image = image::open(path).ok()?.to_rgb8();
-
-    Some(
-        image
-            .pixels()
-            .map(|pixel| {
-                let [r, g, b] = pixel.0;
-
-                ((r as u32) << 16) | ((g as u32) << 8) | (b as u32)
-            })
-            .collect(),
-    )
 }
 
 fn interpret_tile_from_rgb(color: u32) -> Option<TileType> {

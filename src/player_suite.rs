@@ -20,6 +20,7 @@ pub(crate) enum ReturnStatus {
     NotPositive,
 }
 
+#[allow(unused)]
 impl PlayerSuiteResource {
     pub(crate) fn health(&self) -> u16 {
         self.health

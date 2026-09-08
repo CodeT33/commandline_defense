@@ -48,7 +48,7 @@ impl GridCoordinate {
     /// index 0 = top-left pixel
     ///
     /// Therefore, Y needs to be inverted here.
-    pub(crate) fn to_index(&self, map_size: U16Vec2) -> Option<usize> {
+    pub(crate) fn to_index(self, map_size: U16Vec2) -> Option<usize> {
         if !self.is_on_map(map_size) {
             return None;
         }
