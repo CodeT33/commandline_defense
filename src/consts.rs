@@ -141,6 +141,21 @@ impl TowerType {
                 ],
                 tower_rotates: true,
             },
+            TowerType::RocketTroop => TowerAttributes {
+                price: 0,
+                size_tiles: Vec2::splat(2.0),
+                range: 3.0,
+                cooldown_ms: 2000,
+                bullet_speed_tps: 10.0,
+                bullet_type: BulletType::Rocket,
+                sprites: [
+                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                ],
+                tower_rotates: true,
+            },
             tt => panic!("TowerType {tt:?} not implemented yet"),
         }
     }
@@ -168,7 +183,7 @@ impl EnemyType {
             EnemyType::Rocher => EnemyStats {
                 health: 10.0,
                 player_health_penalty: 1,
-                speed_tps:0.5,
+                speed_tps: 0.5,
                 relative_collider_size: 0.5,
                 texture_size_tiles: 2.0,
                 asset: TexturePackAssets::Enemies_Rocher_RocherDarkmodeLvl1,
@@ -179,7 +194,7 @@ impl EnemyType {
                 speed_tps: 1.0,
                 relative_collider_size: 0.25,
                 texture_size_tiles: 1.0,
-                asset: TexturePackAssets::Enemies_Zapano_ZapanoFrontendLvl1
+                asset: TexturePackAssets::Enemies_Zapano_ZapanoFrontendLvl1,
             },
         }
     }
@@ -227,7 +242,15 @@ impl BulletType {
                 relative_collider_size: 1.0,
                 texture_size_tiles: 1.0,
                 asset: TexturePackAssets::WipSprites_Banana,
-            }
+            },
+            BulletType::Rocket => BulletStats {
+                damage: 4.0,
+                health: 1.0,
+                spins: false,
+                relative_collider_size: 1.0,
+                texture_size_tiles: 1.0,
+                asset: TexturePackAssets::Projectiles_OrangeRocket,
+            },
         }
     }
 }

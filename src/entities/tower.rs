@@ -60,6 +60,7 @@ pub enum TowerType {
 
     //meme stuff
     DonBanano,
+    RocketTroop,
 }
 
 pub struct TowerRangeMapInner {
