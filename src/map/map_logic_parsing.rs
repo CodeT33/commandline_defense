@@ -1,12 +1,7 @@
+use crate::consts::map_logic_parsing::{PATH, PATH_START, PLACEABLE, RESTRICTED, WATER};
 use crate::coordinates::GridCoordinate;
 use crate::map::MapLogicLayers;
 use bevy::math::{I16Vec2, U16Vec2};
-
-const PATH_START: u32 = 0xff00ff;
-const PATH: u32 = 0xffff00;
-const RESTRICTED: u32 = 0xff0000;
-const PLACEABLE: u32 = 0x00ff00;
-const WATER: u32 = 0x0000ff;
 
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub(crate) enum TileType {

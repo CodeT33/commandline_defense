@@ -38,15 +38,11 @@ pub(crate) mod viewports {
 }
 
 pub(crate) mod map_logic_parsing {
-    use crate::ui_overlay::grid::LogicGridTileColors;
-
-    pub(crate) const LOGIC_GRID_TILE_COLORS: LogicGridTileColors = LogicGridTileColors {
-        path_start: 0xff00ff,
-        path: 0xffff00,
-        restricted: 0xff0000,
-        placeable: 0x00ff00,
-        water: 0x0000ff,
-    };
+    pub(crate) const PATH_START: u32 = 0xff00ff;
+    pub(crate) const PATH: u32 = 0xffff00;
+    pub(crate) const RESTRICTED: u32 = 0xff0000;
+    pub(crate) const PLACEABLE: u32 = 0x00ff00;
+    pub(crate) const WATER: u32 = 0x0000ff;
 }
 
 impl TowerType {

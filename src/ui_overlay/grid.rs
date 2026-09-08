@@ -155,14 +155,6 @@ pub(crate) fn spawn_contrast_overlay(commands: &mut Commands, map_resource: &Map
     ));
 }
 
-pub(crate) struct LogicGridTileColors {
-    pub(crate) path_start: u32,
-    pub(crate) path: u32,
-    pub(crate) restricted: u32,
-    pub(crate) placeable: u32,
-    pub(crate) water: u32,
-}
-
 pub(crate) struct FontSettings {
     pub(crate) font_size: f32,
     pub(crate) font_weight: FontWeight,
