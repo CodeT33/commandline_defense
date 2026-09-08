@@ -145,6 +145,7 @@ impl TowerType {
                     TexturePackAssets::WipSprites_DonBananoCool,
                 ],
                 tower_rotates: true,
+                predictive_targeting: true,
             },
             TowerType::RocketTroop => TowerAttributes {
                 price: 0,
@@ -160,6 +161,7 @@ impl TowerType {
                     TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
                 ],
                 tower_rotates: true,
+                predictive_targeting: true,
             },
             tt => panic!("TowerType {tt:?} not implemented yet"),
         }

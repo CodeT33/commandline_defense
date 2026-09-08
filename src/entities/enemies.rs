@@ -87,9 +87,7 @@ pub fn handle_enemy_spawns(
             ColliderTypeA,
             ColliderShape::circle(stats.texture_size_tiles * stats.relative_collider_size / 2.0),
             Sprite {
-                image: asset_server.load(
-                    texture_pack_settings.get_asset_path(stats.asset),
-                ),
+                image: asset_server.load(texture_pack_settings.get_asset_path(stats.asset)),
                 custom_size: Some(Vec2::splat(stats.texture_size_tiles)),
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()
