@@ -173,10 +173,10 @@ fn parse_single_command(
 
 fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
     match tower_type_string {
-        "assault-troop" => Some(TowerType::AssaultTower),
-        "boom-troop" => Some(TowerType::BoomTower),
-        "gatling-troop" => Some(TowerType::GatlingTower),
-        "sniper-troop" => Some(TowerType::SniperTower),
+        "assault-bober" => Some(TowerType::AssaultTower),
+        "boom-bober" => Some(TowerType::BoomTower),
+        "gatling-bober" => Some(TowerType::GatlingTower),
+        "sniper-bober" => Some(TowerType::SniperTower),
         "eitshtu" => Some(TowerType::Eitshtu),
         "acitonion" => Some(TowerType::Acitonion),
         "strorm" => Some(TowerType::Strorm),
@@ -184,6 +184,8 @@ fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
         "icebyte" => Some(TowerType::Icebyte),
         "goldt" => Some(TowerType::Goldt),
         "copprina" => Some(TowerType::Copprina),
+        "don-banano" => Some(TowerType::DonBanano),
+        "rocket-bober" => Some(TowerType::RocketTroop),
         _ => {
             println!("Unknown tower type: {:?}", tower_type_string);
             None

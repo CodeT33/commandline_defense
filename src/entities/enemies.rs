@@ -18,6 +18,8 @@ use std::f32;
 pub enum EnemyType {
     WideBirb,
     Mausmeister,
+    Zapano,
+    Rocher,
 }
 
 #[allow(unused)]
@@ -31,6 +33,8 @@ pub struct EnemyStats {
     pub health: f32,
     pub player_health_penalty: u16,
     pub speed_tps: f32,
+    pub(crate) relative_collider_size: f32,
+    pub(crate) texture_size_tiles: f32,
     pub asset: TexturePackAssets,
 }
 
@@ -65,7 +69,7 @@ pub fn request_enemy_spawns(
     }
 
     while let Some(tick_time) = t.tick_if_ready(&time) {
-        enemy_spawns.write(SpawnEnemy { enemy_type: EnemyType::WideBirb, time: tick_time });
+        enemy_spawns.write(SpawnEnemy { enemy_type: EnemyType::Rocher, time: tick_time });
     }
 }
 
@@ -75,17 +79,18 @@ pub fn handle_enemy_spawns(
     map_resource: Res<MapResource>,
 ) {
     for message in enemy_spawns.read() {
+        let stats = message.enemy_type.get_stats();
         commands.spawn((
             Enemy(EnemyData::new(message.enemy_type)),
-            HealthStats(HealthStatsInner::new(message.enemy_type.get_stats().health)),
+            HealthStats(HealthStatsInner::new(stats.health)),
             CreationTime(message.time),
             ColliderTypeA,
-            ColliderShape::circle(consts::ENEMY_BOUNDING_CIRCLE_RADIUS),
+            ColliderShape::circle(stats.texture_size_tiles * stats.relative_collider_size / 2.0),
             Sprite {
                 image: asset_server.load(
-                    texture_pack_settings.get_asset_path(message.enemy_type.get_stats().asset),
+                    texture_pack_settings.get_asset_path(stats.asset),
                 ),
-                custom_size: consts::ENEMY_SPRITE_SIZE_TILES.into(),
+                custom_size: Some(Vec2::splat(stats.texture_size_tiles)),
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()
             },
