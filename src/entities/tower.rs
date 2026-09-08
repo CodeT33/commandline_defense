@@ -281,7 +281,7 @@ fn calculate_target_position(
         let start = current_corner.position().as_vec2() + Vec2::splat(0.5);
         let end = next_corner.position().as_vec2() + Vec2::splat(0.5);
         // 6. Calculate position of enemy on the line at bullet shoot time + movement vector of enemy
-        let enemy_life_time_at_start = enemy_creation_time - bullet_creation_time;
+        let enemy_life_time_at_start = bullet_creation_time - enemy_creation_time;
         let direction_line = (end - start).normalize();
         let line_start_at_t0 = start - direction_line * current_corner.path_length() as f32;
         let enemy_velocity = direction_line * enemy_speed_tps;

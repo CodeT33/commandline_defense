@@ -40,10 +40,10 @@ pub fn move_enemies(
     mut reached_end_writer: MessageWriter<EnemyReachedEnd>, time: Res<Time>,
 ) {
     let path_len = map_resource.0.enemy_path().get_length();
-    let path_duration_secs = path_len as f32 / consts::ENEMY_SPEED_TILES_PER_SECOND;
-    let path_duration_ms = (path_duration_secs * 1000.0).round() as u64;
 
     for (entity, mut transform, mut enemy, creation_time) in &mut enemy {
+        let path_duration_secs = path_len as f32 / enemy.0.enemy_type.get_stats().speed_tps;
+        let path_duration_ms = (path_duration_secs * 1000.0).round() as u64;
         let elapsed_ms = creation_time.0.elapsed_ms(&time);
         let progress = elapsed_ms.min(path_duration_ms) as f32 / path_duration_ms as f32;
         enemy.0.path_progress = progress;
