@@ -15,10 +15,15 @@ pub(crate) enum PreviewCommand {
     #[default]
     None,
     ShowGrid,
+    #[allow(unused)]
     ShowPath,
+    #[allow(unused)]
     ShowRestricted,
+    #[allow(unused)]
     ShowWater,
+    #[allow(unused)]
     ShowTowers,
+    #[allow(unused)]
     ShowRanges,
     HighlightTile {
         tile: GridCoordinate,

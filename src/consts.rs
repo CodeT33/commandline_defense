@@ -13,14 +13,8 @@ pub(crate) const PHYSICS_FRAME_RATE: u16 = 144 * 2;
 pub(crate) const MAP_SIZE_TILES: U16Vec2 = U16Vec2 { x: 32, y: 16 };
 pub(crate) const TILE_SIZE: u16 = 16;
 
-pub(crate) const ENEMY_COUNT: usize = 40;
-pub(crate) const ENEMY_SPRITE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
-pub(crate) const ENEMY_BOUNDING_CIRCLE_RADIUS: f32 = ENEMY_SPRITE_SIZE_TILES.x * 0.3;
-pub(crate) const ENEMY_SPEED_TILES_PER_SECOND: f32 = 3.0;
 pub(crate) const ENEMY_SPAWN_INTERVAL_MS: u64 = 2000;
 
-pub(crate) const TOWER_SIZE_TILES: Vec2 = Vec2::splat(1.0);
-pub(crate) const TOWER_RANGE_TILES: u16 = 5;
 pub(crate) const TOWER_COOLDOWN_MS: u32 = 1000;
 
 pub(crate) const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
@@ -28,6 +22,7 @@ pub(crate) const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 pub(crate) const BULLET_ROTATION_DURATION_MS: u64 = 234;
 
 /// Number of simulated seconds captured before the log is saved and the program is terminated.
+#[cfg(feature = "determinism")]
 pub(crate) const LOG_DURATION_SECS: u64 = 15;
 
 pub(crate) mod viewports {

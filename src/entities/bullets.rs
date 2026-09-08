@@ -41,18 +41,17 @@ pub(crate) struct BulletData {
 
 pub(crate) struct BulletEmissionDataInner {
     pub(crate) timer: IntervalTimer,
-    pub(crate) direction: Rot2,
 }
 
 impl Default for BulletEmissionDataInner {
     fn default() -> Self {
-        Self { timer: IntervalTimer::new(consts::TOWER_COOLDOWN_MS), direction: Rot2::degrees(0.0) }
+        Self { timer: IntervalTimer::new(consts::TOWER_COOLDOWN_MS) }
     }
 }
 
 impl BulletEmissionDataInner {
     pub(crate) fn new(spawn_cooldown_ms: u32) -> Self {
-        Self { timer: IntervalTimer::new(spawn_cooldown_ms), ..Default::default() }
+        Self { timer: IntervalTimer::new(spawn_cooldown_ms) }
     }
 }
 

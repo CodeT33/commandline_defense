@@ -14,7 +14,7 @@ use crate::player_suite::TransactionReturnStatus;
 use crate::scheduling::TimePoint;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
-use bevy::math::{Quat, Rot2, U16Vec2, Vec2};
+use bevy::math::{Quat, Rot2, Vec2};
 use bevy::prelude::{
     Circle, Commands, Entity, MessageReader, MessageWriter, Query, Res, ResMut, Sprite,
     SpriteImageMode, SpriteScalingMode, Time, Transform, With, Without, default,
@@ -81,11 +81,6 @@ pub(crate) enum TowerType {
     RocketTroop,
 }
 
-pub(crate) struct TowerRangeMapInner {
-    pub(crate) size: U16Vec2,
-    towers_in_range: Vec<Vec<Entity>>,
-}
-
 pub(crate) struct TowerAttributes {
     pub(crate) price: u16,
     pub(crate) size_tiles: Vec2,
@@ -94,15 +89,9 @@ pub(crate) struct TowerAttributes {
     pub(crate) bullet_speed_tps: f32,
     pub(crate) bullet_type: BulletType,
     pub(crate) sprites: [TexturePackAssets; 4],
+    #[allow(unused)]
     pub(crate) tower_rotates: bool,
     pub(crate) predictive_targeting: bool,
-}
-
-impl Default for TowerRangeMapInner {
-    fn default() -> Self {
-        let size = U16Vec2::from_array(<[u16; 2]>::from(consts::MAP_SIZE_TILES));
-        Self { size, towers_in_range: vec![Vec::new(); (size.x * size.y) as usize] }
-    }
 }
 
 pub(crate) fn handle_tower_placing_events(
@@ -170,40 +159,6 @@ impl Tower {
                 ),
             ))
             .id();
-    }
-}
-
-impl TowerRangeMapInner {
-    pub(crate) fn clear(&mut self) {
-        for x in &mut self.towers_in_range {
-            x.clear();
-        }
-    }
-
-    pub(crate) fn range_bounds(
-        &self, pos_tiles: GridCoordinate, range_tiles: u16,
-    ) -> (U16Vec2, U16Vec2) {
-        let center = pos_tiles;
-        let range = U16Vec2::splat(range_tiles);
-        let min = center.saturating_sub(range);
-        let max = center.saturating_add(range).min(self.size.saturating_sub(U16Vec2::ONE));
-        (min, max)
-    }
-
-    pub(crate) fn add_range_rect(
-        &mut self, pos_tiles: GridCoordinate, range_tiles: u16, entity: Entity,
-    ) {
-        let (min, max) = self.range_bounds(pos_tiles, range_tiles);
-        for y in min.y..=max.y {
-            for x in min.x..=max.x {
-                self.towers_in_range[(y * self.size.x + x) as usize].push(entity);
-            }
-        }
-    }
-
-    pub(crate) fn towers_in_range_at(&self, tile: GridCoordinate) -> &[Entity] {
-        let index = tile.y as usize * self.size.x as usize + tile.x as usize;
-        &self.towers_in_range[index]
     }
 }
 

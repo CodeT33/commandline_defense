@@ -162,6 +162,7 @@ impl MapTiles {
         self.map_size
     }
 
+    #[allow(unused)]
     pub(crate) fn tiles(&self) -> &[TileType] {
         &self.tiles
     }
@@ -173,11 +174,8 @@ impl MapTiles {
         self.tiles[index]
     }
 
-    pub(crate) fn is_tile_type(&self, coordinate: GridCoordinate, tile_type: TileType) -> bool {
-        self.get_tile_type(coordinate) == tile_type
-    }
-
     /// Prints the map in the same coordinate orientation as the game: bottom-left is (0,0).
+    #[allow(unused)]
     pub(crate) fn print_pixels(&self) {
         for y in (0..self.map_size.y).rev() {
             for x in 0..self.map_size.x {

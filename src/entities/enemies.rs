@@ -14,6 +14,7 @@ use crate::texture_packs::TexturePackAssets;
 use bevy::prelude::*;
 use std::f32;
 
+#[allow(unused)]
 #[derive(Copy, Clone, Debug)]
 pub(crate) enum EnemyType {
     WideBirb,

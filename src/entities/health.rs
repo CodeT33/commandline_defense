@@ -16,6 +16,7 @@ impl HealthStatsInner {
         self.current_health = (self.current_health + amount).clamp(0.0, self.max_health);
     }
 
+    #[allow(unused)]
     pub(crate) fn current_health(&self) -> f32 {
         self.current_health
     }
