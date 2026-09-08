@@ -107,38 +107,33 @@ pub(crate) fn handle_tower_placing_events(
         }
         println!("Performing transaction of {:?}", attributes.price);
 
-        let tower_pos = GridCoordinate::new(message.tower_pos.x, message.tower_pos.y);
-        let bullet_emission_data: BulletEmissionData =
-            BulletEmissionData(BulletEmissionDataInner::new(attributes.cooldown_ms));
+        let tower_pos = GridCoordinate::from_u16vec2(*message.tower_pos);
+        let tower_data = TowerData(TowerDataInner {
+            tower_type: message.tower_type,
+            upgrade_level: UpgradeLevel::SmallSchlongKongStrong,
+            effects: vec![],
+        });
+
+        Tower::spawn(&mut commands, &asset_server, &texture_pack_settings, tower_pos, tower_data);
+    }
+}
+
+impl Tower {
+    pub(crate) fn spawn(
+        commands: &mut Commands, asset_server: &AssetServer,
+        texture_pack_settings: &TexturePackSettings, tower_pos: GridCoordinate,
+        tower_data: TowerData,
+    ) {
+        let attributes = tower_data.0.tower_type.get_attributes();
         let sprite: Sprite = Sprite {
             image: asset_server.load(texture_pack_settings.get_asset_path(attributes.sprites[0])),
             custom_size: attributes.size_tiles.into(),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()
         };
-        let tower_data = TowerData(TowerDataInner {
-            tower_type: message.tower_type,
-            upgrade_level: UpgradeLevel::SmallSchlongKongStrong,
-            effects: vec![],
-        });
+        let bullet_emission_data =
+            BulletEmissionData(BulletEmissionDataInner::new(attributes.cooldown_ms));
         let collider_shape = ColliderShape::Circle(Circle::new(attributes.range));
-
-        Tower::spawn(
-            &mut commands,
-            sprite,
-            tower_pos,
-            tower_data,
-            bullet_emission_data,
-            collider_shape,
-        );
-    }
-}
-
-impl Tower {
-    pub(crate) fn spawn(
-        commands: &mut Commands, sprite: Sprite, tower_pos: GridCoordinate, tower_data: TowerData,
-        bullet_emission_data: BulletEmissionData, collider_shape: ColliderShape,
-    ) {
         _ = commands
             .spawn((
                 Tower::default(),
