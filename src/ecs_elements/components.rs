@@ -4,8 +4,7 @@ use crate::entities::enemies::EnemyData;
 use crate::entities::health::HealthStatsInner;
 use crate::entities::tower::TowerDataInner;
 use crate::scheduling::TimePoint;
-use bevy::ecs::entity::EntityHashSet;
-use bevy::prelude::{Circle, Component, Entity, Rectangle};
+use bevy::prelude::{Circle, Component, Rectangle};
 
 #[derive(Component)]
 pub(crate) struct Enemy(pub(crate) EnemyData);
@@ -39,12 +38,6 @@ pub(crate) struct ColliderTypeA;
 
 #[derive(Component)]
 pub(crate) struct ColliderTypeB;
-
-#[derive(Component, Default)]
-pub(crate) struct Tower {
-    pub(crate) enemies_in_range: EntityHashSet,
-    pub(crate) target: Vec<Entity>,
-}
 
 #[derive(Component)]
 pub(crate) struct TowerData(pub(crate) TowerDataInner);

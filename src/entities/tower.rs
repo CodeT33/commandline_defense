@@ -2,7 +2,7 @@ use crate::collision::CollisionPair;
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::components::{
-    BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, Tower, TowerData,
+    BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, TowerData,
 };
 use crate::ecs_elements::messages::{
     CollisionEnded, CollisionStarted, PlaceTowerMessage, SpawnBullet,
@@ -14,6 +14,7 @@ use crate::player_suite::TransactionReturnStatus;
 use crate::scheduling::TimePoint;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
+use bevy::ecs::entity::EntityHashSet;
 use bevy::math::{Quat, Rot2, Vec2};
 use bevy::prelude::{
     Circle, Commands, Entity, MessageReader, MessageWriter, Query, Res, ResMut, Sprite,
@@ -29,6 +30,8 @@ pub(crate) struct TowerDataInner {
     upgrade_level: UpgradeLevel,
     #[allow(unused)]
     effects: Vec<Effect>,
+    enemies_in_range: EntityHashSet,
+    target: Vec<Entity>,
 }
 
 #[allow(unused)]
@@ -111,13 +114,21 @@ pub(crate) fn handle_tower_placing_events(
             tower_type: message.tower_type,
             upgrade_level: UpgradeLevel::SmallSchlongKongStrong,
             effects: vec![],
+            enemies_in_range: EntityHashSet::default(),
+            target: vec![],
         });
 
-        Tower::spawn(&mut commands, &asset_server, &texture_pack_settings, tower_pos, tower_data);
+        TowerData::spawn(
+            &mut commands,
+            &asset_server,
+            &texture_pack_settings,
+            tower_pos,
+            tower_data,
+        );
     }
 }
 
-impl Tower {
+impl TowerData {
     pub(crate) fn spawn(
         commands: &mut Commands, asset_server: &AssetServer,
         texture_pack_settings: &TexturePackSettings, tower_pos: GridCoordinate,
@@ -135,7 +146,6 @@ impl Tower {
         let collider_shape = ColliderShape::Circle(Circle::new(attributes.range));
         _ = commands
             .spawn((
-                Tower::default(),
                 tower_data,
                 sprite,
                 bullet_emission_data,
@@ -152,7 +162,7 @@ impl Tower {
 }
 
 pub(crate) fn update_enemies_in_range(
-    enemies: Query<Entity, With<Enemy>>, mut towers: Query<(Entity, &mut Tower)>,
+    enemies: Query<Entity, With<Enemy>>, mut towers: Query<(Entity, &mut TowerData)>,
     mut collision_started: MessageReader<CollisionStarted>,
     mut collision_ended: MessageReader<CollisionEnded>,
 ) {
@@ -161,42 +171,42 @@ pub(crate) fn update_enemies_in_range(
         else {
             continue;
         };
-        tower.enemies_in_range.insert(*type_a);
+        tower.0.enemies_in_range.insert(*type_a);
     }
     for CollisionEnded(CollisionPair { type_a, type_b }) in collision_ended.read() {
         let Ok((_, mut tower)) = towers.get_mut(*type_b) else {
             continue;
         };
-        tower.enemies_in_range.remove(type_a);
+        tower.0.enemies_in_range.remove(type_a);
     }
 }
 
 pub(crate) fn select_tower_target_enemy(
-    enemy_transforms: Query<(Entity, &Enemy), With<Enemy>>, mut towers: Query<&mut Tower>,
+    enemy_transforms: Query<(Entity, &Enemy), With<Enemy>>, mut towers: Query<&mut TowerData>,
 ) {
     for mut tower in &mut towers {
         let mut enemies: Vec<_> =
-            tower.enemies_in_range.iter().flat_map(|e| enemy_transforms.get(*e)).collect();
+            tower.0.enemies_in_range.iter().flat_map(|e| enemy_transforms.get(*e)).collect();
         // highest progress first
         enemies.sort_by(|a, b| {
             a.1.0.get_path_progress().total_cmp(&b.1.0.get_path_progress()).reverse()
         });
 
-        tower.target = enemies.iter().map(|e| e.0).collect();
+        tower.0.target = enemies.iter().map(|e| e.0).collect();
     }
 }
 
 pub(crate) fn shoot_bullets(
     mut bullet_spawns: MessageWriter<SpawnBullet>,
-    enemies: Query<(&Enemy, &CreationTime, &Transform), Without<Tower>>,
-    mut towers: Query<(&mut Transform, &Tower, &TowerData, &mut BulletEmissionData), With<Tower>>,
-    time: Res<Time>, map: Res<MapResource>,
+    enemies: Query<(&Enemy, &CreationTime, &Transform), Without<TowerData>>,
+    mut towers: Query<(&mut Transform, &TowerData, &mut BulletEmissionData)>, time: Res<Time>,
+    map: Res<MapResource>,
 ) {
-    for (mut tower_transform, tower, tower_data, mut data) in &mut towers {
+    for (mut tower_transform, tower_data, mut data) in &mut towers {
         let emission_data = &mut data.0;
 
         // 0. if there are no enemies, pause and continue
-        if tower.target.is_empty() {
+        if tower_data.0.target.is_empty() {
             emission_data.timer.pause();
             continue;
         }
@@ -206,7 +216,7 @@ pub(crate) fn shoot_bullets(
         // 3. if not tick anyways
         while let Some(shoot_time) = emission_data.timer.tick_if_ready(&time) {
             for (target_enemy, enemy_creation_time, enemy_transform) in
-                tower.target.iter().filter_map(|e| enemies.get(*e).ok())
+                tower_data.0.target.iter().filter_map(|e| enemies.get(*e).ok())
             {
                 let target_pos = if tower_data.0.tower_type.get_attributes().predictive_targeting {
                     let Some((target_pos, _hit_time)) = calculate_target_position(
