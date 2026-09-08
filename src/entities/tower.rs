@@ -24,14 +24,11 @@ use std::time::Duration;
 use strum::{EnumString, VariantNames};
 
 pub(crate) struct TowerDataInner {
-    #[allow(unused)]
     tower_type: TowerType,
     #[allow(unused)]
     upgrade_level: UpgradeLevel,
     #[allow(unused)]
     effects: Vec<Effect>,
-    pub(crate) bullet_speed_tps: f32,
-    pub(crate) bullet_type: BulletType,
 }
 
 #[allow(unused)]
@@ -123,8 +120,6 @@ pub(crate) fn handle_tower_placing_events(
             tower_type: message.tower_type,
             upgrade_level: UpgradeLevel::SmallSchlongKongStrong,
             effects: vec![],
-            bullet_speed_tps: attributes.bullet_speed_tps,
-            bullet_type: attributes.bullet_type,
         });
         let collider_shape = ColliderShape::Circle(Circle::new(attributes.range));
 
@@ -225,7 +220,7 @@ pub(crate) fn request_bullet_spawns(
                         shoot_time,
                         tower_transform.translation.truncate(),
                         map.0.enemy_path(),
-                        tower_data.0.bullet_speed_tps,
+                        tower_data.0.tower_type.get_attributes().bullet_speed_tps,
                         target_enemy.0.get_type().get_stats().speed_tps,
                     ) else {
                         continue;
@@ -240,11 +235,11 @@ pub(crate) fn request_bullet_spawns(
                 let shoot_direction = Rot2::radians(angle);
 
                 bullet_spawns.write(SpawnBullet {
-                    bullet_type: tower_data.0.bullet_type,
+                    bullet_type: tower_data.0.tower_type.get_attributes().bullet_type,
                     time: shoot_time,
                     position: tower_transform.translation.truncate(),
                     direction: shoot_direction,
-                    speed_tps: tower_data.0.bullet_speed_tps,
+                    speed_tps: tower_data.0.tower_type.get_attributes().bullet_speed_tps,
                 });
                 break;
             }
