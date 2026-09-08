@@ -2,9 +2,9 @@ use crate::cli::command_line_state_management::PreviewCommand;
 use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::map::map_logic_parsing::GameMap;
-use bevy::prelude::Resource;
+use bevy::prelude::{Deref, DerefMut, Resource};
 
-#[derive(Resource)]
+#[derive(Resource, Deref, DerefMut)]
 pub(crate) struct MapResource(pub(crate) GameMap);
 
 #[derive(Resource, Default)]

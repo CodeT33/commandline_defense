@@ -44,18 +44,18 @@ pub(crate) fn move_enemies(
     mut enemy: Query<(Entity, &mut Transform, &mut Enemy, &CreationTime)>,
     mut reached_end_writer: MessageWriter<EnemyReachedEnd>, time: Res<Time>,
 ) {
-    let path_len = map_resource.0.enemy_path().get_length();
+    let path_len = map_resource.enemy_path().get_length();
 
     for (entity, mut transform, mut enemy, creation_time) in &mut enemy {
-        let path_duration_secs = path_len as f32 / enemy.0.enemy_type.get_stats().speed_tps;
+        let path_duration_secs = path_len as f32 / enemy.enemy_type.get_stats().speed_tps;
         let path_duration_ms = (path_duration_secs * 1000.0).round() as u64;
-        let elapsed_ms = creation_time.0.elapsed_ms(&time);
+        let elapsed_ms = creation_time.elapsed_ms(&time);
         let progress = elapsed_ms.min(path_duration_ms) as f32 / path_duration_ms as f32;
-        enemy.0.path_progress = progress;
+        enemy.path_progress = progress;
         if progress == 1.0 {
             reached_end_writer.write(EnemyReachedEnd(entity));
         }
-        *transform = get_enemy_transform(progress, map_resource.0.enemy_path());
+        *transform = get_enemy_transform(progress, map_resource.enemy_path());
     }
 }
 
@@ -93,7 +93,7 @@ pub(crate) fn handle_enemy_spawns(
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()
             },
-            get_enemy_transform(0.0, map_resource.0.enemy_path()),
+            get_enemy_transform(0.0, map_resource.enemy_path()),
         ));
     }
 }
@@ -165,7 +165,7 @@ pub(crate) fn handle_enemies_reaching_end(
     {
         commands.entity(entity).try_despawn();
         player.health =
-            player.health.saturating_sub(enemy.0.enemy_type.get_stats().player_health_penalty);
+            player.health.saturating_sub(enemy.enemy_type.get_stats().player_health_penalty);
     }
     if player.health == 0 {
         commands.trigger(PlayerHasDied);

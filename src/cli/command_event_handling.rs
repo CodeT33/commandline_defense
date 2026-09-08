@@ -52,7 +52,7 @@ fn place_tower(
     messages: &mut MessageWriter<PlaceTowerMessage>, tower_type: &TowerType,
     tower_pos: &GridCoordinate, game_map: &Res<MapResource>,
 ) {
-    let tile_type = game_map.0.return_tile_type(*tower_pos);
+    let tile_type = game_map.return_tile_type(*tower_pos);
 
     println!("Trying to place {:?} at {:?} -> {:?}", tower_type, tower_pos, tile_type);
 

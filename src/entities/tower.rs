@@ -1,4 +1,3 @@
-use crate::collision::CollisionPair;
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::components::{
@@ -134,7 +133,7 @@ impl TowerData {
         texture_pack_settings: &TexturePackSettings, tower_pos: GridCoordinate,
         tower_data: TowerData,
     ) {
-        let attributes = tower_data.0.tower_type.get_attributes();
+        let attributes = tower_data.tower_type.get_attributes();
         let sprite: Sprite = Sprite {
             image: asset_server.load(texture_pack_settings.get_asset_path(attributes.sprites[0])),
             custom_size: attributes.size_tiles.into(),
@@ -162,22 +161,23 @@ impl TowerData {
 }
 
 pub(crate) fn update_enemies_in_range(
-    enemies: Query<Entity, With<Enemy>>, mut towers: Query<(Entity, &mut TowerData)>,
+    enemies: Query<Entity, With<Enemy>>, mut towers: Query<&mut TowerData>,
     mut collision_started: MessageReader<CollisionStarted>,
     mut collision_ended: MessageReader<CollisionEnded>,
 ) {
-    for CollisionStarted(CollisionPair { type_a, type_b }) in collision_started.read() {
-        let Some(Ok((_, mut tower))) = enemies.contains(*type_a).then(|| towers.get_mut(*type_b))
+    for pair in collision_started.read() {
+        let Some(Ok(mut tower)) =
+            enemies.contains(pair.type_a).then(|| towers.get_mut(pair.type_b))
         else {
             continue;
         };
-        tower.0.enemies_in_range.insert(*type_a);
+        tower.enemies_in_range.insert(pair.type_a);
     }
-    for CollisionEnded(CollisionPair { type_a, type_b }) in collision_ended.read() {
-        let Ok((_, mut tower)) = towers.get_mut(*type_b) else {
+    for pair in collision_ended.read() {
+        let Ok(mut tower) = towers.get_mut(pair.type_b) else {
             continue;
         };
-        tower.0.enemies_in_range.remove(type_a);
+        tower.enemies_in_range.remove(&pair.type_a);
     }
 }
 
@@ -186,13 +186,12 @@ pub(crate) fn select_tower_target_enemy(
 ) {
     for mut tower in &mut towers {
         let mut enemies: Vec<_> =
-            tower.0.enemies_in_range.iter().flat_map(|e| enemy_transforms.get(*e)).collect();
+            tower.enemies_in_range.iter().flat_map(|e| enemy_transforms.get(*e)).collect();
         // highest progress first
-        enemies.sort_by(|a, b| {
-            a.1.0.get_path_progress().total_cmp(&b.1.0.get_path_progress()).reverse()
-        });
+        enemies
+            .sort_by(|a, b| a.1.get_path_progress().total_cmp(&b.1.get_path_progress()).reverse());
 
-        tower.0.target = enemies.iter().map(|e| e.0).collect();
+        tower.target = enemies.iter().map(|e| e.0).collect();
     }
 }
 
@@ -203,29 +202,27 @@ pub(crate) fn shoot_bullets(
     map: Res<MapResource>,
 ) {
     for (mut tower_transform, tower_data, mut data) in &mut towers {
-        let emission_data = &mut data.0;
-
         // 0. if there are no enemies, pause and continue
-        if tower_data.0.target.is_empty() {
-            emission_data.timer.pause();
+        if tower_data.target.is_empty() {
+            data.timer.pause();
             continue;
         }
 
         // 1. get next tick time -> if none available continue
         // 2. go through the enemies and if a target_pos is acquired, apply the tick and go back to 1.
         // 3. if not tick anyways
-        while let Some(shoot_time) = emission_data.timer.tick_if_ready(&time) {
+        while let Some(shoot_time) = data.timer.tick_if_ready(&time) {
             for (target_enemy, enemy_creation_time, enemy_transform) in
-                tower_data.0.target.iter().filter_map(|e| enemies.get(*e).ok())
+                tower_data.target.iter().filter_map(|e| enemies.get(*e).ok())
             {
-                let target_pos = if tower_data.0.tower_type.get_attributes().predictive_targeting {
+                let target_pos = if tower_data.tower_type.get_attributes().predictive_targeting {
                     let Some((target_pos, _hit_time)) = calculate_target_position(
                         enemy_creation_time.0,
                         shoot_time,
                         tower_transform.translation.truncate(),
-                        map.0.enemy_path(),
-                        tower_data.0.tower_type.get_attributes().bullet_speed_tps,
-                        target_enemy.0.get_type().get_stats().speed_tps,
+                        map.enemy_path(),
+                        tower_data.tower_type.get_attributes().bullet_speed_tps,
+                        target_enemy.get_type().get_stats().speed_tps,
                     ) else {
                         continue;
                     };
@@ -236,18 +233,18 @@ pub(crate) fn shoot_bullets(
 
                 let angle = (target_pos - tower_transform.translation.truncate()).to_angle();
 
-                if tower_data.0.tower_type.get_attributes().tower_rotates {
+                if tower_data.tower_type.get_attributes().tower_rotates {
                     tower_transform.rotation = Quat::from_rotation_z(angle - PI / 2.0);
                 }
 
                 let shoot_direction = Rot2::radians(angle);
 
                 bullet_spawns.write(SpawnBullet {
-                    bullet_type: tower_data.0.tower_type.get_attributes().bullet_type,
+                    bullet_type: tower_data.tower_type.get_attributes().bullet_type,
                     time: shoot_time,
                     position: tower_transform.translation.truncate(),
                     direction: shoot_direction,
-                    speed_tps: tower_data.0.tower_type.get_attributes().bullet_speed_tps,
+                    speed_tps: tower_data.tower_type.get_attributes().bullet_speed_tps,
                 });
                 break;
             }

@@ -16,7 +16,7 @@ pub(crate) fn set_camera_position(
         return;
     };
 
-    let map_size = map_resource.0.map_tiles().map_size().as_vec2();
+    let map_size = map_resource.map_tiles().map_size().as_vec2();
 
     let window_size = window.size();
 

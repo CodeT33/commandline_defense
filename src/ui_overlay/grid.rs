@@ -26,7 +26,7 @@ pub(crate) fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapRe
         weight: consts::ui::grid::GRID_META_POSITION.font_weight,
         ..default()
     };
-    let map_size = map_resource.0.map_tiles().map_size();
+    let map_size = map_resource.map_tiles().map_size();
 
     for x in 0..map_size.x {
         commands.spawn((
@@ -61,7 +61,7 @@ pub(crate) fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapRe
             let coordinate = GridCoordinate::new(x, y);
             let position = format!("{}{}", get_letter_from_number(y), x);
 
-            let tile_type: TileType = map_resource.0.return_tile_type(coordinate);
+            let tile_type: TileType = map_resource.return_tile_type(coordinate);
             let text_color = match tile_type {
                 TileType::None => consts::ui::grid::GRID_POSITION_TILE_COLORS.none,
                 TileType::PathStart => consts::ui::grid::GRID_POSITION_TILE_COLORS.path_start,
@@ -93,7 +93,7 @@ pub(crate) fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapRe
 }
 
 pub(crate) fn spawn_grid(commands: &mut Commands, map_resource: &MapResource) {
-    let [width, height] = map_resource.0.map_tiles().map_size().to_array();
+    let [width, height] = map_resource.map_tiles().map_size().to_array();
 
     // Vertical lines
     for x in 0..=width {
@@ -136,7 +136,7 @@ pub(crate) fn update_grid_preview(
 }
 
 pub(crate) fn spawn_contrast_overlay(commands: &mut Commands, map_resource: &MapResource) {
-    let map_size = map_resource.0.map_tiles().map_size();
+    let map_size = map_resource.map_tiles().map_size();
 
     commands.spawn((
         Sprite {

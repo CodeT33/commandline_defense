@@ -4,21 +4,21 @@ use crate::entities::enemies::EnemyData;
 use crate::entities::health::HealthStatsInner;
 use crate::entities::tower::TowerDataInner;
 use crate::scheduling::TimePoint;
-use bevy::prelude::{Circle, Component, Rectangle};
+use bevy::prelude::{Circle, Component, Deref, DerefMut, Rectangle};
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 pub(crate) struct Enemy(pub(crate) EnemyData);
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 pub(crate) struct Bullet(pub(crate) BulletData);
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 pub(crate) struct HealthStats(pub(crate) HealthStatsInner);
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 pub(crate) struct CreationTime(pub(crate) TimePoint);
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 pub(crate) struct BulletEmissionData(pub(crate) BulletEmissionDataInner);
 
 #[derive(Component, Copy, Clone)]
@@ -39,7 +39,7 @@ pub(crate) struct ColliderTypeA;
 #[derive(Component)]
 pub(crate) struct ColliderTypeB;
 
-#[derive(Component)]
+#[derive(Component, Deref, DerefMut)]
 pub(crate) struct TowerData(pub(crate) TowerDataInner);
 
 #[derive(Component)]

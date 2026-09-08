@@ -1,5 +1,5 @@
 use bevy::math::{I16Vec2, U16Vec2};
-use std::ops::Deref;
+use bevy::prelude::{Deref, DerefMut};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 /// Logical coordinate of a tile in the game grid.
@@ -11,15 +11,8 @@ use std::ops::Deref;
 /// IMPORTANT:
 /// PNG/image coordinates are NOT the same.
 /// The conversion to a Vec index handles the vertical flip.
+#[derive(Deref, DerefMut)]
 pub(crate) struct GridCoordinate(pub(crate) U16Vec2);
-
-impl Deref for GridCoordinate {
-    type Target = U16Vec2;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
 
 impl GridCoordinate {
     pub(crate) const fn new(x: u16, y: u16) -> Self {

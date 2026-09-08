@@ -20,7 +20,7 @@ impl Default for MapResource {
 }
 
 pub(crate) fn spawn_map_bounds(commands: &mut Commands, map: &MapResource) {
-    let map_size = map.0.map_tiles().map_size().as_vec2();
+    let map_size = map.map_tiles().map_size().as_vec2();
     commands.spawn((
         Map,
         ColliderShape::rect(map_size),

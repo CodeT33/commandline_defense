@@ -11,7 +11,7 @@ pub(crate) fn draw_health_bars(
     mut painter: ShapePainter, query: Query<(&Transform, &HealthStats), Without<Bullet>>,
 ) {
     for (transform, health) in &query {
-        let ratio = health.0.ratio();
+        let ratio = health.ratio();
         let base_pos = transform
             .translation
             .with_y(transform.translation.y - HEALTH_BAR_OFFSET_TILES)

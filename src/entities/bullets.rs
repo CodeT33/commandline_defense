@@ -1,4 +1,3 @@
-use crate::collision::CollisionPair;
 use crate::consts;
 use crate::ecs_elements::components::{
     Bullet, ColliderShape, ColliderTypeB, CreationTime, DeleteWhenOutOfMap, Enemy, HealthStats,
@@ -60,16 +59,16 @@ pub(crate) fn move_bullets(
 ) {
     for (mut tf, bullet, creation_time) in &mut q {
         let delta_time = if bullet.is_added() {
-            creation_time.0.elapsed_ms(&time) as f32 / 1000.0
+            creation_time.elapsed_ms(&time) as f32 / 1000.0
         } else {
             time.delta_secs()
         };
-        let velocity = bullet.0.rotation * Vec2::X * bullet.0.speed_tps * delta_time;
+        let velocity = bullet.rotation * Vec2::X * bullet.speed_tps * delta_time;
         tf.translation += velocity.extend(0.0);
 
-        tf.rotation = if bullet.0.bullet_type.get_stats().spins {
+        tf.rotation = if bullet.bullet_type.get_stats().spins {
             Quat::from_rotation_z(
-                (creation_time.0.elapsed_ms(&time) % consts::BULLET_ROTATION_DURATION_MS) as f32
+                (creation_time.elapsed_ms(&time) % consts::BULLET_ROTATION_DURATION_MS) as f32
                     / consts::BULLET_ROTATION_DURATION_MS as f32
                     * PI
                     * 2.0,
@@ -109,19 +108,19 @@ pub(crate) fn handle_bullet_enemy_collisions(
     mut bullet_query: Query<(&mut HealthStats, &Bullet), Without<Enemy>>,
     mut enemy_query: Query<&mut HealthStats, With<Enemy>>,
 ) {
-    for &CollisionStarted(CollisionPair { type_a, type_b }) in collision_reader.read() {
+    for pair in collision_reader.read() {
         let (Ok((mut bullet_health, bullet)), Ok(mut enemy_health)) =
-            (bullet_query.get_mut(type_b), enemy_query.get_mut(type_a))
+            (bullet_query.get_mut(pair.type_b), enemy_query.get_mut(pair.type_a))
         else {
             continue;
         };
-        enemy_health.0.change_health(-bullet.0.bullet_type.get_stats().damage);
-        if enemy_health.0.is_dead() {
-            commands.entity(type_a).try_despawn();
+        enemy_health.change_health(-bullet.bullet_type.get_stats().damage);
+        if enemy_health.is_dead() {
+            commands.entity(pair.type_a).try_despawn();
         }
-        bullet_health.0.change_health(-1.0);
-        if bullet_health.0.is_dead() {
-            commands.entity(type_b).try_despawn();
+        bullet_health.change_health(-1.0);
+        if bullet_health.is_dead() {
+            commands.entity(pair.type_b).try_despawn();
         }
     }
 }

@@ -5,7 +5,7 @@ use crate::entities::bullets::BulletType;
 use crate::entities::enemies::EnemyType;
 use crate::entities::tower::TowerType;
 use crate::scheduling::TimePoint;
-use bevy::prelude::{Entity, Message, Rot2, Vec2};
+use bevy::prelude::{Deref, DerefMut, Entity, Message, Rot2, Vec2};
 
 #[derive(Message)]
 pub(crate) struct SpawnEnemy {
@@ -28,14 +28,14 @@ pub(crate) struct PlaceTowerMessage {
     pub(crate) tower_pos: GridCoordinate,
 }
 
-#[derive(Message)]
+#[derive(Message, Deref, DerefMut)]
 pub(crate) struct CollisionStarted(pub(crate) CollisionPair);
 
 #[allow(unused)]
-#[derive(Message)]
+#[derive(Message, Deref, DerefMut)]
 pub(crate) struct CollisionSustained(pub(crate) CollisionPair);
 
-#[derive(Message)]
+#[derive(Message, Deref, DerefMut)]
 pub(crate) struct CollisionEnded(pub(crate) CollisionPair);
 
 #[derive(Message, Debug)]
