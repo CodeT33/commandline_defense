@@ -22,7 +22,7 @@ use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
 use crate::ecs_elements::messages::EnemyReachedEnd;
 use crate::entities::enemies::{handle_enemies_reaching_end, handle_enemy_spawns};
-use crate::entities::tower::{request_bullet_spawns, select_tower_target_enemy};
+use crate::entities::tower::{select_tower_target_enemy, shoot_bullets};
 use crate::map::map_rendering::spawn_map_visual_layer;
 use crate::map::spawn_map_bounds;
 use crate::movement::delete_out_of_map_entities;
@@ -120,7 +120,7 @@ fn register_systems(app: &mut App) {
                 update_enemies_in_range,
                 select_tower_target_enemy,
                 (
-                    (request_bullet_spawns, handle_bullet_spawns).chain(),
+                    (shoot_bullets, handle_bullet_spawns).chain(),
                     (request_enemy_spawns, handle_enemy_spawns).chain(),
                 ),
                 handle_enemies_reaching_end,

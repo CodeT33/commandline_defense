@@ -86,7 +86,6 @@ pub(crate) struct TowerAttributes {
     pub(crate) bullet_speed_tps: f32,
     pub(crate) bullet_type: BulletType,
     pub(crate) sprites: [TexturePackAssets; 4],
-    #[allow(unused)]
     pub(crate) tower_rotates: bool,
     pub(crate) predictive_targeting: bool,
 }
@@ -187,7 +186,7 @@ pub(crate) fn select_tower_target_enemy(
     }
 }
 
-pub(crate) fn request_bullet_spawns(
+pub(crate) fn shoot_bullets(
     mut bullet_spawns: MessageWriter<SpawnBullet>,
     enemies: Query<(&Enemy, &CreationTime, &Transform), Without<Tower>>,
     mut towers: Query<(&mut Transform, &Tower, &TowerData, &mut BulletEmissionData), With<Tower>>,
@@ -226,7 +225,11 @@ pub(crate) fn request_bullet_spawns(
                 };
 
                 let angle = (target_pos - tower_transform.translation.truncate()).to_angle();
-                tower_transform.rotation = Quat::from_rotation_z(angle - PI / 2.0);
+
+                if tower_data.0.tower_type.get_attributes().tower_rotates {
+                    tower_transform.rotation = Quat::from_rotation_z(angle - PI / 2.0);
+                }
+
                 let shoot_direction = Rot2::radians(angle);
 
                 bullet_spawns.write(SpawnBullet {
