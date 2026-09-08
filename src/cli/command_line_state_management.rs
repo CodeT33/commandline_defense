@@ -8,7 +8,7 @@ use bevy::input_focus::InputFocus;
 use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut};
 use bevy::text::EditableText;
 use std::str::FromStr;
-use strum::{EnumIter, EnumString, VariantNames};
+use strum::{EnumString, VariantNames};
 
 #[derive(Default)]
 pub enum PreviewCommand {
@@ -25,7 +25,7 @@ pub enum PreviewCommand {
     },
 }
 
-#[derive(Debug, EnumIter, VariantNames, EnumString)]
+#[derive(Debug, VariantNames, EnumString)]
 pub enum Settings {
     #[strum(serialize = "bounding-boxes")]
     BoundingBoxes,
@@ -172,23 +172,9 @@ fn parse_single_command(
 }
 
 fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
-    match tower_type_string {
-        "assault-troop" => Some(TowerType::AssaultTower),
-        "boom-troop" => Some(TowerType::BoomTower),
-        "gatling-troop" => Some(TowerType::GatlingTower),
-        "sniper-troop" => Some(TowerType::SniperTower),
-        "eitshtu" => Some(TowerType::Eitshtu),
-        "acitonion" => Some(TowerType::Acitonion),
-        "strorm" => Some(TowerType::Strorm),
-        "infernon" => Some(TowerType::Infernon),
-        "icebyte" => Some(TowerType::Icebyte),
-        "goldt" => Some(TowerType::Goldt),
-        "copprina" => Some(TowerType::Copprina),
-        _ => {
-            println!("Unknown tower type: {:?}", tower_type_string);
-            None
-        },
-    }
+    TowerType::from_str(tower_type_string)
+        .map_err(|_| println!("Unknown tower type: {:?}", tower_type_string))
+        .ok()
 }
 
 fn parse_tile_position(position: &str) -> Option<GridCoordinate> {

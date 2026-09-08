@@ -21,6 +21,7 @@ use bevy::prelude::{
 };
 use std::f32::consts::PI;
 use std::time::Duration;
+use strum::{EnumString, VariantNames};
 
 pub struct TowerDataInner {
     #[allow(unused)]
@@ -48,19 +49,29 @@ enum Effect {
     BigBirbMode,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, VariantNames, EnumString)]
 pub enum TowerType {
+    #[strum(serialize = "assault-troop")]
     AssaultTower,
+    #[strum(serialize = "boom-troop")]
     BoomTower,
+    #[strum(serialize = "gatling-troop")]
     GatlingTower,
+    #[strum(serialize = "sniper-troop")]
     SniperTower,
-
+    #[strum(serialize = "eitshtu")]
     Eitshtu,
+    #[strum(serialize = "acitonion")]
     Acitonion,
+    #[strum(serialize = "strorm")]
     Strorm,
+    #[strum(serialize = "infernon")]
     Infernon,
+    #[strum(serialize = "icebyte")]
     Icebyte,
+    #[strum(serialize = "goldt")]
     Goldt,
+    #[strum(serialize = "copprina")]
     Copprina,
 }
 
