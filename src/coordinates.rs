@@ -1,5 +1,5 @@
 use bevy::math::{I16Vec2, U16Vec2};
-use std::ops::Deref;
+use bevy::prelude::{Deref, DerefMut};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 /// Logical coordinate of a tile in the game grid.
@@ -11,32 +11,25 @@ use std::ops::Deref;
 /// IMPORTANT:
 /// PNG/image coordinates are NOT the same.
 /// The conversion to a Vec index handles the vertical flip.
-pub struct GridCoordinate(pub U16Vec2);
-
-impl Deref for GridCoordinate {
-    type Target = U16Vec2;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+#[derive(Deref, DerefMut)]
+pub(crate) struct GridCoordinate(pub(crate) U16Vec2);
 
 impl GridCoordinate {
-    pub const fn new(x: u16, y: u16) -> Self {
+    pub(crate) const fn new(x: u16, y: u16) -> Self {
         Self(U16Vec2::new(x, y))
     }
 
-    pub const fn from_u16vec2(position: U16Vec2) -> Self {
+    pub(crate) const fn from_u16vec2(position: U16Vec2) -> Self {
         Self(position)
     }
 
     /// Checks whether this position is inside the given map.
-    pub fn is_on_map(&self, map_size: U16Vec2) -> bool {
+    pub(crate) fn is_on_map(&self, map_size: U16Vec2) -> bool {
         self.x < map_size.x && self.y < map_size.y
     }
 
     /// Checks whether a position is inside the given map.
-    pub fn is_position_on_map(position: U16Vec2, map_size: U16Vec2) -> bool {
+    pub(crate) fn is_position_on_map(position: U16Vec2, map_size: U16Vec2) -> bool {
         position.x < map_size.x && position.y < map_size.y
     }
 
@@ -48,7 +41,7 @@ impl GridCoordinate {
     /// index 0 = top-left pixel
     ///
     /// Therefore, Y needs to be inverted here.
-    pub fn to_index(&self, map_size: U16Vec2) -> Option<usize> {
+    pub(crate) fn to_index(self, map_size: U16Vec2) -> Option<usize> {
         if !self.is_on_map(map_size) {
             return None;
         }
@@ -63,7 +56,7 @@ impl GridCoordinate {
     }
 
     /// Converts a Vec/image index back into a logical bottom-left GridCoordinate.
-    pub fn from_index(index: usize, map_size: U16Vec2) -> Option<Self> {
+    pub(crate) fn from_index(index: usize, map_size: U16Vec2) -> Option<Self> {
         let width = map_size.x as usize;
         let height = map_size.y as usize;
 
@@ -84,7 +77,7 @@ impl GridCoordinate {
 
     /// Returns a neighboring coordinate.
     /// Useful for pathfinding and other grid operations.
-    pub fn offset(&self, offset: I16Vec2, map_size: U16Vec2) -> Option<Self> {
+    pub(crate) fn offset(&self, offset: I16Vec2, map_size: U16Vec2) -> Option<Self> {
         let position = self.checked_add_signed(offset)?;
 
         Self::is_position_on_map(position, map_size).then_some(Self::from_u16vec2(position))

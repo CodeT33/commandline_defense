@@ -2,46 +2,46 @@ use crate::cli::command_line_state_management::PreviewCommand;
 use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::map::map_logic_parsing::GameMap;
-use bevy::prelude::Resource;
+use bevy::prelude::{Deref, DerefMut, Resource};
 
-#[derive(Resource)]
-pub struct MapResource(pub GameMap);
+#[derive(Resource, Deref, DerefMut)]
+pub(crate) struct MapResource(pub(crate) GameMap);
 
 #[derive(Resource, Default)]
-pub struct CommandHistory {
+pub(crate) struct CommandHistory {
     pub(crate) entries: Vec<String>,
     pub(crate) idx: usize,
 }
 
 #[derive(Resource, Default)]
-pub struct CommandState {
-    pub preview: PreviewCommand,
-    pub last_input: String,
+pub(crate) struct CommandState {
+    pub(crate) preview: PreviewCommand,
+    pub(crate) last_input: String,
 }
 
 #[derive(Resource)]
-pub struct PlayerSuiteResource {
-    pub health: u16,
-    pub shield: u16,
-    pub points: u16,
-    pub money: u16,
+pub(crate) struct PlayerSuiteResource {
+    pub(crate) health: u16,
+    pub(crate) shield: u16,
+    pub(crate) points: u16,
+    pub(crate) money: u16,
 }
 
 #[derive(Resource)]
-pub struct TexturePackSettings {
-    pub base_path: String,
+pub(crate) struct TexturePackSettings {
+    pub(crate) base_path: String,
 }
 
 #[derive(Resource, Default)]
-pub struct SelectionState {
-    pub selected_tile: Option<GridCoordinate>,
+pub(crate) struct SelectionState {
+    pub(crate) selected_tile: Option<GridCoordinate>,
 }
 
 #[derive(Resource)]
-pub struct DebugSettings {
-    pub enable_bounding_boxes: bool,
-    pub enemy_spawn_interval_ms: u64,
-    pub sim_speed: f32,
+pub(crate) struct DebugSettings {
+    pub(crate) enable_bounding_boxes: bool,
+    pub(crate) enemy_spawn_interval_ms: u64,
+    pub(crate) sim_speed: f32,
 }
 
 impl Default for DebugSettings {

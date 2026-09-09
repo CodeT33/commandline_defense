@@ -1,17 +1,17 @@
 mod camera;
-pub mod cli;
-pub mod collision;
-pub mod consts;
-pub mod coordinates;
+pub(crate) mod cli;
+pub(crate) mod collision;
+pub(crate) mod consts;
+pub(crate) mod coordinates;
 #[cfg(feature = "determinism")]
-pub mod determinism_harness;
-pub mod ecs_elements;
-pub mod entities;
-pub mod map;
-pub mod movement;
-pub mod player_suite;
-pub mod scheduling;
-pub mod texture_packs;
+pub(crate) mod determinism_harness;
+pub(crate) mod ecs_elements;
+pub(crate) mod entities;
+pub(crate) mod map;
+pub(crate) mod movement;
+pub(crate) mod player_suite;
+pub(crate) mod scheduling;
+pub(crate) mod texture_packs;
 mod ui_overlay;
 
 use crate::camera::{camera_zoom_and_pan, set_camera_position};
@@ -21,8 +21,9 @@ use crate::cli::command_line_state_management::handle_command_line_state;
 use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
 use crate::ecs_elements::messages::EnemyReachedEnd;
+use crate::entities::bullets::{bullet_despawn_observer, bullet_spawn_observer};
 use crate::entities::enemies::{handle_enemies_reaching_end, handle_enemy_spawns};
-use crate::entities::tower::{request_bullet_spawns, select_tower_target_enemy};
+use crate::entities::tower::{select_tower_target_enemy, shoot_bullets};
 use crate::map::map_rendering::spawn_map_visual_layer;
 use crate::map::spawn_map_bounds;
 use crate::movement::delete_out_of_map_entities;
@@ -102,7 +103,9 @@ fn register_messages(app: &mut App) {
 }
 
 fn register_events(app: &mut App) {
-    app.add_observer(player_died_observer);
+    app.add_observer(player_died_observer)
+        .add_observer(bullet_spawn_observer)
+        .add_observer(bullet_despawn_observer);
 }
 
 fn register_systems(app: &mut App) {
@@ -120,7 +123,7 @@ fn register_systems(app: &mut App) {
                 update_enemies_in_range,
                 select_tower_target_enemy,
                 (
-                    (request_bullet_spawns, handle_bullet_spawns).chain(),
+                    (shoot_bullets, handle_bullet_spawns).chain(),
                     (request_enemy_spawns, handle_enemy_spawns).chain(),
                 ),
                 handle_enemies_reaching_end,

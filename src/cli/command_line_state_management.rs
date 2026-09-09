@@ -8,25 +8,30 @@ use bevy::input_focus::InputFocus;
 use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut};
 use bevy::text::EditableText;
 use std::str::FromStr;
-use strum::{EnumIter, EnumString, VariantNames};
+use strum::{EnumString, VariantNames};
 
 #[derive(Default)]
-pub enum PreviewCommand {
+pub(crate) enum PreviewCommand {
     #[default]
     None,
     ShowGrid,
+    #[allow(unused)]
     ShowPath,
+    #[allow(unused)]
     ShowRestricted,
+    #[allow(unused)]
     ShowWater,
+    #[allow(unused)]
     ShowTowers,
+    #[allow(unused)]
     ShowRanges,
     HighlightTile {
         tile: GridCoordinate,
     },
 }
 
-#[derive(Debug, EnumIter, VariantNames, EnumString)]
-pub enum Settings {
+#[derive(Debug, VariantNames, EnumString)]
+pub(crate) enum Settings {
     #[strum(serialize = "bounding-boxes")]
     BoundingBoxes,
     #[strum(serialize = "sim-speed")]
@@ -35,7 +40,7 @@ pub enum Settings {
     EnemySpawnInterval,
 }
 
-pub fn handle_command_line_state(
+pub(crate) fn handle_command_line_state(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
     mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
     mut history: ResMut<CommandHistory>, selection_state: ResMut<SelectionState>,
@@ -172,25 +177,9 @@ fn parse_single_command(
 }
 
 fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
-    match tower_type_string {
-        "assault-bober" => Some(TowerType::AssaultTower),
-        "boom-bober" => Some(TowerType::BoomTower),
-        "gatling-bober" => Some(TowerType::GatlingTower),
-        "sniper-bober" => Some(TowerType::SniperTower),
-        "eitshtu" => Some(TowerType::Eitshtu),
-        "acitonion" => Some(TowerType::Acitonion),
-        "strorm" => Some(TowerType::Strorm),
-        "infernon" => Some(TowerType::Infernon),
-        "icebyte" => Some(TowerType::Icebyte),
-        "goldt" => Some(TowerType::Goldt),
-        "copprina" => Some(TowerType::Copprina),
-        "don-banano" => Some(TowerType::DonBanano),
-        "rocket-bober" => Some(TowerType::RocketTroop),
-        _ => {
-            println!("Unknown tower type: {:?}", tower_type_string);
-            None
-        },
-    }
+    TowerType::from_str(tower_type_string)
+        .map_err(|_| println!("Unknown tower type: {:?}", tower_type_string))
+        .ok()
 }
 
 fn parse_tile_position(position: &str) -> Option<GridCoordinate> {

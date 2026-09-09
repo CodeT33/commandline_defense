@@ -11,22 +11,22 @@ use bevy::prelude::{
 };
 use bevy::text::*;
 
-pub fn get_letter_from_number(number: u16) -> char {
+pub(crate) fn get_letter_from_number(number: u16) -> char {
     if number < 26 { (b'A' + number as u8) as char } else { '_' }
 }
 
-pub fn get_number_from_letter(letter: char) -> Option<u16> {
+pub(crate) fn get_number_from_letter(letter: char) -> Option<u16> {
     let letter = letter.to_ascii_uppercase();
     if letter.is_ascii_uppercase() { Some((letter as u8 - b'A') as u16) } else { None }
 }
 
-pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapResource) {
+pub(crate) fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapResource) {
     let meta_position_text_font: TextFont = TextFont {
         font_size: FontSize::Px(consts::ui::grid::GRID_META_POSITION.font_size),
         weight: consts::ui::grid::GRID_META_POSITION.font_weight,
         ..default()
     };
-    let map_size = map_resource.0.map_tiles().map_size;
+    let map_size = map_resource.map_tiles().map_size();
 
     for x in 0..map_size.x {
         commands.spawn((
@@ -61,7 +61,7 @@ pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapResource)
             let coordinate = GridCoordinate::new(x, y);
             let position = format!("{}{}", get_letter_from_number(y), x);
 
-            let tile_type: TileType = map_resource.0.return_tile_type(coordinate);
+            let tile_type: TileType = map_resource.return_tile_type(coordinate);
             let text_color = match tile_type {
                 TileType::None => consts::ui::grid::GRID_POSITION_TILE_COLORS.none,
                 TileType::PathStart => consts::ui::grid::GRID_POSITION_TILE_COLORS.path_start,
@@ -92,9 +92,8 @@ pub fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapResource)
     }
 }
 
-pub fn spawn_grid(commands: &mut Commands, map_resource: &MapResource) {
-    let width = map_resource.0.map_tiles().map_size.x;
-    let height = map_resource.0.map_tiles().map_size.y;
+pub(crate) fn spawn_grid(commands: &mut Commands, map_resource: &MapResource) {
+    let [width, height] = map_resource.map_tiles().map_size().to_array();
 
     // Vertical lines
     for x in 0..=width {
@@ -125,7 +124,7 @@ pub fn spawn_grid(commands: &mut Commands, map_resource: &MapResource) {
     }
 }
 
-pub fn update_grid_preview(
+pub(crate) fn update_grid_preview(
     command_state: Res<CommandState>, mut grid_overlay: Query<&mut Visibility, With<GridOverlay>>,
 ) {
     let visible = matches!(command_state.preview, PreviewCommand::ShowGrid)
@@ -136,8 +135,8 @@ pub fn update_grid_preview(
     }
 }
 
-pub fn spawn_contrast_overlay(commands: &mut Commands, map_resource: &MapResource) {
-    let map_size = map_resource.0.map_tiles().map_size;
+pub(crate) fn spawn_contrast_overlay(commands: &mut Commands, map_resource: &MapResource) {
+    let map_size = map_resource.map_tiles().map_size();
 
     commands.spawn((
         Sprite {
@@ -155,25 +154,17 @@ pub fn spawn_contrast_overlay(commands: &mut Commands, map_resource: &MapResourc
     ));
 }
 
-pub struct LogicGridTileColors {
-    pub path_start: u32,
-    pub path: u32,
-    pub restricted: u32,
-    pub placeable: u32,
-    pub water: u32,
+pub(crate) struct FontSettings {
+    pub(crate) font_size: f32,
+    pub(crate) font_weight: FontWeight,
+    pub(crate) color: Color,
 }
 
-pub struct FontSettings {
-    pub font_size: f32,
-    pub font_weight: FontWeight,
-    pub color: Color,
-}
-
-pub struct GridTileColors {
-    pub none: Color,
-    pub path_start: Color,
-    pub path: Color,
-    pub restricted: Color,
-    pub placeable: Color,
-    pub water: Color,
+pub(crate) struct GridTileColors {
+    pub(crate) none: Color,
+    pub(crate) path_start: Color,
+    pub(crate) path: Color,
+    pub(crate) restricted: Color,
+    pub(crate) placeable: Color,
+    pub(crate) water: Color,
 }

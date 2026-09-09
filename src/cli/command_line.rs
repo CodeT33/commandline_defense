@@ -4,7 +4,7 @@ use bevy::input_focus::{AutoFocus, InputFocus};
 use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle, TextEdit};
 
-pub fn spawn_command_line(commands: &mut Commands) {
+pub(crate) fn spawn_command_line(commands: &mut Commands) {
     commands
         .spawn((
             Node {
@@ -37,7 +37,7 @@ pub fn spawn_command_line(commands: &mut Commands) {
         });
 }
 
-pub fn navigate_command_history(
+pub(crate) fn navigate_command_history(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
     mut history: ResMut<CommandHistory>,
 ) {

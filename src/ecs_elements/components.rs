@@ -4,59 +4,55 @@ use crate::entities::enemies::EnemyData;
 use crate::entities::health::HealthStatsInner;
 use crate::entities::tower::TowerDataInner;
 use crate::scheduling::TimePoint;
-use bevy::ecs::entity::EntityHashSet;
-use bevy::prelude::{Circle, Component, Entity, Rectangle};
+use bevy::prelude::{Circle, Component, Deref, DerefMut, Entity, Rectangle};
 
-#[derive(Component)]
-pub struct Enemy(pub EnemyData);
+#[derive(Component, Deref, DerefMut)]
+pub(crate) struct Enemy(pub(crate) EnemyData);
 
-#[derive(Component)]
-pub struct Bullet(pub BulletData);
+#[derive(Component, Deref, DerefMut)]
+pub(crate) struct Bullet(pub(crate) BulletData);
 
-#[derive(Component)]
-pub struct HealthStats(pub HealthStatsInner);
+#[derive(Component, Deref, DerefMut)]
+pub(crate) struct TargetEnemy(pub(crate) Entity);
 
-#[derive(Component)]
-pub struct CreationTime(pub TimePoint);
+#[derive(Component, Deref, DerefMut)]
+pub(crate) struct HealthStats(pub(crate) HealthStatsInner);
 
-#[derive(Component)]
-pub struct BulletEmissionData(pub BulletEmissionDataInner);
+#[derive(Component, Deref, DerefMut)]
+pub(crate) struct CreationTime(pub(crate) TimePoint);
+
+#[derive(Component, Deref, DerefMut)]
+pub(crate) struct BulletEmissionData(pub(crate) BulletEmissionDataInner);
 
 #[derive(Component, Copy, Clone)]
-pub enum ColliderShape {
+pub(crate) enum ColliderShape {
     Rectangle(Rectangle),
     Circle(Circle),
 }
 
 #[derive(Component)]
-pub struct DeleteWhenOutOfMap;
+pub(crate) struct DeleteWhenOutOfMap;
 
 #[derive(Component)]
-pub struct Map;
+pub(crate) struct Map;
 
 #[derive(Component)]
-pub struct ColliderTypeA;
+pub(crate) struct ColliderTypeA;
 
 #[derive(Component)]
-pub struct ColliderTypeB;
+pub(crate) struct ColliderTypeB;
 
-#[derive(Component, Default)]
-pub struct Tower {
-    pub enemies_in_range: EntityHashSet,
-    pub target: Vec<Entity>,
-}
+#[derive(Component, Deref, DerefMut)]
+pub(crate) struct TowerData(pub(crate) TowerDataInner);
 
 #[derive(Component)]
-pub struct TowerData(pub TowerDataInner);
+pub(crate) struct GridOverlay;
 
 #[derive(Component)]
-pub struct GridOverlay;
+pub(crate) struct GridLine;
 
 #[derive(Component)]
-pub struct GridLine;
+pub(crate) struct GridPositionLabel;
 
 #[derive(Component)]
-pub struct GridPositionLabel;
-
-#[derive(Component)]
-pub struct TileHighlight;
+pub(crate) struct TileHighlight;

@@ -1,7 +1,7 @@
-use crate::collision::CollisionPair;
 use crate::consts;
 use crate::ecs_elements::components::{
     Bullet, ColliderShape, ColliderTypeB, CreationTime, DeleteWhenOutOfMap, Enemy, HealthStats,
+    TargetEnemy,
 };
 use crate::ecs_elements::messages::{CollisionStarted, SpawnBullet};
 use crate::ecs_elements::resources::TexturePackSettings;
@@ -11,9 +11,10 @@ use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::f32::consts::PI;
+use std::ops::Deref;
 
 #[derive(Copy, Clone, Debug)]
-pub enum BulletType {
+pub(crate) enum BulletType {
     // meme stuff
     Bullet,
     MetalBall,
@@ -23,52 +24,52 @@ pub enum BulletType {
     Rocket,
 }
 
-pub struct BulletStats {
-    pub damage: f32,
-    pub health: f32,
-    pub spins: bool,
-    pub relative_collider_size: f32,
-    pub texture_size_tiles: f32,
-    pub asset: TexturePackAssets,
+pub(crate) struct BulletStats {
+    pub(crate) damage: f32,
+    pub(crate) health: f32,
+    pub(crate) spins: bool,
+    pub(crate) relative_collider_size: f32,
+    pub(crate) texture_size_tiles: f32,
+    pub(crate) asset: TexturePackAssets,
 }
 
-#[allow(unused)]
-pub struct BulletData {
+pub(crate) struct BulletData {
     bullet_type: BulletType,
     rotation: Rot2,
     speed_tps: f32,
 }
 
-pub struct BulletEmissionDataInner {
-    pub timer: IntervalTimer,
-    pub direction: Rot2,
+pub(crate) struct BulletEmissionDataInner {
+    pub(crate) timer: IntervalTimer,
 }
 
 impl Default for BulletEmissionDataInner {
     fn default() -> Self {
-        Self { timer: IntervalTimer::new(consts::TOWER_COOLDOWN_MS), direction: Rot2::degrees(0.0) }
+        Self { timer: IntervalTimer::new(consts::TOWER_COOLDOWN_MS) }
     }
 }
 
 impl BulletEmissionDataInner {
-    pub fn new(spawn_cooldown_ms: u32) -> Self {
-        Self { timer: IntervalTimer::new(spawn_cooldown_ms), ..Default::default() }
+    pub(crate) fn new(spawn_cooldown_ms: u32) -> Self {
+        Self { timer: IntervalTimer::new(spawn_cooldown_ms) }
     }
 }
 
-pub fn move_bullets(mut q: Query<(&mut Transform, Ref<Bullet>, &CreationTime)>, time: Res<Time>) {
+pub(crate) fn move_bullets(
+    mut q: Query<(&mut Transform, Ref<Bullet>, &CreationTime)>, time: Res<Time>,
+) {
     for (mut tf, bullet, creation_time) in &mut q {
         let delta_time = if bullet.is_added() {
-            creation_time.0.elapsed_ms(&time) as f32 / 1000.0
+            creation_time.elapsed_ms(&time) as f32 / 1000.0
         } else {
             time.delta_secs()
         };
-        let velocity = bullet.0.rotation * Vec2::X * bullet.0.speed_tps * delta_time;
+        let velocity = bullet.rotation * Vec2::X * bullet.speed_tps * delta_time;
         tf.translation += velocity.extend(0.0);
 
-        tf.rotation = if bullet.0.bullet_type.get_stats().spins {
+        tf.rotation = if bullet.bullet_type.get_stats().spins {
             Quat::from_rotation_z(
-                (creation_time.0.elapsed_ms(&time) % consts::BULLET_ROTATION_DURATION_MS) as f32
+                (creation_time.elapsed_ms(&time) % consts::BULLET_ROTATION_DURATION_MS) as f32
                     / consts::BULLET_ROTATION_DURATION_MS as f32
                     * PI
                     * 2.0,
@@ -79,13 +80,13 @@ pub fn move_bullets(mut q: Query<(&mut Transform, Ref<Bullet>, &CreationTime)>, 
     }
 }
 
-pub fn handle_bullet_spawns(
+pub(crate) fn handle_bullet_spawns(
     mut bullet_spawns: MessageReader<SpawnBullet>, mut commands: Commands,
     asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
 ) {
     for message in bullet_spawns.read() {
         let stats = message.bullet_type.get_stats();
-        commands.spawn((
+        let mut bullet_entity = commands.spawn((
             Bullet(BulletData::new(message.bullet_type, message.direction, message.speed_tps)),
             HealthStats(HealthStatsInner::new(stats.health)),
             CreationTime(message.time),
@@ -100,33 +101,64 @@ pub fn handle_bullet_spawns(
                 ..default()
             },
         ));
+        if let Some(entity) = message.target_entity {
+            bullet_entity.insert(TargetEnemy(entity));
+        }
     }
 }
 
-pub fn handle_bullet_enemy_collisions(
+pub(crate) fn handle_bullet_enemy_collisions(
     mut commands: Commands, mut collision_reader: MessageReader<CollisionStarted>,
     mut bullet_query: Query<(&mut HealthStats, &Bullet), Without<Enemy>>,
     mut enemy_query: Query<&mut HealthStats, With<Enemy>>,
 ) {
-    for &CollisionStarted(CollisionPair { type_a, type_b }) in collision_reader.read() {
+    for pair in collision_reader.read() {
         let (Ok((mut bullet_health, bullet)), Ok(mut enemy_health)) =
-            (bullet_query.get_mut(type_b), enemy_query.get_mut(type_a))
+            (bullet_query.get_mut(pair.type_b), enemy_query.get_mut(pair.type_a))
         else {
             continue;
         };
-        enemy_health.0.change_health(-bullet.0.bullet_type.get_stats().damage);
-        if enemy_health.0.is_dead() {
-            commands.entity(type_a).try_despawn();
+        enemy_health.change_health(-bullet.bullet_type.get_stats().damage);
+        if enemy_health.is_dead() {
+            commands.entity(pair.type_a).try_despawn();
         }
-        bullet_health.0.change_health(-1.0);
-        if bullet_health.0.is_dead() {
-            commands.entity(type_b).try_despawn();
+        bullet_health.change_health(-1.0);
+        if bullet_health.is_dead() {
+            commands.entity(pair.type_b).try_despawn();
         }
     }
 }
 
+pub(crate) fn bullet_spawn_observer(
+    trigger: On<Add, TargetEnemy>, target_enemy_query: Query<(&TargetEnemy, &Bullet)>,
+    mut enemy_query: Query<&mut Enemy>,
+) {
+    let bullet_entity = trigger.entity;
+    let Ok((target_enemy, bullet_data)) = target_enemy_query.get(bullet_entity) else {
+        return;
+    };
+    let Ok(mut enemy) = enemy_query.get_mut(*target_enemy.deref()) else {
+        return;
+    };
+    enemy.add_target_from_bullet(bullet_entity, bullet_data.bullet_type.get_stats().damage);
+}
+
+pub(crate) fn bullet_despawn_observer(
+    trigger: On<Despawn, Bullet>, target_enemy_query: Query<&TargetEnemy, With<Bullet>>,
+    mut enemy_query: Query<&mut Enemy>,
+) {
+    let bullet_entity = trigger.entity;
+    let Ok(target_enemy) = target_enemy_query.get(bullet_entity) else {
+        return;
+    };
+    let Ok(mut enemy) = enemy_query.get_mut(*target_enemy.deref()) else {
+        return;
+    };
+    enemy.remove_target_from(bullet_entity);
+}
+
 impl BulletData {
-    pub fn new(bullet_type: BulletType, rotation: Rot2, speed_tps: f32) -> Self {
+    pub(crate) fn new(bullet_type: BulletType, rotation: Rot2, speed_tps: f32) -> Self {
         Self { bullet_type, rotation, speed_tps }
     }
 }

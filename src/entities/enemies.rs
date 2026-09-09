@@ -11,54 +11,56 @@ use crate::entities::health::HealthStatsInner;
 use crate::map::map_logic_parsing::EnemyPath;
 use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
+use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
 use std::f32;
 
+#[allow(unused)]
 #[derive(Copy, Clone, Debug)]
-pub enum EnemyType {
+pub(crate) enum EnemyType {
     WideBirb,
     Mausmeister,
     Zapano,
     Rocher,
 }
 
-#[allow(unused)]
-pub struct EnemyData {
+pub(crate) struct EnemyData {
     enemy_type: EnemyType,
     path_progress: f32,
+    targeted_by: EntityHashMap<f32>,
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct EnemyStats {
-    pub health: f32,
-    pub player_health_penalty: u16,
-    pub speed_tps: f32,
+pub(crate) struct EnemyStats {
+    pub(crate) health: f32,
+    pub(crate) player_health_penalty: u16,
+    pub(crate) speed_tps: f32,
     pub(crate) relative_collider_size: f32,
     pub(crate) texture_size_tiles: f32,
-    pub asset: TexturePackAssets,
+    pub(crate) asset: TexturePackAssets,
 }
 
-pub fn move_enemies(
+pub(crate) fn move_enemies(
     map_resource: Res<MapResource>,
     mut enemy: Query<(Entity, &mut Transform, &mut Enemy, &CreationTime)>,
     mut reached_end_writer: MessageWriter<EnemyReachedEnd>, time: Res<Time>,
 ) {
-    let path_len = map_resource.0.enemy_path().get_length();
+    let path_len = map_resource.enemy_path().get_length();
 
     for (entity, mut transform, mut enemy, creation_time) in &mut enemy {
-        let path_duration_secs = path_len as f32 / enemy.0.enemy_type.get_stats().speed_tps;
+        let path_duration_secs = path_len as f32 / enemy.enemy_type.get_stats().speed_tps;
         let path_duration_ms = (path_duration_secs * 1000.0).round() as u64;
-        let elapsed_ms = creation_time.0.elapsed_ms(&time);
+        let elapsed_ms = creation_time.elapsed_ms(&time);
         let progress = elapsed_ms.min(path_duration_ms) as f32 / path_duration_ms as f32;
-        enemy.0.path_progress = progress;
+        enemy.path_progress = progress;
         if progress == 1.0 {
             reached_end_writer.write(EnemyReachedEnd(entity));
         }
-        *transform = get_enemy_transform(progress, map_resource.0.enemy_path());
+        *transform = get_enemy_transform(progress, map_resource.enemy_path());
     }
 }
 
-pub fn request_enemy_spawns(
+pub(crate) fn request_enemy_spawns(
     mut enemy_spawns: MessageWriter<SpawnEnemy>, mut timer: Local<Option<IntervalTimer>>,
     time: Res<Time>, debug_settings: Res<DebugSettings>,
 ) {
@@ -73,7 +75,7 @@ pub fn request_enemy_spawns(
     }
 }
 
-pub fn handle_enemy_spawns(
+pub(crate) fn handle_enemy_spawns(
     mut enemy_spawns: MessageReader<SpawnEnemy>, mut commands: Commands,
     asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
     map_resource: Res<MapResource>,
@@ -87,19 +89,17 @@ pub fn handle_enemy_spawns(
             ColliderTypeA,
             ColliderShape::circle(stats.texture_size_tiles * stats.relative_collider_size / 2.0),
             Sprite {
-                image: asset_server.load(
-                    texture_pack_settings.get_asset_path(stats.asset),
-                ),
+                image: asset_server.load(texture_pack_settings.get_asset_path(stats.asset)),
                 custom_size: Some(Vec2::splat(stats.texture_size_tiles)),
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()
             },
-            get_enemy_transform(0.0, map_resource.0.enemy_path()),
+            get_enemy_transform(0.0, map_resource.enemy_path()),
         ));
     }
 }
 
-pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
+pub(crate) fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
     let progress = progress.clamp(0.0, 1.0);
 
     let Some(start) = path.corners().first() else {
@@ -144,20 +144,32 @@ pub fn get_enemy_transform(progress: f32, path: &EnemyPath) -> Transform {
 }
 
 impl EnemyData {
-    pub fn new(enemy_type: EnemyType) -> Self {
-        Self { enemy_type, path_progress: 0.0 }
+    pub(crate) fn new(enemy_type: EnemyType) -> Self {
+        Self { enemy_type, path_progress: 0.0, targeted_by: Default::default() }
     }
 
-    pub fn get_path_progress(&self) -> f32 {
+    pub(crate) fn get_path_progress(&self) -> f32 {
         self.path_progress
     }
 
-    pub fn get_type(&self) -> EnemyType {
+    pub(crate) fn get_type(&self) -> EnemyType {
         self.enemy_type
+    }
+
+    pub(crate) fn remove_target_from(&mut self, bullet: Entity) {
+        self.targeted_by.remove(&bullet);
+    }
+
+    pub(crate) fn add_target_from_bullet(&mut self, bullet: Entity, damage: f32) {
+        self.targeted_by.insert(bullet, damage);
+    }
+
+    pub(crate) fn get_planned_bullet_damage(&self) -> f32 {
+        self.targeted_by.values().sum()
     }
 }
 
-pub fn handle_enemies_reaching_end(
+pub(crate) fn handle_enemies_reaching_end(
     mut reached_end: MessageReader<EnemyReachedEnd>, enemies: Query<&Enemy>,
     mut player: ResMut<PlayerSuiteResource>, mut commands: Commands,
 ) {
@@ -166,7 +178,7 @@ pub fn handle_enemies_reaching_end(
     {
         commands.entity(entity).try_despawn();
         player.health =
-            player.health.saturating_sub(enemy.0.enemy_type.get_stats().player_health_penalty);
+            player.health.saturating_sub(enemy.enemy_type.get_stats().player_health_penalty);
     }
     if player.health == 0 {
         commands.trigger(PlayerHasDied);

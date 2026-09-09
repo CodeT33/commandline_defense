@@ -1,6 +1,6 @@
 use crate::consts;
 use crate::coordinates::GridCoordinate;
-use crate::ecs_elements::components::{Bullet, Enemy, Tower};
+use crate::ecs_elements::components::{Bullet, Enemy, TowerData};
 use crate::ecs_elements::messages::CommandEvent;
 use crate::entities::tower::TowerType;
 use bevy::app::App;
@@ -11,7 +11,7 @@ use bevy::prelude::{
 use std::fs;
 use std::process::exit;
 
-pub struct DeterminismHarnessPlugin;
+pub(crate) struct DeterminismHarnessPlugin;
 
 impl Plugin for DeterminismHarnessPlugin {
     fn build(&self, app: &mut App) {
@@ -33,8 +33,11 @@ where
 #[allow(clippy::type_complexity)]
 fn log_entity_positions(
     mut tick: Local<u64>, mut lines: Local<Vec<String>>, enemies: Query<&Transform, With<Enemy>>,
-    bullets: Query<&Transform, With<Bullet>>, towers: Query<&Transform, With<Tower>>,
-    others: Query<&Transform, (Without<Enemy>, Without<Bullet>, Without<Tower>, Without<Camera2d>)>,
+    bullets: Query<&Transform, With<Bullet>>, towers: Query<&Transform, With<TowerData>>,
+    others: Query<
+        &Transform,
+        (Without<Enemy>, Without<Bullet>, Without<TowerData>, Without<Camera2d>),
+    >,
 ) {
     *tick += 1;
     lines.push(format!(

@@ -1,8 +1,7 @@
-use crate::collision::CollisionPair;
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::components::{
-    BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, Tower, TowerData,
+    BulletEmissionData, ColliderShape, ColliderTypeB, CreationTime, Enemy, HealthStats, TowerData,
 };
 use crate::ecs_elements::messages::{
     CollisionEnded, CollisionStarted, PlaceTowerMessage, SpawnBullet,
@@ -14,23 +13,24 @@ use crate::player_suite::TransactionReturnStatus;
 use crate::scheduling::TimePoint;
 use crate::texture_packs::TexturePackAssets;
 use bevy::asset::AssetServer;
-use bevy::math::{Quat, Rot2, U16Vec2, Vec2};
+use bevy::ecs::entity::EntityHashSet;
+use bevy::math::{Quat, Rot2, Vec2};
 use bevy::prelude::{
     Circle, Commands, Entity, MessageReader, MessageWriter, Query, Res, ResMut, Sprite,
     SpriteImageMode, SpriteScalingMode, Time, Transform, With, Without, default,
 };
 use std::f32::consts::PI;
 use std::time::Duration;
+use strum::{EnumString, VariantNames};
 
-pub struct TowerDataInner {
-    #[allow(unused)]
+pub(crate) struct TowerDataInner {
     tower_type: TowerType,
     #[allow(unused)]
     upgrade_level: UpgradeLevel,
     #[allow(unused)]
     effects: Vec<Effect>,
-    pub bullet_speed_tps: f32,
-    pub bullet_type: BulletType,
+    enemies_in_range: EntityHashSet,
+    target: Vec<Entity>,
 }
 
 #[allow(unused)]
@@ -48,51 +48,60 @@ enum Effect {
     BigBirbMode,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum TowerType {
+#[derive(Debug, Clone, Copy, VariantNames, EnumString)]
+pub(crate) enum TowerType {
+    #[strum(serialize = "assault-bober")]
     AssaultTower,
+    #[strum(serialize = "boom-bober")]
     BoomTower,
+    #[strum(serialize = "gatling-bober")]
     GatlingTower,
+    #[strum(serialize = "sniper-bober")]
     SniperTower,
-
+    #[strum(serialize = "eitshtu")]
     Eitshtu,
+    #[strum(serialize = "acitonion")]
     Acitonion,
+    #[strum(serialize = "strorm")]
     Strorm,
+    #[strum(serialize = "infernon")]
     Infernon,
+    #[strum(serialize = "icebyte")]
     Icebyte,
+    #[strum(serialize = "goldt")]
     Goldt,
+    #[strum(serialize = "copprina")]
     Copprina,
 
     //meme stuff
+    #[strum(serialize = "don-banano")]
     DonBanano,
+    #[strum(serialize = "rocket-bober")]
     RocketTroop,
 }
 
-pub struct TowerRangeMapInner {
-    pub size: U16Vec2,
-    towers_in_range: Vec<Vec<Entity>>,
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub(crate) enum TargetingType {
+    #[allow(unused)]
+    Basic,
+    #[allow(unused)]
+    Predictive,
+    PredictiveWithLoadBalancing,
 }
 
-pub struct TowerAttributes {
-    pub price: u16,
-    pub size_tiles: Vec2,
-    pub range: f32,
-    pub cooldown_ms: u32,
-    pub bullet_speed_tps: f32,
-    pub bullet_type: BulletType,
-    pub sprites: [TexturePackAssets; 4],
-    pub tower_rotates: bool,
-    pub predictive_targeting: bool,
+pub(crate) struct TowerAttributes {
+    pub(crate) price: u16,
+    pub(crate) size_tiles: Vec2,
+    pub(crate) range: f32,
+    pub(crate) cooldown_ms: u32,
+    pub(crate) bullet_speed_tps: f32,
+    pub(crate) bullet_type: BulletType,
+    pub(crate) sprites: [TexturePackAssets; 4],
+    pub(crate) tower_rotates: bool,
+    pub(crate) targeting_type: TargetingType,
 }
 
-impl Default for TowerRangeMapInner {
-    fn default() -> Self {
-        let size = U16Vec2::from_array(<[u16; 2]>::from(consts::MAP_SIZE_TILES));
-        Self { size, towers_in_range: vec![Vec::new(); (size.x * size.y) as usize] }
-    }
-}
-
-pub fn handle_tower_placing_events(
+pub(crate) fn handle_tower_placing_events(
     mut messages: MessageReader<PlaceTowerMessage>, mut commands: Commands,
     asset_server: Res<AssetServer>, mut player_suite: ResMut<PlayerSuiteResource>,
     texture_pack_settings: Res<TexturePackSettings>,
@@ -108,36 +117,43 @@ pub fn handle_tower_placing_events(
         }
         println!("Performing transaction of {:?}", attributes.price);
 
-        let tower_pos = GridCoordinate::new(message.tower_pos.x, message.tower_pos.y);
-        let bullet_emission_data: BulletEmissionData =
-            BulletEmissionData(BulletEmissionDataInner::new(attributes.cooldown_ms));
+        let tower_pos = GridCoordinate::from_u16vec2(*message.tower_pos);
+        let tower_data = TowerData(TowerDataInner {
+            tower_type: message.tower_type,
+            upgrade_level: UpgradeLevel::SmallSchlongKongStrong,
+            effects: vec![],
+            enemies_in_range: EntityHashSet::default(),
+            target: vec![],
+        });
+
+        TowerData::spawn(
+            &mut commands,
+            &asset_server,
+            &texture_pack_settings,
+            tower_pos,
+            tower_data,
+        );
+    }
+}
+
+impl TowerData {
+    pub(crate) fn spawn(
+        commands: &mut Commands, asset_server: &AssetServer,
+        texture_pack_settings: &TexturePackSettings, tower_pos: GridCoordinate,
+        tower_data: TowerData,
+    ) {
+        let attributes = tower_data.tower_type.get_attributes();
         let sprite: Sprite = Sprite {
             image: asset_server.load(texture_pack_settings.get_asset_path(attributes.sprites[0])),
             custom_size: attributes.size_tiles.into(),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()
         };
-        let tower_data = TowerData(TowerDataInner {
-            tower_type: message.tower_type,
-            upgrade_level: UpgradeLevel::SmallSchlongKongStrong,
-            effects: vec![],
-            bullet_speed_tps: attributes.bullet_speed_tps,
-            bullet_type: attributes.bullet_type,
-        });
+        let bullet_emission_data =
+            BulletEmissionData(BulletEmissionDataInner::new(attributes.cooldown_ms));
         let collider_shape = ColliderShape::Circle(Circle::new(attributes.range));
-
-        Tower::spawn(&mut commands, sprite, tower_pos, tower_data, bullet_emission_data, collider_shape);
-    }
-}
-
-impl Tower {
-    pub fn spawn(
-        commands: &mut Commands, sprite: Sprite, tower_pos: GridCoordinate, tower_data: TowerData,
-        bullet_emission_data: BulletEmissionData, collider_shape: ColliderShape,
-    ) {
         _ = commands
             .spawn((
-                Tower::default(),
                 tower_data,
                 sprite,
                 bullet_emission_data,
@@ -153,101 +169,84 @@ impl Tower {
     }
 }
 
-impl TowerRangeMapInner {
-    pub fn clear(&mut self) {
-        for x in &mut self.towers_in_range {
-            x.clear();
-        }
-    }
-
-    pub fn range_bounds(&self, pos_tiles: GridCoordinate, range_tiles: u16) -> (U16Vec2, U16Vec2) {
-        let center = pos_tiles;
-        let range = U16Vec2::splat(range_tiles);
-        let min = center.saturating_sub(range);
-        let max = center.saturating_add(range).min(self.size.saturating_sub(U16Vec2::ONE));
-        (min, max)
-    }
-
-    pub fn add_range_rect(&mut self, pos_tiles: GridCoordinate, range_tiles: u16, entity: Entity) {
-        let (min, max) = self.range_bounds(pos_tiles, range_tiles);
-        for y in min.y..=max.y {
-            for x in min.x..=max.x {
-                self.towers_in_range[(y * self.size.x + x) as usize].push(entity);
-            }
-        }
-    }
-
-    pub fn towers_in_range_at(&self, tile: GridCoordinate) -> &[Entity] {
-        let index = tile.y as usize * self.size.x as usize + tile.x as usize;
-        &self.towers_in_range[index]
-    }
-}
-
-pub fn update_enemies_in_range(
-    enemies: Query<Entity, With<Enemy>>, mut towers: Query<(Entity, &mut Tower)>,
+pub(crate) fn update_enemies_in_range(
+    enemies: Query<Entity, With<Enemy>>, mut towers: Query<&mut TowerData>,
     mut collision_started: MessageReader<CollisionStarted>,
     mut collision_ended: MessageReader<CollisionEnded>,
 ) {
-    for CollisionStarted(CollisionPair { type_a, type_b }) in collision_started.read() {
-        let Some(Ok((_, mut tower))) = enemies.contains(*type_a).then(|| towers.get_mut(*type_b))
+    for pair in collision_started.read() {
+        let Some(Ok(mut tower)) =
+            enemies.contains(pair.type_a).then(|| towers.get_mut(pair.type_b))
         else {
             continue;
         };
-        tower.enemies_in_range.insert(*type_a);
+        tower.enemies_in_range.insert(pair.type_a);
     }
-    for CollisionEnded(CollisionPair { type_a, type_b }) in collision_ended.read() {
-        let Ok((_, mut tower)) = towers.get_mut(*type_b) else {
+    for pair in collision_ended.read() {
+        let Ok(mut tower) = towers.get_mut(pair.type_b) else {
             continue;
         };
-        tower.enemies_in_range.remove(type_a);
+        tower.enemies_in_range.remove(&pair.type_a);
     }
 }
 
-pub fn select_tower_target_enemy(
-    enemy_transforms: Query<(Entity, &Enemy), With<Enemy>>, mut towers: Query<&mut Tower>,
+pub(crate) fn select_tower_target_enemy(
+    enemy_transforms: Query<(Entity, &Enemy), With<Enemy>>, mut towers: Query<&mut TowerData>,
 ) {
     for mut tower in &mut towers {
         let mut enemies: Vec<_> =
             tower.enemies_in_range.iter().flat_map(|e| enemy_transforms.get(*e)).collect();
         // highest progress first
-        enemies.sort_by(|a, b| {
-            a.1.0.get_path_progress().total_cmp(&b.1.0.get_path_progress()).reverse()
-        });
+        enemies
+            .sort_by(|a, b| a.1.get_path_progress().total_cmp(&b.1.get_path_progress()).reverse());
 
         tower.target = enemies.iter().map(|e| e.0).collect();
     }
 }
 
-pub fn request_bullet_spawns(
+pub(crate) fn shoot_bullets(
     mut bullet_spawns: MessageWriter<SpawnBullet>,
-    enemies: Query<(&Enemy, &CreationTime, &Transform), Without<Tower>>,
-    mut towers: Query<(&mut Transform, &Tower, &TowerData, &mut BulletEmissionData), With<Tower>>,
-    time: Res<Time>, map: Res<MapResource>,
+    enemies: Query<(&Enemy, &CreationTime, &Transform, &HealthStats), Without<TowerData>>,
+    mut towers: Query<(&mut Transform, &TowerData, &mut BulletEmissionData)>, time: Res<Time>,
+    map: Res<MapResource>,
 ) {
-    for (mut tower_transform, tower, tower_data, mut data) in &mut towers {
-        let emission_data = &mut data.0;
-
+    for (mut tower_transform, tower_data, mut data) in &mut towers {
         // 0. if there are no enemies, pause and continue
-        if tower.target.is_empty() {
-            emission_data.timer.pause();
+        if tower_data.target.is_empty() {
+            data.timer.pause();
             continue;
         }
+
+        let tower_attributes = tower_data.tower_type.get_attributes();
 
         // 1. get next tick time -> if none available continue
         // 2. go through the enemies and if a target_pos is acquired, apply the tick and go back to 1.
         // 3. if not tick anyways
-        while let Some(shoot_time) = emission_data.timer.tick_if_ready(&time) {
-            for (target_enemy, enemy_creation_time, enemy_transform) in
-                tower.target.iter().filter_map(|e| enemies.get(*e).ok())
+        while let Some(shoot_time) = data.timer.tick_if_ready(&time) {
+            for (target_entity, target_enemy, enemy_creation_time, enemy_transform, enemy_health) in
+                tower_data.target.iter().filter_map(|e| {
+                    enemies
+                        .get(*e)
+                        .ok()
+                        .map(|(enemy, ect, trfm, health)| (e, enemy, ect, trfm, health))
+                })
             {
-                let target_pos = if tower_data.0.tower_type.get_attributes().predictive_targeting {
+                let target_pos = if matches!(
+                    tower_attributes.targeting_type,
+                    TargetingType::Predictive | TargetingType::PredictiveWithLoadBalancing
+                ) {
+                    if tower_attributes.targeting_type == TargetingType::PredictiveWithLoadBalancing
+                        && target_enemy.get_planned_bullet_damage() >= enemy_health.current_health()
+                    {
+                        continue;
+                    }
                     let Some((target_pos, _hit_time)) = calculate_target_position(
                         enemy_creation_time.0,
                         shoot_time,
                         tower_transform.translation.truncate(),
-                        map.0.enemy_path(),
-                        tower_data.0.bullet_speed_tps,
-                        target_enemy.0.get_type().get_stats().speed_tps,
+                        map.enemy_path(),
+                        tower_attributes.bullet_speed_tps,
+                        target_enemy.get_type().get_stats().speed_tps,
                     ) else {
                         continue;
                     };
@@ -257,15 +256,24 @@ pub fn request_bullet_spawns(
                 };
 
                 let angle = (target_pos - tower_transform.translation.truncate()).to_angle();
-                tower_transform.rotation = Quat::from_rotation_z(angle - PI / 2.0);
+
+                if tower_attributes.tower_rotates {
+                    tower_transform.rotation = Quat::from_rotation_z(angle - PI / 2.0);
+                }
+
                 let shoot_direction = Rot2::radians(angle);
 
                 bullet_spawns.write(SpawnBullet {
-                    bullet_type: tower_data.0.bullet_type,
+                    bullet_type: tower_attributes.bullet_type,
                     time: shoot_time,
                     position: tower_transform.translation.truncate(),
                     direction: shoot_direction,
-                    speed_tps: tower_data.0.bullet_speed_tps,
+                    speed_tps: tower_attributes.bullet_speed_tps,
+                    target_entity: matches!(
+                        tower_attributes.targeting_type,
+                        TargetingType::PredictiveWithLoadBalancing
+                    )
+                    .then_some(*target_entity),
                 });
                 break;
             }
@@ -323,7 +331,7 @@ fn calculate_target_position(
 /// - `vb` = bullet velocity
 /// - `ve` = enemy velocity
 /// - `d` = enemy_pos - tower_pos
-pub fn calculate_collision_time(vb: f32, ve: Vec2, d: Vec2) -> Option<f32> {
+pub(crate) fn calculate_collision_time(vb: f32, ve: Vec2, d: Vec2) -> Option<f32> {
     // a = ||ve||^2 - vb^2
     let a = (-vb).mul_add(vb, ve.length_squared());
     let h = d.dot(ve);

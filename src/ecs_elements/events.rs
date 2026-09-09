@@ -1,4 +1,4 @@
 use bevy::prelude::Event;
 
 #[derive(Event)]
-pub struct PlayerHasDied;
+pub(crate) struct PlayerHasDied;

@@ -6,17 +6,16 @@ use bevy::prelude::{
     Commands, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
 };
 
-pub fn spawn_map_visual_layer(
+pub(crate) fn spawn_map_visual_layer(
     commands: &mut Commands, asset_server: &AssetServer, map_resource: &MapResource,
     texture_pack_settings: &TexturePackSettings,
 ) {
-    let map_size = map_resource.0.map_tiles().map_size;
+    let map_size = map_resource.map_tiles().map_size();
 
     commands.spawn((
         Sprite {
             image: asset_server.load(
-                texture_pack_settings
-                    .get_asset_path(TexturePackAssets::MapVisualLayers_MagicOfLeavesMap1),
+                texture_pack_settings.get_asset_path(TexturePackAssets::MapVisualLayers_ShipYard),
             ),
             custom_size: Option::from(Vec2::splat((consts::TILE_SIZE * 2) as f32)),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
