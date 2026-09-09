@@ -117,18 +117,20 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
             ["show", "towers"] => {
                 return PreviewCommand::SidebarState(UiState::TowersList { filter: None });
             },
-            ["show", "towers", tower_type] => {
-                return PreviewCommand::SidebarState(UiState::TowerInfo(
-                    parse_tower_type(tower_type).unwrap(),
-                ));
+            ["show", "towers", tower_type_string] => {
+                preview = match parse_tower_type(tower_type_string) {
+                    Some(tower_type) => PreviewCommand::SidebarState(UiState::TowerInfo(tower_type)),
+                    None => PreviewCommand::SidebarState(UiState::TowersList {filter: Some(tower_type_string.parse().unwrap())}),
+                }
             },
             ["show", "enemies"] => {
                 return PreviewCommand::SidebarState(UiState::EnemiesList { filter: None });
             },
-            ["show", "enemies", enemy_type] => {
-                return PreviewCommand::SidebarState(UiState::EnemyInfo(
-                    parse_enemy_type(enemy_type).unwrap(),
-                ));
+            ["show", "enemies", enemy_type_string] => {
+                preview = match parse_enemy_type(enemy_type_string) {
+                    Some(enemy_type) => PreviewCommand::SidebarState(UiState::EnemyInfo(enemy_type)),
+                    None => PreviewCommand::SidebarState(UiState::EnemiesList {filter: Some(enemy_type_string.parse().unwrap())})
+                }
             },
 
             _ => {},
