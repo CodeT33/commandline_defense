@@ -6,8 +6,12 @@ use crate::entities::tower::TowerType;
 pub(crate) enum UiState {
     #[default]
     Hidden,
-    TowersList { filter: Option<String> },
-    EnemiesList { filter: Option<String> },
+    TowersList {
+        filter: Option<String>,
+    },
+    EnemiesList {
+        filter: Option<String>,
+    },
     TowerInfo(TowerType),
     EnemyInfo(EnemyType),
     TowerUpgrades(TowerType),

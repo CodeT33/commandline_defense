@@ -91,7 +91,7 @@ fn tower_entry(
     egui::Frame::group(ui.style()).show(ui, |ui| {
         ui.horizontal(|ui| {
             ui.vertical(|ui| {
-                ui.label(egui::RichText::new("assault-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").strong());
+                ui.label(egui::RichText::new("assault-bober").strong());
 
                 ui.label(egui::RichText::new(format!("${}", attributes.price)).size(16.0));
             });
