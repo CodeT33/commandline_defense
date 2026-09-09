@@ -12,6 +12,7 @@ pub(crate) mod movement;
 pub(crate) mod player_suite;
 pub(crate) mod scheduling;
 pub(crate) mod texture_packs;
+pub(crate) mod tiers;
 mod ui_overlay;
 
 use crate::camera::{camera_zoom_and_pan, set_camera_position};
