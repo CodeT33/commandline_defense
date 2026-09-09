@@ -1,3 +1,4 @@
+use crate::cli::auto_completion::Autocompletion;
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::CommandEvent;
 use crate::ecs_elements::resources::{CommandHistory, CommandState, SelectionState};
@@ -7,7 +8,8 @@ use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
 use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut};
 use bevy::text::EditableText;
-use clap::Parser;
+use clap::{Error, Parser, ValueEnum};
+use clap_complete::CompletionCandidate;
 use std::str::FromStr;
 use strum::{EnumString, VariantNames};
 
@@ -31,13 +33,10 @@ pub(crate) enum PreviewCommand {
     },
 }
 
-#[derive(Debug, VariantNames, EnumString, PartialEq, Parser, Copy, Clone)]
+#[derive(Debug, PartialEq, ValueEnum, Copy, Clone)]
 pub(crate) enum Settings {
-    #[strum(serialize = "bounding-boxes")]
     BoundingBoxes,
-    #[strum(serialize = "sim-speed")]
     SimSpeed,
-    #[strum(serialize = "enemy-spawn-interval")]
     EnemySpawnInterval,
 }
 
@@ -128,53 +127,95 @@ fn parse_commandline_input(
         })
         .collect()
 }
+#[derive(Parser, Debug)]
+#[command(
+    no_binary_name = true,
+    disable_help_subcommand = true,
+    disable_help_flag = true,
+    override_usage = "<COMMAND>"
+)]
+pub(crate) enum CommandInput {
+    Help,
+    Select { tile: GridCoordinate },
+    Place { tower_type: TowerType },
+    Clear,
+    Balance,
+    ExitGame,
+
+    Set { setting: Settings, value: f32 },
+}
+
+fn parse_single_command_new(input_str: &str) -> Result<CommandInput, Error> {
+    CommandInput::try_parse_from(input_str.split_whitespace())
+}
+
+fn get_auto_completion_single_line(input_str: &str) -> Vec<String> {
+    CommandInput::get_autocompletion(input_str)
+        .iter()
+        .map(|cc| cc.get_value().to_string_lossy().to_string())
+        .collect()
+}
+
+#[test]
+fn test_input() {
+    let input = "set";
+    println!(
+        "{:?}",
+        match parse_single_command_new(input) {
+            Ok(val) => println!("Parsed: {:?}", val),
+            Err(err) => println!("Err: {}", err),
+        }
+    );
+    println!("{:?}", get_auto_completion_single_line(input));
+}
 
 fn parse_single_command(
     input_str: &str, current_selected_tile: &mut Option<GridCoordinate>,
 ) -> Result<Option<CommandEvent>, String> {
-    let command_text = input_str.trim();
-
-    if command_text.is_empty() {
-        return Ok(None);
-    }
-
-    let tokens: Vec<&str> = command_text.split_whitespace().collect();
-
-    Ok(Some(match tokens.as_slice() {
-        ["help"] => CommandEvent::Help,
-        ["select", position] => {
-            let tile = parse_tile_position(position)
-                .ok_or_else(|| format!("Invalid tile position: {:?}", position))?;
-            *current_selected_tile = Some(tile);
-            CommandEvent::Select { tile }
-        },
-        ["place", tower_type] => {
-            let tile = current_selected_tile
-                .ok_or_else(|| "Cannot place tower: no tile selected".to_string())?;
-            let tower_type = parse_tower_type(tower_type).ok_or_else(|| {
-                format!("Cannot place tower: unknown tower type: {:?}", tower_type)
-            })?;
-            CommandEvent::Place { tower_type, tower_pos: tile }
-        },
-        ["clear"] => {
-            *current_selected_tile = None;
-            CommandEvent::Clear
-        },
-        ["show", "balance"] => CommandEvent::Balance,
-        ["exit", "game"] => CommandEvent::ExitGame,
-        ["set", setting, value] => {
-            let value = value.parse::<f32>().map_err(|e| e.to_string())?;
-            let setting = Settings::from_str(setting).map_err(|_| {
-                format!(
-                    "Unknown setting: \"{}\", possible options are: {}",
-                    setting,
-                    Settings::VARIANTS.join(", ")
-                )
-            })?;
-            CommandEvent::Set { setting, value }
-        },
-        _ => Err(format!("Unknown command: \"{}\"", command_text))?,
-    }))
+    todo!()
+    // let command_text = input_str.trim();
+    //
+    // if command_text.is_empty() {
+    //     return Ok(None);
+    // }
+    //
+    // let tokens: Vec<&str> = command_text.split_whitespace().collect();
+    //
+    // Ok(Some(match tokens.as_slice() {
+    //     ["help"] => CommandEvent::Help,
+    //     ["select", position] => {
+    //         let tile = parse_tile_position(position)
+    //             .ok_or_else(|| format!("Invalid tile position: {:?}", position))?;
+    //         *current_selected_tile = Some(tile);
+    //         CommandEvent::Select { tile }
+    //     },
+    //     ["place", tower_type] => {
+    //         let tile = current_selected_tile
+    //             .ok_or_else(|| "Cannot place tower: no tile selected".to_string())?;
+    //         let tower_type = parse_tower_type(tower_type).ok_or_else(|| {
+    //             format!("Cannot place tower: unknown tower type: {:?}", tower_type)
+    //         })?;
+    //         CommandEvent::Place { tower_type, tower_pos: tile }
+    //     },
+    //     ["clear"] => {
+    //         *current_selected_tile = None;
+    //         CommandEvent::Clear
+    //     },
+    //     ["show", "balance"] => CommandEvent::Balance,
+    //     ["exit", "game"] => CommandEvent::ExitGame,
+    //     ["set", setting, value] => {
+    //         let value = value.parse::<f32>().map_err(|e| e.to_string())?;
+    //         let setting = Settings::from_str(setting).map_err(|_| {
+    //             format!(
+    //                 "Unknown setting: \"{}\", possible options are: {}",
+    //                 setting,
+    //                 Settings::VARIANTS.join(", ")
+    //             )
+    //         })?;
+    //         CommandEvent::Set { setting, value }
+    //     },
+    //     _ => Err(format!("Unknown command: \"{}\"", command_text))?,
+    // }))
 }
 
 fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {

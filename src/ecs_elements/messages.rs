@@ -40,27 +40,14 @@ pub(crate) struct CollisionSustained(pub(crate) CollisionPair);
 #[derive(Message, Deref, DerefMut)]
 pub(crate) struct CollisionEnded(pub(crate) CollisionPair);
 
-#[derive(Parser, Message, Debug, PartialEq, VariantNames)]
-#[command(
-    no_binary_name = true,
-    disable_help_subcommand = true,
-    disable_help_flag = true,
-    override_usage = "<COMMAND>"
-)]
+#[derive(Message, Debug, PartialEq)]
 pub(crate) enum CommandEvent {
-    #[strum(serialize = "help")]
     Help,
-    #[strum(serialize = "select")]
     Select { tile: GridCoordinate },
-    #[strum(serialize = "place")]
     Place { tower_type: TowerType, tower_pos: GridCoordinate },
-    #[strum(serialize = "clear")]
     Clear,
-    #[strum(serialize = "balance")]
     Balance,
-    #[strum(serialize = "exit")]
     ExitGame,
-    #[strum(serialize = "set")]
     Set { setting: Settings, value: f32 },
 }
 
