@@ -58,16 +58,18 @@ pub(crate) enum TowerType {
     GatlingTower,
     #[strum(serialize = "sniper-bober")]
     SniperTower,
+    #[strum(serialize = "rocket-bober")]
+    RocketTroop,
     #[strum(serialize = "eitshtu")]
     Eitshtu,
     #[strum(serialize = "acitonion")]
-    //Acitonion,
+    Acitonion,
     #[strum(serialize = "strorm")]
-    //Strorm,
+    Strorm,
     #[strum(serialize = "infernon")]
-    //Infernon,
+    Infernon,
     #[strum(serialize = "icebyte")]
-    //Icebyte,
+    Icebyte,
     #[strum(serialize = "goldt")]
     //Goldt,
     #[strum(serialize = "copprina")]
@@ -76,8 +78,6 @@ pub(crate) enum TowerType {
     //meme stuff
     #[strum(serialize = "don-banano")]
     DonBanano,
-    #[strum(serialize = "rocket-bober")]
-    RocketTroop,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]

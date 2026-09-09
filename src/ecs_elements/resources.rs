@@ -3,6 +3,7 @@ use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::map::map_logic_parsing::GameMap;
 use bevy::prelude::{Deref, DerefMut, Resource};
+use crate::ui_overlay::ui_state::UiState;
 
 #[derive(Resource, Deref, DerefMut)]
 pub(crate) struct MapResource(pub(crate) GameMap);

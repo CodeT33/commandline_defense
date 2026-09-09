@@ -3,11 +3,14 @@ use crate::ecs_elements::resources::{CommandState, TexturePackSettings};
 use crate::entities::tower::TowerType;
 use crate::ui_overlay::ui_state::UiState;
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts, EguiTextureHandle};
+use bevy_egui::{EguiContexts, EguiTextureHandle, egui};
 use egui::{LayerId, Ui, UiBuilder};
 use strum::IntoEnumIterator;
 
-pub fn draw_sidebar(mut contexts: EguiContexts, command_state: Res<CommandState>, asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>) -> Result {
+pub fn draw_sidebar(
+    mut contexts: EguiContexts, command_state: Res<CommandState>, asset_server: Res<AssetServer>,
+    texture_pack_settings: Res<TexturePackSettings>,
+) -> Result {
     let ctx = contexts.ctx_mut()?;
     let mut viewport_ui = Ui::new(
         ctx.clone(),
@@ -24,7 +27,14 @@ pub fn draw_sidebar(mut contexts: EguiContexts, command_state: Res<CommandState>
 
                 egui::ScrollArea::vertical().show(ui, |ui| {
                     for tower in TowerType::iter() {
-                        tower_entry(ui, &mut contexts, &asset_server, &texture_pack_settings, tower).expect("Could not load tower into sidebar");
+                        tower_entry(
+                            ui,
+                            &mut contexts,
+                            &asset_server,
+                            &texture_pack_settings,
+                            tower,
+                        )
+                        .expect("Could not load tower into sidebar");
                     }
                 });
             },
@@ -68,37 +78,28 @@ pub fn draw_sidebar(mut contexts: EguiContexts, command_state: Res<CommandState>
 }
 
 fn tower_entry(
-    ui: &mut Ui,
-    contexts: &mut EguiContexts,
-    asset_server: &AssetServer,
-    texture_pack_settings: &TexturePackSettings,
-    tower_type: TowerType,
+    ui: &mut Ui, contexts: &mut EguiContexts, asset_server: &AssetServer,
+    texture_pack_settings: &TexturePackSettings, tower_type: TowerType,
 ) -> Result {
-
     let attributes = tower_type.get_attributes();
 
-    let image_handle = asset_server.load(
-        texture_pack_settings.get_asset_path(attributes.preview_sprite));
+    let image_handle =
+        asset_server.load(texture_pack_settings.get_asset_path(attributes.preview_sprite));
 
-    let texture_id = contexts.add_image(
-        EguiTextureHandle::Strong(image_handle)
-    );
+    let texture_id = contexts.add_image(EguiTextureHandle::Strong(image_handle));
 
-    egui::Frame::group(ui.style())
-        .show(ui, |ui| {
-            ui.horizontal(|ui| {
-                ui.vertical(|ui| {
-                    ui.label(egui::RichText::new("assault-bober").strong());
+    egui::Frame::group(ui.style()).show(ui, |ui| {
+        ui.horizontal(|ui| {
+            ui.vertical(|ui| {
+                ui.label(egui::RichText::new("assault-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").strong());
 
-                    ui.label(egui::RichText::new(format!("${}", attributes.price)).size(16.0));
-                });
-
-                ui.add(
-                    egui::Image::new(egui::load::SizedTexture::new(texture_id, [64.0, 64.0]))
-                );
+                ui.label(egui::RichText::new(format!("${}", attributes.price)).size(16.0));
             });
-        });
 
-    ui.add_space(5.0);
+            ui.add(egui::Image::new(egui::load::SizedTexture::new(texture_id, [64.0, 64.0])));
+        });
+    });
+
+    ui.add_space(4.0);
     Ok(())
 }

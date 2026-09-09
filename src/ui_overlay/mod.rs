@@ -11,9 +11,9 @@ use bevy::prelude::{
 pub(crate) mod debug;
 pub(crate) mod grid;
 pub(crate) mod health_bars;
+pub(crate) mod info_sidebar;
 pub(crate) mod selection;
 pub(crate) mod ui_state;
-pub(crate) mod info_sidebar;
 
 pub(crate) fn spawn_ui_overlay(
     commands: &mut Commands, asset_server: &AssetServer, map_resource: &MapResource,

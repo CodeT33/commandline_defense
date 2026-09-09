@@ -5,7 +5,6 @@ use crate::texture_packs::TexturePackAssets;
 use crate::tiers::{ValueTiers, ValueType};
 use bevy::math::U16Vec2;
 use bevy::prelude::Vec2;
-use egui::Event::Text;
 
 pub(crate) const WINDOW_TITLE: &str = "Commandline Defense";
 pub(crate) const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
@@ -114,7 +113,7 @@ impl TowerType {
                 targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
             TowerType::Eitshtu => TowerAttributes {
-                price: 0,
+                price: 80,
                 size_tiles: Vec2::splat(1.0),
                 range: 3.0,
                 cooldown_ms: 300,
@@ -126,6 +125,74 @@ impl TowerType {
                     TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl2,
                     TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl3,
                     TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl4,
+                ],
+                tower_rotates: false,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+            },
+            TowerType::Acitonion => TowerAttributes {
+                price: 260,
+                size_tiles: Vec2::splat(1.0),
+                range: 3.0,
+                cooldown_ms: 300,
+                bullet_speed_tps: 10.0,
+                bullet_type: BulletType::Bullet,
+                preview_sprite: TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl1,
+                sprites: [
+                    TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl1,
+                    TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl2,
+                    TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl3,
+                    TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl4,
+                ],
+                tower_rotates: false,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+            },
+            TowerType::Strorm => TowerAttributes {
+                price: 420,
+                size_tiles: Vec2::splat(1.0),
+                range: 10.0,
+                cooldown_ms: 3000,
+                bullet_speed_tps: 100.0,
+                bullet_type: BulletType::Bullet,
+                preview_sprite: TexturePackAssets::ElementalRunes_Strorm_StrormLvl1,
+                sprites: [
+                    TexturePackAssets::ElementalRunes_Strorm_StrormLvl1,
+                    TexturePackAssets::ElementalRunes_Strorm_StrormLvl2,
+                    TexturePackAssets::ElementalRunes_Strorm_StrormLvl3,
+                    TexturePackAssets::ElementalRunes_Strorm_StrormLvl4,
+                ],
+                tower_rotates: false,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+            },
+            TowerType::Infernon => TowerAttributes {
+                price: 380,
+                size_tiles: Vec2::splat(1.0),
+                range: 3.0,
+                cooldown_ms: 800,
+                bullet_speed_tps: 30.0,
+                bullet_type: BulletType::AppleBall,
+                preview_sprite: TexturePackAssets::ElementalRunes_Infernon_InfernonLvl1,
+                sprites: [
+                    TexturePackAssets::ElementalRunes_Infernon_InfernonLvl2,
+                    TexturePackAssets::ElementalRunes_Infernon_InfernonLvl2,
+                    TexturePackAssets::ElementalRunes_Infernon_InfernonLvl3,
+                    TexturePackAssets::ElementalRunes_Infernon_InfernonLvl4,
+                ],
+                tower_rotates: false,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+            },
+            TowerType::Icebyte => TowerAttributes {
+                price: 95,
+                size_tiles: Vec2::splat(1.0),
+                range: 2.0,
+                cooldown_ms: 600,
+                bullet_speed_tps: 1.0,
+                bullet_type: BulletType::DonsBananos,
+                preview_sprite: TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl1,
+                sprites: [
+                    TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl2,
+                    TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl2,
+                    TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl3,
+                    TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl4,
                 ],
                 tower_rotates: false,
                 targeting_type: TargetingType::PredictiveWithLoadBalancing,
@@ -164,7 +231,6 @@ impl TowerType {
                 tower_rotates: true,
                 targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
-            tt => panic!("TowerType {tt:?} not implemented yet"),
         }
     }
 }

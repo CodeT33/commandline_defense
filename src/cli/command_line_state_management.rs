@@ -115,26 +115,33 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
                 }
             },
             ["show", menu_path] => {
-
                 let parts: Vec<&str> = menu_path.split('/').collect();
 
                 match parts.as_slice() {
                     ["menu", "towers"] => {
-                        return PreviewCommand::SidebarState(
-                            UiState::TowersList {filter: None}
-                        );
+                        return PreviewCommand::SidebarState(UiState::TowersList { filter: None });
                     },
-                    ["menu", "towers", tower_type_string] =>preview = match parse_tower_type(tower_type_string) {
-                        Some(tower_type) => PreviewCommand::SidebarState(UiState::TowerInfo(tower_type)),
-                        None => PreviewCommand::SidebarState(UiState::TowersList {filter: Some(tower_type_string.parse().unwrap())}),
+                    ["menu", "towers", tower_type_string] => {
+                        preview = match parse_tower_type(tower_type_string) {
+                            Some(tower_type) => {
+                                PreviewCommand::SidebarState(UiState::TowerInfo(tower_type))
+                            },
+                            None => PreviewCommand::SidebarState(UiState::TowersList {
+                                filter: Some(tower_type_string.parse().unwrap()),
+                            }),
+                        }
                     },
                     ["menu", "enemies"] => {
-                        return PreviewCommand::SidebarState(UiState::EnemiesList {filter: None});
+                        return PreviewCommand::SidebarState(UiState::EnemiesList { filter: None });
                     },
                     ["show", "menu", "enemies", enemy_type_string] => {
                         preview = match parse_enemy_type(enemy_type_string) {
-                            Some(enemy_type) => PreviewCommand::SidebarState(UiState::EnemyInfo(enemy_type)),
-                            None => PreviewCommand::SidebarState(UiState::EnemiesList {filter: Some(enemy_type_string.parse().unwrap())})
+                            Some(enemy_type) => {
+                                PreviewCommand::SidebarState(UiState::EnemyInfo(enemy_type))
+                            },
+                            None => PreviewCommand::SidebarState(UiState::EnemiesList {
+                                filter: Some(enemy_type_string.parse().unwrap()),
+                            }),
                         }
                     },
                     _ => {},
