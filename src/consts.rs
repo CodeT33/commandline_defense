@@ -2,6 +2,7 @@ use crate::entities::bullets::{BulletStats, BulletType};
 use crate::entities::enemies::{EnemyStats, EnemyType};
 use crate::entities::tower::{TargetingType, TowerAttributes, TowerType};
 use crate::texture_packs::TexturePackAssets;
+use crate::tiers::{ValueTiers, ValueType};
 use bevy::math::U16Vec2;
 use bevy::prelude::Vec2;
 
@@ -315,3 +316,65 @@ pub(crate) mod rendering_layers {
 }
 
 pub(crate) const BASE_TEXTURE_PACK_PATH: &str = "assets/texture_packs/default";
+
+impl ValueTiers {
+    #[allow(unused)]
+    pub fn get_value(&self, value_type: ValueType) -> f32 {
+        match value_type {
+            ValueType::Range => match self {
+                ValueTiers::S => 1.0,
+                ValueTiers::A => 1.0,
+                ValueTiers::B => 1.0,
+                ValueTiers::C => 1.0,
+                ValueTiers::D => 1.0,
+                ValueTiers::E => 1.0,
+                ValueTiers::F => 1.0,
+            },
+            ValueType::BulletSpeed => match self {
+                ValueTiers::S => 1.0,
+                ValueTiers::A => 1.0,
+                ValueTiers::B => 1.0,
+                ValueTiers::C => 1.0,
+                ValueTiers::D => 1.0,
+                ValueTiers::E => 1.0,
+                ValueTiers::F => 1.0,
+            },
+            ValueType::MovementSpeed => match self {
+                ValueTiers::S => 1.0,
+                ValueTiers::A => 1.0,
+                ValueTiers::B => 1.0,
+                ValueTiers::C => 1.0,
+                ValueTiers::D => 1.0,
+                ValueTiers::E => 1.0,
+                ValueTiers::F => 1.0,
+            },
+            ValueType::ReloadSpeed => match self {
+                ValueTiers::S => 1.0,
+                ValueTiers::A => 1.0,
+                ValueTiers::B => 1.0,
+                ValueTiers::C => 1.0,
+                ValueTiers::D => 1.0,
+                ValueTiers::E => 1.0,
+                ValueTiers::F => 1.0,
+            },
+            ValueType::BulletDamage => match self {
+                ValueTiers::S => 1.0,
+                ValueTiers::A => 1.0,
+                ValueTiers::B => 1.0,
+                ValueTiers::C => 1.0,
+                ValueTiers::D => 1.0,
+                ValueTiers::E => 1.0,
+                ValueTiers::F => 1.0,
+            },
+            ValueType::AreaDamage => match self {
+                ValueTiers::S => 1.0,
+                ValueTiers::A => 1.0,
+                ValueTiers::B => 1.0,
+                ValueTiers::C => 1.0,
+                ValueTiers::D => 1.0,
+                ValueTiers::E => 1.0,
+                ValueTiers::F => 1.0,
+            },
+        }
+    }
+}
