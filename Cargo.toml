@@ -25,6 +25,8 @@ bevy_vector_shapes = "0.13"
 macros = { path = "./macros" }
 image = "0.25.10"
 strum = { version = "0.28.0", features = ["derive"]}
+clap = { version = "4.6.6", features = ["derive"] }
+clap_complete = { version = "4.6.9", features = ["unstable-dynamic"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 bevy = { version = "0.19", default-features = false, features = ["wayland"] }

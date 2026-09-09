@@ -6,6 +6,7 @@ use crate::entities::enemies::EnemyType;
 use crate::entities::tower::TowerType;
 use crate::scheduling::TimePoint;
 use bevy::prelude::{Deref, DerefMut, Entity, Message, Rot2, Vec2};
+use strum::VariantNames;
 
 #[derive(Message)]
 pub(crate) struct SpawnEnemy {
@@ -38,14 +39,21 @@ pub(crate) struct CollisionSustained(pub(crate) CollisionPair);
 #[derive(Message, Deref, DerefMut)]
 pub(crate) struct CollisionEnded(pub(crate) CollisionPair);
 
-#[derive(Message, Debug)]
+#[derive(Message, Debug, VariantNames)]
 pub(crate) enum CommandEvent {
+    #[strum(serialize = "help")]
     Help,
+    #[strum(serialize = "select")]
     Select { tile: GridCoordinate },
+    #[strum(serialize = "place")]
     Place { tower_type: TowerType, tower_pos: GridCoordinate },
+    #[strum(serialize = "clear")]
     Clear,
+    #[strum(serialize = "balance")]
     Balance,
+    #[strum(serialize = "exit")]
     ExitGame,
+    #[strum(serialize = "set")]
     Set { setting: Settings, value: f32 },
 }
 
