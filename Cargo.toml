@@ -23,7 +23,7 @@ opt-level = 3
 bevy = { version = "0.19", default-features = false, features = ["2d", "ui", "jpeg", "system_clipboard"] }
 bevy_vector_shapes = "0.13"
 macros = { path = "./macros" }
-image = "0.25.10"
+image = {version = "0.25.10", default-features = false, features = ["png"]}
 strum = { version = "0.28.0", features = ["derive"]}
 
 [target.'cfg(target_os = "linux")'.dependencies]
