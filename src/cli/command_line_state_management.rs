@@ -9,9 +9,6 @@ use bevy::input_focus::InputFocus;
 use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut};
 use bevy::text::EditableText;
 use clap::{Error, Parser, ValueEnum};
-use clap_complete::CompletionCandidate;
-use std::str::FromStr;
-use strum::{EnumString, VariantNames};
 
 #[derive(Default)]
 pub(crate) enum PreviewCommand {
@@ -43,7 +40,7 @@ pub(crate) enum Settings {
 pub(crate) fn handle_command_line_state(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
     mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
-    mut history: ResMut<CommandHistory>, selection_state: ResMut<SelectionState>,
+    mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
 ) {
     let Some(entity) = focus.get() else {
         return;
@@ -62,12 +59,11 @@ pub(crate) fn handle_command_line_state(
 
     //Submit
     if keys.just_pressed(KeyCode::Enter) {
-        let output: Result<Vec<_>, _> =
-            parse_commandline_input(&current_input, selection_state.selected_tile)
-                .into_iter()
-                .collect::<Result<_, _>>();
-
-        let commands = match output {
+        let parse_output = parse_commandline_input(&current_input);
+        if !parse_output.autocompletion.is_empty() {
+            println!("{:?}", parse_output.autocompletion);
+        }
+        let command_inputs = match &parse_output.evaluated {
             Ok(commands) => commands,
             Err(err) => {
                 println!("Failed to parse commands: {}", err);
@@ -75,7 +71,18 @@ pub(crate) fn handle_command_line_state(
             },
         };
 
-        for command in commands {
+        let mut local_selection_state = selection_state.selected_tile;
+        let sendable_commands =
+            match parse_to_sendable_commands(command_inputs, &mut local_selection_state) {
+                Ok(commands) => commands,
+                Err(error) => {
+                    println!("{}", error);
+                    return;
+                },
+            };
+        selection_state.selected_tile = local_selection_state;
+
+        for command in sendable_commands {
             command_events.write(command);
             history.entries.push(current_input.clone());
             history.idx = history.entries.len();
@@ -86,6 +93,28 @@ pub(crate) fn handle_command_line_state(
         command_state.last_input.clear();
         command_state.preview = PreviewCommand::None;
     }
+}
+
+fn parse_to_sendable_commands(
+    input_commands: &[CommandInput], grid_pos: &mut Option<GridCoordinate>,
+) -> Result<Vec<CommandEvent>, &'static str> {
+    input_commands
+        .iter()
+        .copied()
+        .map(|ic| {
+            Ok(match ic {
+                CommandInput::Help => CommandEvent::Help,
+                CommandInput::Select { tile } => CommandEvent::Select { tile },
+                CommandInput::Place { tower_type } => grid_pos
+                    .map(|p| CommandEvent::Place { tower_type, tower_pos: p })
+                    .ok_or("No Tile selected")?,
+                CommandInput::Clear => CommandEvent::Clear,
+                CommandInput::Balance => CommandEvent::Balance,
+                CommandInput::ExitGame => CommandEvent::ExitGame,
+                CommandInput::Set { setting, value } => CommandEvent::Set { setting, value },
+            })
+        })
+        .collect()
 }
 
 fn parse_command_preview(input: &str) -> PreviewCommand {
@@ -117,17 +146,20 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
     preview
 }
 
-fn parse_commandline_input(
-    input: &str, mut selected_tile: Option<GridCoordinate>,
-) -> Vec<Result<CommandEvent, String>> {
-    input
-        .split(';')
-        .filter_map(|command_text| {
-            parse_single_command(command_text, &mut selected_tile).transpose()
-        })
-        .collect()
+struct ParseOutput {
+    autocompletion: Vec<String>,
+    evaluated: Result<Vec<CommandInput>, Error>,
 }
-#[derive(Parser, Debug)]
+
+fn parse_commandline_input(input: &str) -> ParseOutput {
+    let split = input.split(';').collect::<Vec<_>>();
+    let evaluated = split.iter().map(parse_single_command_new).collect::<Result<Vec<_>, Error>>();
+    let autocompletion: Vec<_> =
+        split.last().map(get_auto_completion_single_line).unwrap_or_default();
+    ParseOutput { evaluated, autocompletion }
+}
+
+#[derive(Parser, Debug, Clone, Copy)]
 #[command(
     no_binary_name = true,
     disable_help_subcommand = true,
@@ -145,12 +177,12 @@ pub(crate) enum CommandInput {
     Set { setting: Settings, value: f32 },
 }
 
-fn parse_single_command_new(input_str: &str) -> Result<CommandInput, Error> {
-    CommandInput::try_parse_from(input_str.split_whitespace())
+fn parse_single_command_new(input_str: impl AsRef<str>) -> Result<CommandInput, Error> {
+    CommandInput::try_parse_from(input_str.as_ref().split_whitespace())
 }
 
-fn get_auto_completion_single_line(input_str: &str) -> Vec<String> {
-    CommandInput::get_autocompletion(input_str)
+fn get_auto_completion_single_line(input_str: impl AsRef<str>) -> Vec<String> {
+    CommandInput::get_autocompletion(input_str.as_ref())
         .iter()
         .map(|cc| cc.get_value().to_string_lossy().to_string())
         .collect()
@@ -167,61 +199,6 @@ fn test_input() {
         }
     );
     println!("{:?}", get_auto_completion_single_line(input));
-}
-
-fn parse_single_command(
-    input_str: &str, current_selected_tile: &mut Option<GridCoordinate>,
-) -> Result<Option<CommandEvent>, String> {
-    todo!()
-    // let command_text = input_str.trim();
-    //
-    // if command_text.is_empty() {
-    //     return Ok(None);
-    // }
-    //
-    // let tokens: Vec<&str> = command_text.split_whitespace().collect();
-    //
-    // Ok(Some(match tokens.as_slice() {
-    //     ["help"] => CommandEvent::Help,
-    //     ["select", position] => {
-    //         let tile = parse_tile_position(position)
-    //             .ok_or_else(|| format!("Invalid tile position: {:?}", position))?;
-    //         *current_selected_tile = Some(tile);
-    //         CommandEvent::Select { tile }
-    //     },
-    //     ["place", tower_type] => {
-    //         let tile = current_selected_tile
-    //             .ok_or_else(|| "Cannot place tower: no tile selected".to_string())?;
-    //         let tower_type = parse_tower_type(tower_type).ok_or_else(|| {
-    //             format!("Cannot place tower: unknown tower type: {:?}", tower_type)
-    //         })?;
-    //         CommandEvent::Place { tower_type, tower_pos: tile }
-    //     },
-    //     ["clear"] => {
-    //         *current_selected_tile = None;
-    //         CommandEvent::Clear
-    //     },
-    //     ["show", "balance"] => CommandEvent::Balance,
-    //     ["exit", "game"] => CommandEvent::ExitGame,
-    //     ["set", setting, value] => {
-    //         let value = value.parse::<f32>().map_err(|e| e.to_string())?;
-    //         let setting = Settings::from_str(setting).map_err(|_| {
-    //             format!(
-    //                 "Unknown setting: \"{}\", possible options are: {}",
-    //                 setting,
-    //                 Settings::VARIANTS.join(", ")
-    //             )
-    //         })?;
-    //         CommandEvent::Set { setting, value }
-    //     },
-    //     _ => Err(format!("Unknown command: \"{}\"", command_text))?,
-    // }))
-}
-
-fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
-    TowerType::from_str(tower_type_string)
-        .map_err(|_| println!("Unknown tower type: {:?}", tower_type_string))
-        .ok()
 }
 
 pub fn parse_tile_position(position: &str) -> Option<GridCoordinate> {

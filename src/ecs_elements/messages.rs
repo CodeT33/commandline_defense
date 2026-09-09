@@ -6,8 +6,6 @@ use crate::entities::enemies::EnemyType;
 use crate::entities::tower::TowerType;
 use crate::scheduling::TimePoint;
 use bevy::prelude::{Deref, DerefMut, Entity, Message, Rot2, Vec2};
-use clap::Parser;
-use strum::VariantNames;
 
 #[derive(Message)]
 pub(crate) struct SpawnEnemy {
