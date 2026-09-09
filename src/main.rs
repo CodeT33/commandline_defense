@@ -3,6 +3,7 @@ pub(crate) mod cli;
 pub(crate) mod collision;
 pub(crate) mod consts;
 pub(crate) mod coordinates;
+pub(crate) mod demo_plugin;
 #[cfg(feature = "determinism")]
 pub(crate) mod determinism_harness;
 pub(crate) mod ecs_elements;
@@ -20,6 +21,7 @@ use crate::cli::command_line::navigate_command_history;
 use crate::cli::command_line_state_management::handle_command_line_state;
 use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
+use crate::demo_plugin::DemoCommandPlugin;
 use crate::ecs_elements::messages::EnemyReachedEnd;
 use crate::entities::bullets::{bullet_despawn_observer, bullet_spawn_observer};
 use crate::entities::enemies::{handle_enemies_reaching_end, handle_enemy_spawns};
@@ -75,6 +77,7 @@ fn register_plugins(app: &mut App) {
             .set(AssetPlugin { file_path: "./".to_owned(), ..default() }),
         TabNavigationPlugin,
         Shape2dPlugin::default(),
+        DemoCommandPlugin,
     ));
     #[cfg(feature = "determinism")]
     app.add_plugins(crate::determinism_harness::DeterminismHarnessPlugin);
