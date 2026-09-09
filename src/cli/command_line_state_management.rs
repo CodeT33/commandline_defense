@@ -7,7 +7,7 @@ use crate::ui_overlay::grid::get_number_from_letter;
 use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
 use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut};
-use bevy::text::EditableText;
+use bevy::text::{EditableText, TextEdit};
 use clap::{Error, Parser, ValueEnum};
 
 #[derive(Default)]
@@ -49,21 +49,34 @@ pub(crate) fn handle_command_line_state(
         return;
     };
 
-    let current_input = input.value().to_string();
+    let mut current_input = input.value().to_string();
 
     //Preview
     if current_input != command_state.last_input {
         command_state.last_input = current_input.clone();
         command_state.preview = parse_command_preview(&current_input);
+        command_state.parse_output = parse_commandline_input(&current_input);
+        if !command_state.parse_output.autocompletion.is_empty() {
+            println!("{:?}", command_state.parse_output.autocompletion);
+        }
+    }
+
+    if keys.just_pressed(KeyCode::Tab)
+        && let [complete_to] = command_state.parse_output.autocompletion.as_slice()
+        && let Some(last_command) = current_input.split(";").last()
+        && let Some(last_word) = last_command.split_whitespace().last()
+        && complete_to.len() > last_word.len()
+    {
+        let new_len = current_input.len() - last_word.len();
+        current_input.truncate(new_len);
+        current_input.push_str(complete_to);
+        input.editor.set_text(&current_input);
+        input.queue_edit(TextEdit::TextEnd(false));
     }
 
     //Submit
     if keys.just_pressed(KeyCode::Enter) {
-        let parse_output = parse_commandline_input(&current_input);
-        if !parse_output.autocompletion.is_empty() {
-            println!("{:?}", parse_output.autocompletion);
-        }
-        let command_inputs = match &parse_output.evaluated {
+        let command_inputs = match &command_state.parse_output.evaluated {
             Ok(commands) => commands,
             Err(err) => {
                 println!("Failed to parse commands: {}", err);
@@ -96,7 +109,7 @@ pub(crate) fn handle_command_line_state(
 }
 
 fn parse_to_sendable_commands(
-    input_commands: &[CommandInput], grid_pos: &mut Option<GridCoordinate>,
+    input_commands: &[CommandInput], selected_tile: &mut Option<GridCoordinate>,
 ) -> Result<Vec<CommandEvent>, &'static str> {
     input_commands
         .iter()
@@ -104,8 +117,11 @@ fn parse_to_sendable_commands(
         .map(|ic| {
             Ok(match ic {
                 CommandInput::Help => CommandEvent::Help,
-                CommandInput::Select { tile } => CommandEvent::Select { tile },
-                CommandInput::Place { tower_type } => grid_pos
+                CommandInput::Select { tile } => {
+                    *selected_tile = tile.into();
+                    CommandEvent::Select { tile }
+                },
+                CommandInput::Place { tower_type } => selected_tile
                     .map(|p| CommandEvent::Place { tower_type, tower_pos: p })
                     .ok_or("No Tile selected")?,
                 CommandInput::Clear => CommandEvent::Clear,
@@ -146,9 +162,15 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
     preview
 }
 
-struct ParseOutput {
+pub struct ParseOutput {
     autocompletion: Vec<String>,
     evaluated: Result<Vec<CommandInput>, Error>,
+}
+
+impl Default for ParseOutput {
+    fn default() -> Self {
+        Self { autocompletion: Vec::new(), evaluated: Ok(Vec::new()) }
+    }
 }
 
 fn parse_commandline_input(input: &str) -> ParseOutput {
