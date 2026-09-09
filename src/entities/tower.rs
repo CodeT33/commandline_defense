@@ -21,7 +21,7 @@ use bevy::prelude::{
 };
 use std::f32::consts::PI;
 use std::time::Duration;
-use strum::{EnumString, VariantNames};
+use strum::{EnumIter, EnumString, VariantNames};
 
 pub(crate) struct TowerDataInner {
     tower_type: TowerType,
@@ -48,7 +48,7 @@ enum Effect {
     BigBirbMode,
 }
 
-#[derive(Debug, Clone, Copy, VariantNames, EnumString, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, VariantNames, EnumString, PartialEq, Eq, EnumIter)]
 pub(crate) enum TowerType {
     #[strum(serialize = "assault-bober")]
     AssaultTower,
@@ -61,17 +61,17 @@ pub(crate) enum TowerType {
     #[strum(serialize = "eitshtu")]
     Eitshtu,
     #[strum(serialize = "acitonion")]
-    Acitonion,
+    //Acitonion,
     #[strum(serialize = "strorm")]
-    Strorm,
+    //Strorm,
     #[strum(serialize = "infernon")]
-    Infernon,
+    //Infernon,
     #[strum(serialize = "icebyte")]
-    Icebyte,
+    //Icebyte,
     #[strum(serialize = "goldt")]
-    Goldt,
+    //Goldt,
     #[strum(serialize = "copprina")]
-    Copprina,
+    //Copprina,
 
     //meme stuff
     #[strum(serialize = "don-banano")]
@@ -96,6 +96,7 @@ pub(crate) struct TowerAttributes {
     pub(crate) cooldown_ms: u32,
     pub(crate) bullet_speed_tps: f32,
     pub(crate) bullet_type: BulletType,
+    pub(crate) preview_sprite: TexturePackAssets,
     pub(crate) sprites: [TexturePackAssets; 4],
     pub(crate) tower_rotates: bool,
     pub(crate) targeting_type: TargetingType,

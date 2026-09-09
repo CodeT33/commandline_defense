@@ -5,6 +5,7 @@ use crate::texture_packs::TexturePackAssets;
 use crate::tiers::{ValueTiers, ValueType};
 use bevy::math::U16Vec2;
 use bevy::prelude::Vec2;
+use egui::Event::Text;
 
 pub(crate) const WINDOW_TITLE: &str = "Commandline Defense";
 pub(crate) const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
@@ -51,6 +52,7 @@ impl TowerType {
                 cooldown_ms: 1000,
                 bullet_speed_tps: 10.0,
                 bullet_type: BulletType::OrangeBall,
+                preview_sprite: TexturePackAssets::Troops_Assault_AssaultTroopLvl1,
                 sprites: [
                     TexturePackAssets::Troops_Assault_AssaultTroopLvl1,
                     TexturePackAssets::Troops_Assault_AssaultTroopLvl2,
@@ -67,6 +69,7 @@ impl TowerType {
                 cooldown_ms: 3000,
                 bullet_speed_tps: 6.0,
                 bullet_type: BulletType::MetalBall,
+                preview_sprite: TexturePackAssets::Troops_Boom_BoomTroopLvl1,
                 sprites: [
                     TexturePackAssets::Troops_Boom_BoomTroopLvl1,
                     TexturePackAssets::Troops_Boom_BoomTroopLvl2,
@@ -83,6 +86,7 @@ impl TowerType {
                 cooldown_ms: 100,
                 bullet_speed_tps: 16.0,
                 bullet_type: BulletType::AppleBall,
+                preview_sprite: TexturePackAssets::Troops_Gatling_GatlingTroopLvl1,
                 sprites: [
                     TexturePackAssets::Troops_Gatling_GatlingTroopLvl1,
                     TexturePackAssets::Troops_Gatling_GatlingTroopLvl2,
@@ -99,6 +103,7 @@ impl TowerType {
                 cooldown_ms: 4000,
                 bullet_speed_tps: 100.0,
                 bullet_type: BulletType::Bullet,
+                preview_sprite: TexturePackAssets::Troops_Sniper_SniperTroopLvl1,
                 sprites: [
                     TexturePackAssets::Troops_Sniper_SniperTroopLvl1,
                     TexturePackAssets::Troops_Sniper_SniperTroopLvl2,
@@ -115,6 +120,7 @@ impl TowerType {
                 cooldown_ms: 300,
                 bullet_speed_tps: 10.0,
                 bullet_type: BulletType::Bullet,
+                preview_sprite: TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl1,
                 sprites: [
                     TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl1,
                     TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl2,
@@ -131,6 +137,7 @@ impl TowerType {
                 cooldown_ms: 500,
                 bullet_speed_tps: 10.0,
                 bullet_type: BulletType::DonsBananos,
+                preview_sprite: TexturePackAssets::WipSprites_DonBananoCool,
                 sprites: [
                     TexturePackAssets::WipSprites_DonBananoCool,
                     TexturePackAssets::WipSprites_DonBananoCool,
@@ -147,6 +154,7 @@ impl TowerType {
                 cooldown_ms: 2000,
                 bullet_speed_tps: 10.0,
                 bullet_type: BulletType::Rocket,
+                preview_sprite: TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
                 sprites: [
                     TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
                     TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
