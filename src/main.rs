@@ -31,11 +31,13 @@ use crate::player_suite::player_died_observer;
 use crate::ui_overlay::debug::{draw_bounding_boxes, set_simulation_speed};
 use crate::ui_overlay::grid::update_grid_preview;
 use crate::ui_overlay::health_bars::draw_health_bars;
+use crate::ui_overlay::info_sidebar::{spawn_sidebar};
 use crate::ui_overlay::selection::update_selected_tile;
 use crate::ui_overlay::spawn_ui_overlay;
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
+use bevy_egui::{EguiPlugin, EguiPrimaryContextPass};
 use bevy_vector_shapes::prelude::*;
 use ecs_elements::messages::{
     CollisionEnded, CollisionStarted, CollisionSustained, CommandEvent, PlaceTowerMessage,
@@ -75,7 +77,8 @@ fn register_plugins(app: &mut App) {
             .set(AssetPlugin { file_path: "./".to_owned(), ..default() }),
         TabNavigationPlugin,
         Shape2dPlugin::default(),
-    ));
+    ))
+    .add_plugins(EguiPlugin::default());
     #[cfg(feature = "determinism")]
     app.add_plugins(crate::determinism_harness::DeterminismHarnessPlugin);
 }
@@ -147,7 +150,8 @@ fn register_systems(app: &mut App) {
                 handle_tower_placing_events,
                 set_simulation_speed,
             ),
-        );
+        )
+        .add_systems(EguiPrimaryContextPass, spawn_sidebar);
 }
 
 fn setup(
