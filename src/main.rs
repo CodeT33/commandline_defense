@@ -1,3 +1,4 @@
+#![deny(dead_code_pub_in_binary)]
 mod camera;
 pub(crate) mod cli;
 pub(crate) mod collision;

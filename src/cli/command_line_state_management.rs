@@ -7,6 +7,7 @@ use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
 use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut};
 use bevy::text::EditableText;
+use clap::Parser;
 use std::str::FromStr;
 use strum::{EnumString, VariantNames};
 
@@ -30,7 +31,7 @@ pub(crate) enum PreviewCommand {
     },
 }
 
-#[derive(Debug, VariantNames, EnumString)]
+#[derive(Debug, VariantNames, EnumString, PartialEq, Parser, Copy, Clone)]
 pub(crate) enum Settings {
     #[strum(serialize = "bounding-boxes")]
     BoundingBoxes,
@@ -182,7 +183,7 @@ fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
         .ok()
 }
 
-fn parse_tile_position(position: &str) -> Option<GridCoordinate> {
+pub fn parse_tile_position(position: &str) -> Option<GridCoordinate> {
     let position = position.to_ascii_uppercase();
 
     let mut number = String::new();

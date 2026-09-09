@@ -6,6 +6,7 @@ use crate::entities::enemies::EnemyType;
 use crate::entities::tower::TowerType;
 use crate::scheduling::TimePoint;
 use bevy::prelude::{Deref, DerefMut, Entity, Message, Rot2, Vec2};
+use clap::Parser;
 use strum::VariantNames;
 
 #[derive(Message)]
@@ -39,7 +40,13 @@ pub(crate) struct CollisionSustained(pub(crate) CollisionPair);
 #[derive(Message, Deref, DerefMut)]
 pub(crate) struct CollisionEnded(pub(crate) CollisionPair);
 
-#[derive(Message, Debug, VariantNames)]
+#[derive(Parser, Message, Debug, PartialEq, VariantNames)]
+#[command(
+    no_binary_name = true,
+    disable_help_subcommand = true,
+    disable_help_flag = true,
+    override_usage = "<COMMAND>"
+)]
 pub(crate) enum CommandEvent {
     #[strum(serialize = "help")]
     Help,

@@ -1,5 +1,7 @@
+use crate::cli::command_line_state_management::parse_tile_position;
 use bevy::math::{I16Vec2, U16Vec2};
 use bevy::prelude::{Deref, DerefMut};
+use std::str::FromStr;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 /// Logical coordinate of a tile in the game grid.
@@ -13,6 +15,14 @@ use bevy::prelude::{Deref, DerefMut};
 /// The conversion to a Vec index handles the vertical flip.
 #[derive(Deref, DerefMut)]
 pub(crate) struct GridCoordinate(pub(crate) U16Vec2);
+
+impl FromStr for GridCoordinate {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse_tile_position(s).ok_or(format!("Invalid tile position: {}", s))
+    }
+}
 
 impl GridCoordinate {
     pub(crate) const fn new(x: u16, y: u16) -> Self {
