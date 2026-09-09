@@ -1,8 +1,10 @@
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::CommandEvent;
 use crate::ecs_elements::resources::{CommandHistory, CommandState, SelectionState};
+use crate::entities::enemies::EnemyType;
 use crate::entities::tower::TowerType;
 use crate::ui_overlay::grid::get_number_from_letter;
+use crate::ui_overlay::ui_state::UiState;
 use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
 use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut};
@@ -10,11 +12,12 @@ use bevy::text::EditableText;
 use std::str::FromStr;
 use strum::{EnumString, VariantNames};
 
-#[derive(Default)]
+#[derive(Default, PartialEq, Clone, Eq)]
 pub(crate) enum PreviewCommand {
     #[default]
     None,
     ShowGrid,
+    SidebarState(UiState),
     #[allow(unused)]
     ShowPath,
     #[allow(unused)]
@@ -111,6 +114,23 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
                     None => PreviewCommand::ShowGrid,
                 }
             },
+            ["show", "towers"] => {
+                return PreviewCommand::SidebarState(UiState::TowersList { filter: None });
+            },
+            ["show", "towers", tower_type] => {
+                return PreviewCommand::SidebarState(UiState::TowerInfo(
+                    parse_tower_type(tower_type).unwrap(),
+                ));
+            },
+            ["show", "enemies"] => {
+                return PreviewCommand::SidebarState(UiState::EnemiesList { filter: None });
+            },
+            ["show", "enemies", enemy_type] => {
+                return PreviewCommand::SidebarState(UiState::EnemyInfo(
+                    parse_enemy_type(enemy_type).unwrap(),
+                ));
+            },
+
             _ => {},
         }
     }
@@ -179,6 +199,12 @@ fn parse_single_command(
 fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
     TowerType::from_str(tower_type_string)
         .map_err(|_| println!("Unknown tower type: {:?}", tower_type_string))
+        .ok()
+}
+
+fn parse_enemy_type(enemy_type_string: &str) -> Option<EnemyType> {
+    EnemyType::from_str(enemy_type_string)
+        .map_err(|_| println!("Unknown enemy type: {:?}", enemy_type_string))
         .ok()
 }
 

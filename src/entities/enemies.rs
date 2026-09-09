@@ -14,9 +14,10 @@ use crate::texture_packs::TexturePackAssets;
 use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
 use std::f32;
+use strum::{EnumString, VariantNames};
 
 #[allow(unused)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Debug, Clone, Copy, VariantNames, EnumString, PartialEq, Eq)]
 pub(crate) enum EnemyType {
     WideBirb,
     Mausmeister,

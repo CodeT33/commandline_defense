@@ -32,7 +32,7 @@ use crate::player_suite::player_died_observer;
 use crate::ui_overlay::debug::{draw_bounding_boxes, set_simulation_speed};
 use crate::ui_overlay::grid::update_grid_preview;
 use crate::ui_overlay::health_bars::draw_health_bars;
-use crate::ui_overlay::info_sidebar::{spawn_sidebar};
+use crate::ui_overlay::info_sidebar::{draw_sidebar};
 use crate::ui_overlay::selection::update_selected_tile;
 use crate::ui_overlay::spawn_ui_overlay;
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
@@ -152,7 +152,7 @@ fn register_systems(app: &mut App) {
                 set_simulation_speed,
             ),
         )
-        .add_systems(EguiPrimaryContextPass, spawn_sidebar);
+        .add_systems(EguiPrimaryContextPass, draw_sidebar);
 }
 
 fn setup(

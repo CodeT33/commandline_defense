@@ -48,7 +48,7 @@ enum Effect {
     BigBirbMode,
 }
 
-#[derive(Debug, Clone, Copy, VariantNames, EnumString)]
+#[derive(Debug, Clone, Copy, VariantNames, EnumString, PartialEq, Eq)]
 pub(crate) enum TowerType {
     #[strum(serialize = "assault-bober")]
     AssaultTower,
