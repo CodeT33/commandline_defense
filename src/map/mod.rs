@@ -13,7 +13,7 @@ dir_structure_as_enum_absolute_paths!(MapLogicLayers, "assets/map_logic_layers")
 impl Default for MapResource {
     fn default() -> Self {
         MapResource(
-            GameMap::load(MapLogicLayers::ShipYard, consts::MAP_SIZE_TILES)
+            GameMap::load(MapLogicLayers::MagicOfLeavesMap1, consts::MAP_SIZE_TILES)
                 .expect("Could not load game map"),
         )
     }

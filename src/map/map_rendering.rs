@@ -16,7 +16,7 @@ pub fn spawn_map_visual_layer(
         Sprite {
             image: asset_server.load(
                 texture_pack_settings
-                    .get_asset_path(TexturePackAssets::MapVisualLayers_ShipYard),
+                    .get_asset_path(TexturePackAssets::MapVisualLayers_MagicOfLeavesMap1),
             ),
             custom_size: Option::from(Vec2::splat((consts::TILE_SIZE * 2) as f32)),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
