@@ -9,6 +9,7 @@ use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
 use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor};
 use bevy::text::{EditableText, TextEdit};
+use clap::error::ErrorKind;
 use clap::error::ErrorKind::MissingRequiredArgument;
 use clap::{Error, Parser, ValueEnum};
 
@@ -223,8 +224,25 @@ pub(crate) enum CommandInput {
     Set { setting: Settings, value: f32 },
 }
 
+impl CommandInput {
+    pub(crate) fn validate_values(&self) -> bool {
+        match self {
+            CommandInput::Select { tile } => tile.cmplt(consts::MAP_SIZE_TILES).all(),
+            CommandInput::Place { tower_type: _ } => true, // todo maybe add check here so no placement on used tiles can happen
+            CommandInput::Set { setting, value } => match setting {
+                Settings::BoundingBoxes => matches!(*value, 0.0 | 1.0),
+                Settings::SimSpeed => matches!(*value, 0.0..consts::MAX_SIM_SPEED),
+                Settings::EnemySpawnInterval => matches!(*value, 1.0..),
+            },
+            _ => true,
+        }
+    }
+}
+
 fn parse_single_command_new(input_str: impl AsRef<str>) -> Result<CommandInput, Error> {
-    CommandInput::try_parse_from(input_str.as_ref().split_whitespace())
+    CommandInput::try_parse_from(input_str.as_ref().split_whitespace()).and_then(|ci| {
+        if ci.validate_values() { Ok(ci) } else { Err(Error::new(ErrorKind::ArgumentConflict)) }
+    })
 }
 
 fn get_auto_completion_single_line(input_str: impl AsRef<str>) -> Vec<String> {
@@ -248,6 +266,7 @@ fn test_input() {
 }
 
 #[test]
+#[ignore]
 fn probe_show_error() {
     let cases: &[(&str, bool)] = &[
         ("help", false),

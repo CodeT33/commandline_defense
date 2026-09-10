@@ -1,4 +1,5 @@
 use crate::cli::command_line_state_management::Settings;
+use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::{CommandEvent, PlaceTowerMessage};
 use crate::ecs_elements::resources::{
@@ -28,7 +29,11 @@ pub(crate) fn handle_command_events(
                     debug_settings.enable_bounding_boxes = *value != 0.0;
                 },
                 Settings::SimSpeed => {
-                    let used_value = if !value.is_finite() { 0.0 } else { value.clamp(0.0, 20.0) };
+                    let used_value = if !value.is_finite() {
+                        0.0
+                    } else {
+                        value.clamp(0.0, consts::MAX_SIM_SPEED)
+                    };
                     debug_settings.sim_speed = used_value;
                 },
                 Settings::EnemySpawnInterval => {
