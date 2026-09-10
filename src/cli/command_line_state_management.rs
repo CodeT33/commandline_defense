@@ -12,7 +12,7 @@ use bevy::input_focus::InputFocus;
 use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor};
 use bevy::text::{EditableText, TextEdit};
 use clap::error::ErrorKind::MissingRequiredArgument;
-use clap::{Error, Parser, Subcommand};
+use clap::{Error, Parser, Subcommand, ValueEnum};
 use std::fmt::Debug;
 use std::ops::RangeBounds;
 use std::str::FromStr;
@@ -84,12 +84,24 @@ pub(crate) fn handle_command_line_state(
     if keys.just_pressed(KeyCode::Tab)
         && let [complete_to] = command_state.parse_output.autocompletion.as_slice()
         && let Some(last_command) = current_input.split(";").last()
-        && let Some(last_word) = last_command.split_whitespace().last()
-        && complete_to.len() > last_word.len()
+        && let Some(last_word) = last_command.replace("/", " ").split_whitespace().last()
+        && complete_to.len() >= last_word.len()
     {
-        let new_len = current_input.len() - last_word.len();
+        let mut new = complete_to.to_owned();
+        println!("{}", last_command);
+        if last_command.trim_start().starts_with("open ") {
+            new.push('/');
+        } else {
+            new.push(' ');
+        }
+        let new_len = if current_input.ends_with(" ") {
+            current_input.len()
+        } else {
+            current_input.len() - last_word.len()
+        };
         current_input.truncate(new_len);
-        current_input.push_str(complete_to);
+
+        current_input.push_str(&new);
         input.editor.set_text(&current_input);
         input.queue_edit(TextEdit::TextEnd(false));
     }
@@ -100,7 +112,7 @@ pub(crate) fn handle_command_line_state(
             .parse_output
             .evaluated
             .iter()
-            .map(|r| r.as_ref().map_err(|e| e.to_string()).copied())
+            .map(|r| r.as_ref().map_err(|e| e.to_string()).cloned())
             .collect::<Result<Vec<_>, String>>()
         {
             Ok(commands) => commands,
@@ -151,21 +163,24 @@ fn parse_to_sendable_commands(
 ) -> Result<Vec<CommandEvent>, &'static str> {
     input_commands
         .iter()
-        .copied()
         .map(|ic| {
             Ok(match ic {
                 CommandInput::Help => CommandEvent::Help,
                 CommandInput::Select { tile } => {
-                    *selected_tile = tile.into();
-                    CommandEvent::Select { tile }
+                    *selected_tile = (*tile).into();
+                    CommandEvent::Select { tile: *tile }
                 },
                 CommandInput::Place { tower_type } => selected_tile
-                    .map(|p| CommandEvent::Place { tower_type, tower_pos: p })
+                    .map(|p| CommandEvent::Place { tower_type: *tower_type, tower_pos: p })
                     .ok_or("No Tile selected")?,
                 CommandInput::Clear => CommandEvent::Clear,
                 CommandInput::Balance => CommandEvent::Balance,
                 CommandInput::ExitGame => CommandEvent::ExitGame,
-                CommandInput::Set(setting) => CommandEvent::Set(setting),
+                CommandInput::Set(setting) => CommandEvent::Set(*setting),
+                _ => {
+                    println!("juckt");
+                    Err("Leck Eier")?
+                },
             })
         })
         .collect()
@@ -280,7 +295,7 @@ pub struct ParseOutput {
 }
 
 fn parse_commandline_input(input: &str) -> ParseOutput {
-    let split = input.split(';').collect::<Vec<_>>();
+    let split = input.split(';').map(|s| s.replace("/", " ")).collect::<Vec<_>>();
     let evaluated = split
         .iter()
         .map(|s| s.trim())
@@ -293,7 +308,7 @@ fn parse_commandline_input(input: &str) -> ParseOutput {
     ParseOutput { evaluated, autocompletion }
 }
 
-#[derive(Parser, Debug, Clone, Copy)]
+#[derive(Parser, Debug, Clone)]
 #[command(
     no_binary_name = true,
     disable_help_subcommand = true,
@@ -314,6 +329,41 @@ pub(crate) enum CommandInput {
     ExitGame,
     #[command(subcommand)]
     Set(Settings),
+    #[command(subcommand)]
+    Open(OpenCommand),
+}
+
+#[derive(Subcommand, Debug, Clone)]
+pub(crate) enum OpenCommand {
+    Info {
+        #[command(subcommand)]
+        further: Option<FurtherInfo>,
+    },
+}
+
+#[derive(Subcommand, Debug, Clone)]
+pub(crate) enum FurtherInfo {
+    Enemies {
+        enemy_type: Option<EnemyType>,
+        #[arg(requires = "enemy_type")]
+        further: Option<EnemyFurther>,
+    },
+    Towers {
+        tower_type: Option<TowerType>,
+        #[arg(requires = "tower_type")]
+        further: Option<TowerFurther>,
+    },
+}
+
+#[derive(ValueEnum, Debug, Clone)]
+pub(crate) enum EnemyFurther {
+    Description,
+}
+
+#[derive(ValueEnum, Debug, Clone)]
+pub(crate) enum TowerFurther {
+    Description,
+    Upgrades,
 }
 
 fn parse_tile(s: &str) -> Result<GridCoordinate, String> {
@@ -363,7 +413,7 @@ fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
 }
 
 fn parse_enemy_type(enemy_type_string: &str) -> Option<EnemyType> {
-    <EnemyType as clap::ValueEnum>::from_str(enemy_type_string, true)
+    EnemyType::from_str(enemy_type_string, false)
         .map_err(|_| println!("Unknown enemy type: {:?}", enemy_type_string))
         .ok()
 }
