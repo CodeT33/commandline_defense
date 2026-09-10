@@ -6,7 +6,7 @@ use crate::entities::tower::TowerType;
 use crate::ui_overlay::grid::get_number_from_letter;
 use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
-use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut};
+use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor};
 use bevy::text::{EditableText, TextEdit};
 use clap::{Error, Parser, ValueEnum};
 
@@ -38,14 +38,15 @@ pub(crate) enum Settings {
 }
 
 pub(crate) fn handle_command_line_state(
-    focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
+    focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>,
+    mut inputs: Query<(&mut EditableText, &mut TextColor)>,
     mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
     mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
 ) {
     let Some(entity) = focus.get() else {
         return;
     };
-    let Ok(mut input) = inputs.get_mut(entity) else {
+    let Ok((mut input, mut text_color)) = inputs.get_mut(entity) else {
         return;
     };
 
@@ -59,6 +60,14 @@ pub(crate) fn handle_command_line_state(
         if !command_state.parse_output.autocompletion.is_empty() {
             println!("{:?}", command_state.parse_output.autocompletion);
         }
+        text_color.0 = if command_state.parse_output.evaluated.iter().any(|l| l.is_err())
+            && (command_state.parse_output.autocompletion.is_empty()
+                || current_input.split(";").last().is_some_and(|s| s.is_empty()))
+        {
+            Color::linear_rgb(1.0, 0.0, 0.0)
+        } else {
+            Color::WHITE
+        };
     }
 
     if keys.just_pressed(KeyCode::Tab)
@@ -76,7 +85,13 @@ pub(crate) fn handle_command_line_state(
 
     //Submit
     if keys.just_pressed(KeyCode::Enter) {
-        let command_inputs = match &command_state.parse_output.evaluated {
+        let command_inputs = match command_state
+            .parse_output
+            .evaluated
+            .iter()
+            .map(|r| r.as_ref().map_err(|e| e.to_string()).copied())
+            .collect::<Result<Vec<_>, String>>()
+        {
             Ok(commands) => commands,
             Err(err) => {
                 println!("Failed to parse commands: {}", err);
@@ -86,7 +101,7 @@ pub(crate) fn handle_command_line_state(
 
         let mut local_selection_state = selection_state.selected_tile;
         let sendable_commands =
-            match parse_to_sendable_commands(command_inputs, &mut local_selection_state) {
+            match parse_to_sendable_commands(&command_inputs, &mut local_selection_state) {
                 Ok(commands) => commands,
                 Err(error) => {
                     println!("{}", error);
@@ -162,20 +177,21 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
     preview
 }
 
+#[derive(Default)]
 pub struct ParseOutput {
     autocompletion: Vec<String>,
-    evaluated: Result<Vec<CommandInput>, Error>,
-}
-
-impl Default for ParseOutput {
-    fn default() -> Self {
-        Self { autocompletion: Vec::new(), evaluated: Ok(Vec::new()) }
-    }
+    evaluated: Vec<Result<CommandInput, Error>>,
 }
 
 fn parse_commandline_input(input: &str) -> ParseOutput {
     let split = input.split(';').collect::<Vec<_>>();
-    let evaluated = split.iter().map(parse_single_command_new).collect::<Result<Vec<_>, Error>>();
+    let evaluated = split
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .map(parse_single_command_new)
+        .collect::<Vec<Result<_, Error>>>();
+
     let autocompletion: Vec<_> =
         split.last().map(get_auto_completion_single_line).unwrap_or_default();
     ParseOutput { evaluated, autocompletion }
