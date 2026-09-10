@@ -119,7 +119,7 @@ pub(crate) fn handle_command_line_state(
     }
 }
 
-fn determine_show_error(command_state: &mut ResMut<CommandState>, current_input: &mut str) -> bool {
+fn determine_show_error(command_state: &ResMut<CommandState>, current_input: &str) -> bool {
     let evaluated = &command_state.parse_output.evaluated;
     let autocompletion = &command_state.parse_output.autocompletion;
     evaluated.iter().rev().skip(1).any(|r| r.is_err())
