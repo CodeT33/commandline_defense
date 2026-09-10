@@ -6,7 +6,6 @@ use bevy::prelude::Res;
 use bevy_egui::{EguiContexts, EguiTextureHandle};
 use clap::ValueEnum;
 use egui::Ui;
-use strum::IntoEnumIterator;
 
 pub(crate) fn draw_enemy_info(
     ui: &mut Ui, ctx: &mut EguiContexts, asset_server: &Res<AssetServer>,
@@ -51,8 +50,8 @@ pub(crate) fn draw_enemy_list(
     ui.separator();
 
     egui::ScrollArea::vertical().show(ui, |ui| {
-        for enemy in EnemyType::iter() {
-            enemy_entry(ui, ctx, asset_server, texture_pack_settings, enemy)
+        for enemy in EnemyType::value_variants() {
+            enemy_entry(ui, ctx, asset_server, texture_pack_settings, *enemy)
                 .expect("Could not load tower into sidebar");
         }
     });

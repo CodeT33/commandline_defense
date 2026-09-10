@@ -214,7 +214,7 @@ fn parse_command_preview(input: &str, current_preview: &ResMut<CommandState>) ->
                 }
             },
             ["open", menu_path] => {
-                let parts: Vec<&str> = menu_path.split('/').collect();
+                let parts: Vec<&str> = menu_path.split('/').filter(|s| {!s.is_empty()}).collect();
 
                 match parts.as_slice() {
                     ["info"] => return PreviewCommand::SidebarState(UiState::Menus),

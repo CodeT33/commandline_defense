@@ -1,13 +1,11 @@
+use crate::ecs_elements::resources::TexturePackSettings;
+use crate::entities::tower::TowerType;
+use crate::ui_overlay::info_sidebar::draw_navigation_box;
 use bevy::asset::AssetServer;
 use bevy::prelude::Res;
 use bevy_egui::{EguiContexts, EguiTextureHandle};
 use clap::ValueEnum;
 use egui::Ui;
-use strum::IntoEnumIterator;
-use crate::ecs_elements::resources::TexturePackSettings;
-use crate::entities::enemies::EnemyType;
-use crate::entities::tower::TowerType;
-use crate::ui_overlay::info_sidebar::draw_navigation_box;
 
 pub(crate) fn draw_tower_info(
     ui: &mut Ui, ctx: &mut EguiContexts, asset_server: &Res<AssetServer>,
@@ -63,8 +61,8 @@ pub(crate) fn draw_tower_list(
     ui.separator();
 
     egui::ScrollArea::vertical().show(ui, |ui| {
-        for tower in TowerType::iter() {
-            tower_entry(ui, ctx, asset_server, texture_pack_settings, tower)
+        for tower in TowerType::value_variants() {
+            tower_entry(ui, ctx, asset_server, texture_pack_settings, *tower)
                 .expect("Could not load tower into sidebar");
         }
     });
