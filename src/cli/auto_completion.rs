@@ -15,7 +15,9 @@ pub trait Autocompletion: CommandFactory {
             && let Err(err) = Self::command().try_get_matches_from(&words[..last_word_idx])
             && !matches!(
                 err.kind(),
-                ErrorKind::MissingRequiredArgument | ErrorKind::MissingSubcommand
+                ErrorKind::MissingRequiredArgument
+                    | ErrorKind::MissingSubcommand
+                    | ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand
             )
         {
             return vec![];

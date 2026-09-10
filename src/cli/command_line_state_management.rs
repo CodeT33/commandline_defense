@@ -9,9 +9,9 @@ use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
 use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor};
 use bevy::text::{EditableText, TextEdit};
-use clap::error::ErrorKind;
 use clap::error::ErrorKind::MissingRequiredArgument;
-use clap::{Error, Parser, ValueEnum};
+use clap::{Error, Parser, Subcommand};
+use std::str::FromStr;
 
 #[derive(Default)]
 pub(crate) enum PreviewCommand {
@@ -33,11 +33,20 @@ pub(crate) enum PreviewCommand {
     },
 }
 
-#[derive(Debug, PartialEq, ValueEnum, Copy, Clone)]
+#[derive(Debug, PartialEq, Subcommand, Copy, Clone)]
 pub(crate) enum Settings {
-    BoundingBoxes,
-    SimSpeed,
-    EnemySpawnInterval,
+    BoundingBoxes {
+        #[arg(action = clap::ArgAction::Set, value_parser = clap::value_parser!(bool))]
+        value: bool,
+    },
+    SimSpeed {
+        #[arg(value_parser = parse_f32_ranged(0.0..=consts::MAX_SIM_SPEED))]
+        value: f32,
+    },
+    EnemySpawnInterval {
+        #[arg(value_parser = clap::value_parser!(u16).range(1..))]
+        value: u16,
+    },
 }
 
 pub(crate) fn handle_command_line_state(
@@ -151,7 +160,7 @@ fn parse_to_sendable_commands(
                 CommandInput::Clear => CommandEvent::Clear,
                 CommandInput::Balance => CommandEvent::Balance,
                 CommandInput::ExitGame => CommandEvent::ExitGame,
-                CommandInput::Set { setting, value } => CommandEvent::Set { setting, value },
+                CommandInput::Set(setting) => CommandEvent::Set(setting),
             })
         })
         .collect()
@@ -215,34 +224,41 @@ fn parse_commandline_input(input: &str) -> ParseOutput {
 )]
 pub(crate) enum CommandInput {
     Help,
-    Select { tile: GridCoordinate },
-    Place { tower_type: TowerType },
+    Select {
+        #[arg(value_parser = parse_tile)]
+        tile: GridCoordinate,
+    },
+    Place {
+        tower_type: TowerType,
+    },
     Clear,
     Balance,
     ExitGame,
-
-    Set { setting: Settings, value: f32 },
+    #[command(subcommand)]
+    Set(Settings),
 }
 
-impl CommandInput {
-    pub(crate) fn validate_values(&self) -> bool {
-        match self {
-            CommandInput::Select { tile } => tile.cmplt(consts::MAP_SIZE_TILES).all(),
-            CommandInput::Place { tower_type: _ } => true, // todo maybe add check here so no placement on used tiles can happen
-            CommandInput::Set { setting, value } => match setting {
-                Settings::BoundingBoxes => matches!(*value, 0.0 | 1.0),
-                Settings::SimSpeed => matches!(*value, 0.0..consts::MAX_SIM_SPEED),
-                Settings::EnemySpawnInterval => matches!(*value, 1.0..),
-            },
-            _ => true,
-        }
+fn parse_tile(s: &str) -> Result<GridCoordinate, String> {
+    let tile = GridCoordinate::from_str(s)?;
+    tile.is_on_map(consts::MAP_SIZE_TILES)
+        .then_some(tile)
+        .ok_or_else(|| format!("tile {} is not on the map", s))
+}
+
+fn parse_f32_ranged(
+    range: std::ops::RangeInclusive<f32>,
+) -> impl Fn(&str) -> Result<f32, String> + Clone + Send + Sync + 'static {
+    move |s: &str| {
+        let value: f32 = s.parse().map_err(|_| "expected a number".to_string())?;
+        range
+            .contains(&value)
+            .then_some(value)
+            .ok_or_else(|| format!("must be in {}..={}", range.start(), range.end()))
     }
 }
 
 fn parse_single_command_new(input_str: impl AsRef<str>) -> Result<CommandInput, Error> {
-    CommandInput::try_parse_from(input_str.as_ref().split_whitespace()).and_then(|ci| {
-        if ci.validate_values() { Ok(ci) } else { Err(Error::new(ErrorKind::ArgumentConflict)) }
-    })
+    CommandInput::try_parse_from(input_str.as_ref().split_whitespace())
 }
 
 fn get_auto_completion_single_line(input_str: impl AsRef<str>) -> Vec<String> {
