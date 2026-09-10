@@ -84,12 +84,20 @@ pub(crate) fn handle_command_line_state(
     if keys.just_pressed(KeyCode::Tab)
         && let [complete_to] = command_state.parse_output.autocompletion.as_slice()
         && let Some(last_command) = current_input.split(";").last()
-        && let Some(last_word) = last_command.split_whitespace().last()
-        && complete_to.len() > last_word.len()
+        && let Some(last_word) = last_command.replace("/", " ").split_whitespace().last()
+        && complete_to.len() >= last_word.len()
     {
+        let mut new = complete_to.to_owned();
+        println!("{}", last_command);
+        if last_command.starts_with("open ") {
+            new.push('/');
+        } else {
+            new.push(' ');
+        }
         let new_len = current_input.len() - last_word.len();
         current_input.truncate(new_len);
-        current_input.push_str(complete_to);
+
+        current_input.push_str(&new);
         input.editor.set_text(&current_input);
         input.queue_edit(TextEdit::TextEnd(false));
     }
@@ -250,7 +258,7 @@ pub struct ParseOutput {
 }
 
 fn parse_commandline_input(input: &str) -> ParseOutput {
-    let split = input.split(';').collect::<Vec<_>>();
+    let split = input.split(';').map(|s| s.replace("/", " ")).collect::<Vec<_>>();
     let evaluated = split
         .iter()
         .map(|s| s.trim())
