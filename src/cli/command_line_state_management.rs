@@ -1,4 +1,5 @@
 use crate::cli::auto_completion::Autocompletion;
+use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::CommandEvent;
 use crate::ecs_elements::resources::{CommandHistory, CommandState, SelectionState};
@@ -62,7 +63,7 @@ pub(crate) fn handle_command_line_state(
             println!("{:?}", command_state.parse_output.autocompletion);
         }
         let show_error = determine_show_error(&mut command_state, &mut current_input);
-        text_color.0 = if show_error { Color::linear_rgb(1.0, 0.0, 0.0) } else { Color::WHITE };
+        text_color.0 = if show_error { consts::ui::CONSOLE_ERROR_COLOR } else { Color::WHITE };
     }
 
     if keys.just_pressed(KeyCode::Tab)
