@@ -62,7 +62,7 @@ pub(crate) fn handle_command_line_state(
         if !command_state.parse_output.autocompletion.is_empty() {
             println!("{:?}", command_state.parse_output.autocompletion);
         }
-        let show_error = determine_show_error(&command_state, &current_input);
+        let show_error = determine_show_error(&command_state.parse_output, &current_input);
         text_color.0 = if show_error { consts::ui::CONSOLE_ERROR_COLOR } else { Color::WHITE };
     }
 
@@ -119,9 +119,9 @@ pub(crate) fn handle_command_line_state(
     }
 }
 
-fn determine_show_error(command_state: &ResMut<CommandState>, current_input: &str) -> bool {
-    let evaluated = &command_state.parse_output.evaluated;
-    let autocompletion = &command_state.parse_output.autocompletion;
+fn determine_show_error(output: &ParseOutput, current_input: &str) -> bool {
+    let evaluated = &output.evaluated;
+    let autocompletion = &output.autocompletion;
     evaluated.iter().rev().skip(1).any(|r| r.is_err())
         || evaluated.last().is_some_and(|l| {
             l.as_ref().is_err_and(|err| {
@@ -245,6 +245,52 @@ fn test_input() {
         }
     );
     println!("{:?}", get_auto_completion_single_line(input));
+}
+
+#[test]
+fn probe_show_error() {
+    let cases: &[(&str, bool)] = &[
+        ("help", false),
+        ("help;", false),
+        ("badcmd", true),
+        ("badcmd; help", true),
+        ("help; badcmd", true),
+        ("se", false),
+        ("sh", true),
+        ("exit", false),
+        ("select", false),
+        ("select ", false),
+        ("select 3A", false),
+        ("select 3", false),
+        ("select A", false),
+        ("select 3A; select 3", false),
+        ("select AB", true),
+        ("select 3!", true),
+        ("select a3b", true),
+        ("place", false),
+        ("place ", false),
+        ("place assault", false),
+        ("place assault-bober", false),
+        ("place b", false),
+        ("place qwerty", true),
+        ("set", false),
+        ("set sim-speed ", false),
+        ("set sim-speed 2", false),
+        ("set nope 2", true),
+        ("select;", true),
+        ("place;", true),
+        ("select 3A; select", false),
+        ("select 3A; ; place assault", false),
+        ("set sim-speed nan", true),
+        ("set sim-speed -1", true),
+        ("show balance", true),
+        ("exit game", true),
+    ];
+    for (input, expected) in cases {
+        let output = parse_commandline_input(input);
+        let actual = determine_show_error(&output, input);
+        assert_eq!(actual, *expected, "input {:?}", input);
+    }
 }
 
 pub fn parse_tile_position(position: &str) -> Option<GridCoordinate> {
