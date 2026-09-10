@@ -200,9 +200,7 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
                 let parts: Vec<&str> = menu_path.split('/').collect();
 
                 match parts.as_slice() {
-                    ["info"] => {
-                        return PreviewCommand::SidebarState(UiState::Menus)
-                    }
+                    ["info"] => return PreviewCommand::SidebarState(UiState::Menus),
                     ["info", "towers"] => {
                         return PreviewCommand::SidebarState(UiState::TowersList {
                             selected: None,
@@ -225,12 +223,14 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
                     },
                     ["info", "enemies", enemy_type_string] => {
                         preview = match parse_enemy_type(enemy_type_string) {
-                            Some(enemy_type) => PreviewCommand::SidebarState(UiState::EnemiesList {
+                            Some(enemy_type) => {
+                                PreviewCommand::SidebarState(UiState::EnemiesList {
                                     selected: Option::from(enemy_type),
-                                }),
-                            None => {
-                                PreviewCommand::SidebarState(UiState::EnemiesList { selected: None })
+                                })
                             },
+                            None => PreviewCommand::SidebarState(UiState::EnemiesList {
+                                selected: None,
+                            }),
                         }
                     },
                     _ => {},

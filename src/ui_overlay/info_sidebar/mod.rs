@@ -227,7 +227,7 @@ fn draw_enemy_list(
     ui.separator();
 
     egui::ScrollArea::vertical().show(ui, |ui| {
-        for enemy in EnemyType::iter() {
+        for &enemy in EnemyType::value_variants() {
             enemy_entry(ui, ctx, asset_server, texture_pack_settings, enemy)
                 .expect("Could not load tower into sidebar");
         }
