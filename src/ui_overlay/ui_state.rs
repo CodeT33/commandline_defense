@@ -9,9 +9,25 @@ pub(crate) enum UiState {
     Menus,
     TowersList {
         selected: Option<TowerType>,
+        further_details: TowerPage,
     },
     EnemiesList {
         selected: Option<EnemyType>,
+        further_details: EnemyPage,
     },
-    TowerUpgrades(TowerType),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub(crate) enum TowerPage {
+    #[default]
+    None,
+    Description,
+    Upgrades,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub(crate) enum EnemyPage {
+    #[default]
+    None,
+    Description,
 }
