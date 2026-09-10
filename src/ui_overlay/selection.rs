@@ -1,6 +1,6 @@
 use crate::consts::{self, TILE_SIZE};
 
-use crate::cli::command_line_state_management::PreviewCommand;
+use crate::cli::preview::PreviewCommand;
 use crate::ecs_elements::components::TileHighlight;
 use crate::ecs_elements::resources::{CommandState, SelectionState, TexturePackSettings};
 use crate::texture_packs::TexturePackAssets;

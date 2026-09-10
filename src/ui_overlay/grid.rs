@@ -1,4 +1,4 @@
-use crate::cli::command_line_state_management::PreviewCommand;
+use crate::cli::preview::PreviewCommand;
 use crate::consts::ui::grid::GRID_LINE_THICKNESS;
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;

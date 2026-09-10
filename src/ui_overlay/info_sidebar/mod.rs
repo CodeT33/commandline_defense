@@ -3,7 +3,7 @@ pub mod info_enemies;
 pub mod info_menus;
 pub mod info_towers;
 
-use crate::cli::command_line_state_management::PreviewCommand;
+use crate::cli::preview::PreviewCommand;
 use crate::ecs_elements::resources::{CommandState, TexturePackSettings};
 use crate::ui_overlay::info_sidebar::info_enemies::{
     draw_enemy_description, draw_enemy_info, draw_enemy_list,
