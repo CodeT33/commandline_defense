@@ -14,10 +14,11 @@ use crate::texture_packs::TexturePackAssets;
 use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
 use std::f32;
-use strum::{EnumString, VariantNames};
+use clap::ValueEnum;
+use strum::{EnumIter, EnumString, VariantNames};
 
 #[allow(unused)]
-#[derive(Debug, Clone, Copy, VariantNames, EnumString, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, VariantNames, EnumString, ValueEnum, PartialEq, Eq, EnumIter)]
 pub(crate) enum EnemyType {
     WideBirb,
     Mausmeister,
@@ -33,6 +34,7 @@ pub(crate) struct EnemyData {
 
 #[derive(Copy, Clone, Debug)]
 pub(crate) struct EnemyStats {
+    pub(crate) reward: i16,
     pub(crate) health: f32,
     pub(crate) player_health_penalty: u16,
     pub(crate) speed_tps: f32,
@@ -49,7 +51,7 @@ pub(crate) fn move_enemies(
     let path_len = map_resource.enemy_path().get_length();
 
     for (entity, mut transform, mut enemy, creation_time) in &mut enemy {
-        let path_duration_secs = path_len as f32 / enemy.enemy_type.get_stats().speed_tps;
+        let path_duration_secs = path_len as f32 / enemy.enemy_type.get_attributes().speed_tps;
         let path_duration_ms = (path_duration_secs * 1000.0).round() as u64;
         let elapsed_ms = creation_time.elapsed_ms(&time);
         let progress = elapsed_ms.min(path_duration_ms) as f32 / path_duration_ms as f32;
@@ -82,7 +84,7 @@ pub(crate) fn handle_enemy_spawns(
     map_resource: Res<MapResource>,
 ) {
     for message in enemy_spawns.read() {
-        let stats = message.enemy_type.get_stats();
+        let stats = message.enemy_type.get_attributes();
         commands.spawn((
             Enemy(EnemyData::new(message.enemy_type)),
             HealthStats(HealthStatsInner::new(stats.health)),
@@ -179,7 +181,7 @@ pub(crate) fn handle_enemies_reaching_end(
     {
         commands.entity(entity).try_despawn();
         player.health =
-            player.health.saturating_sub(enemy.enemy_type.get_stats().player_health_penalty);
+            player.health.saturating_sub(enemy.enemy_type.get_attributes().player_health_penalty);
     }
     if player.health == 0 {
         commands.trigger(PlayerHasDied);

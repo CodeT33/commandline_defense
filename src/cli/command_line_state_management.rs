@@ -198,6 +198,9 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
                 let parts: Vec<&str> = menu_path.split('/').collect();
 
                 match parts.as_slice() {
+                    ["menu"] => {
+                        return PreviewCommand::SidebarState(UiState::Menus)
+                    }
                     ["menu", "towers"] => {
                         return PreviewCommand::SidebarState(UiState::TowersList {
                             selected: None,
@@ -218,16 +221,14 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
                             selected: None,
                         });
                     },
-                    ["show", "menu", "enemies", enemy_type_string] => {
+                    ["menu", "enemies", enemy_type_string] => {
                         preview = match parse_enemy_type(enemy_type_string) {
-                            Some(enemy_type) => {
-                                PreviewCommand::SidebarState(UiState::EnemiesList {
+                            Some(enemy_type) => PreviewCommand::SidebarState(UiState::EnemiesList {
                                     selected: Option::from(enemy_type),
-                                })
+                                }),
+                            None => {
+                                PreviewCommand::SidebarState(UiState::EnemiesList { selected: None })
                             },
-                            None => PreviewCommand::SidebarState(UiState::EnemiesList {
-                                selected: None,
-                            }),
                         }
                     },
                     _ => {},
@@ -329,7 +330,7 @@ fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
 }
 
 fn parse_enemy_type(enemy_type_string: &str) -> Option<EnemyType> {
-    EnemyType::from_str(enemy_type_string)
+    <EnemyType as clap::ValueEnum>::from_str(enemy_type_string, true)
         .map_err(|_| println!("Unknown enemy type: {:?}", enemy_type_string))
         .ok()
 }

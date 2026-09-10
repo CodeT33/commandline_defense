@@ -6,6 +6,7 @@ use crate::entities::tower::TowerType;
 pub(crate) enum UiState {
     #[default]
     Hidden,
+    Menus,
     TowersList {
         selected: Option<TowerType>,
     },

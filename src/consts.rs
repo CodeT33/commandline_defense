@@ -237,9 +237,10 @@ impl TowerType {
 }
 
 impl EnemyType {
-    pub(crate) fn get_stats(self) -> EnemyStats {
+    pub(crate) fn get_attributes(self) -> EnemyStats {
         match self {
             EnemyType::WideBirb => EnemyStats {
+                reward: 80,
                 health: 4.0,
                 player_health_penalty: 4,
                 speed_tps: 1.0,
@@ -248,6 +249,7 @@ impl EnemyType {
                 asset: TexturePackAssets::WipSprites_Enemy,
             },
             EnemyType::Mausmeister => EnemyStats {
+                reward: 5000,
                 health: 0.5,
                 player_health_penalty: 1,
                 speed_tps: 4.0,
@@ -256,6 +258,7 @@ impl EnemyType {
                 asset: TexturePackAssets::WipSprites_MausMeister,
             },
             EnemyType::Rocher => EnemyStats {
+                reward: 500,
                 health: 10.0,
                 player_health_penalty: 1,
                 speed_tps: 0.5,
@@ -264,6 +267,7 @@ impl EnemyType {
                 asset: TexturePackAssets::Enemies_Rocher_RocherDarkmodeLvl1,
             },
             EnemyType::Zapano => EnemyStats {
+                reward: 250,
                 health: 2.0,
                 player_health_penalty: 1,
                 speed_tps: 1.0,

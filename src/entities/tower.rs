@@ -51,13 +51,9 @@ enum Effect {
 
 #[derive(Debug, Clone, Copy, VariantNames, EnumString, ValueEnum, PartialEq, Eq, EnumIter)]
 pub(crate) enum TowerType {
-    #[clap(name = "assault-bober")]
     AssaultTower,
-    #[clap(name = "boom-bober")]
     BoomTower,
-    #[clap(name = "gatling-bober")]
     GatlingTower,
-    #[clap(name = "sniper-bober")]
     SniperTower,
     Eitshtu,
     Acitonion,
@@ -240,7 +236,7 @@ pub(crate) fn shoot_bullets(
                         tower_transform.translation.truncate(),
                         map.enemy_path(),
                         tower_attributes.bullet_speed_tps,
-                        target_enemy.get_type().get_stats().speed_tps,
+                        target_enemy.get_type().get_attributes().speed_tps,
                     ) else {
                         continue;
                     };
