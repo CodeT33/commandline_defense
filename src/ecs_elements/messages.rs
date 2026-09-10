@@ -47,6 +47,7 @@ pub(crate) enum CommandEvent {
     Balance,
     ExitGame,
     Set(Settings),
+    Show { path: String },
 }
 
 #[derive(Message)]
