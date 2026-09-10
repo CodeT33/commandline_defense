@@ -1,4 +1,5 @@
 use crate::cli::auto_completion::Autocompletion;
+use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::CommandEvent;
 use crate::ecs_elements::resources::{CommandHistory, CommandState, SelectionState};
@@ -6,7 +7,6 @@ use crate::entities::enemies::EnemyType;
 use crate::entities::tower::TowerType;
 use crate::ui_overlay::grid::get_number_from_letter;
 use crate::ui_overlay::ui_state::UiState;
-use crate::consts;
 use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
 use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor};
@@ -189,29 +189,25 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
 
                 match parts.as_slice() {
                     ["menu", "towers"] => {
-                        return PreviewCommand::SidebarState(UiState::TowersList { filter: None });
+                        return PreviewCommand::SidebarState(UiState::TowersList {selected: None});
                     },
                     ["menu", "towers", tower_type_string] => {
                         preview = match parse_tower_type(tower_type_string) {
                             Some(tower_type) => {
-                                PreviewCommand::SidebarState(UiState::TowerInfo(tower_type))
+                                PreviewCommand::SidebarState(UiState::TowersList {selected: Option::from(tower_type) })
                             },
-                            None => PreviewCommand::SidebarState(UiState::TowersList {
-                                filter: Some(tower_type_string.parse().unwrap()),
-                            }),
+                            None => PreviewCommand::SidebarState(UiState::TowersList {selected: None}),
                         }
                     },
                     ["menu", "enemies"] => {
-                        return PreviewCommand::SidebarState(UiState::EnemiesList { filter: None });
+                        return PreviewCommand::SidebarState(UiState::EnemiesList {selected: None});
                     },
                     ["show", "menu", "enemies", enemy_type_string] => {
                         preview = match parse_enemy_type(enemy_type_string) {
                             Some(enemy_type) => {
-                                PreviewCommand::SidebarState(UiState::EnemyInfo(enemy_type))
+                                PreviewCommand::SidebarState(UiState::EnemiesList{selected: Option::from(enemy_type) })
                             },
-                            None => PreviewCommand::SidebarState(UiState::EnemiesList {
-                                filter: Some(enemy_type_string.parse().unwrap()),
-                            }),
+                            None => PreviewCommand::SidebarState(UiState::EnemiesList {selected: None}),
                         }
                     },
                     _ => {},

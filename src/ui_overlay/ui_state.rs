@@ -7,12 +7,10 @@ pub(crate) enum UiState {
     #[default]
     Hidden,
     TowersList {
-        filter: Option<String>,
+        selected: Option<TowerType>,
     },
     EnemiesList {
-        filter: Option<String>,
+        selected: Option<EnemyType>,
     },
-    TowerInfo(TowerType),
-    EnemyInfo(EnemyType),
     TowerUpgrades(TowerType),
 }

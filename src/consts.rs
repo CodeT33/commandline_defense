@@ -275,7 +275,7 @@ impl EnemyType {
 }
 
 impl BulletType {
-    pub(crate) fn get_stats(self) -> BulletStats {
+    pub(crate) fn get_attributes(self) -> BulletStats {
         match self {
             BulletType::Bullet => BulletStats {
                 damage: 2.0,

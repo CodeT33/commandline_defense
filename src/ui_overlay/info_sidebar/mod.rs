@@ -18,37 +18,28 @@ pub fn draw_sidebar(
         UiBuilder::new().layer_id(LayerId::background()).max_rect(ctx.viewport_rect()),
     );
 
-    if matches!(command_state.preview, PreviewCommand::SidebarState(UiState::TowersList { .. })) {
-        egui::Panel::right("right_panel_towers_list").resizable(false).show(
+    if let PreviewCommand::SidebarState(UiState::TowersList {selected}) = command_state.preview {
+        egui::Panel::right("right_panel_towers_list").resizable(true).default_size(160.0).show(
             &mut viewport_ui,
             |ui| {
-                ui.heading("Towers");
-                ui.separator();
-
-                egui::ScrollArea::vertical().show(ui, |ui| {
-                    for tower in TowerType::iter() {
-                        tower_entry(
-                            ui,
-                            &mut contexts,
-                            &asset_server,
-                            &texture_pack_settings,
-                            tower,
-                        )
-                        .expect("Could not load tower into sidebar");
-                    }
-                });
+                draw_towers_list(ui, &mut contexts, &asset_server, &texture_pack_settings);
             },
         );
-    }
 
-    if matches!(command_state.preview, PreviewCommand::SidebarState(UiState::TowerInfo(..))) {
-        egui::Panel::right("right_panel_tower_info").resizable(false).show(
-            &mut viewport_ui,
-            |ui| {
-                ui.heading("assault-bober");
-                ui.separator();
-            },
-        );
+        if let Some(tower_type) = selected {
+            egui::Panel::right("right_panel_tower_info").resizable(true).default_size(160.0).show(
+                &mut viewport_ui,
+                |ui| {
+                    draw_tower_info(
+                        ui,
+                        &mut contexts,
+                        &asset_server,
+                        &texture_pack_settings,
+                        tower_type,
+                    );
+                },
+            );
+        }
     }
 
     if matches!(command_state.preview, PreviewCommand::SidebarState(UiState::EnemiesList { .. })) {
@@ -64,7 +55,7 @@ pub fn draw_sidebar(
             .width();
     }
 
-    if matches!(command_state.preview, PreviewCommand::SidebarState(UiState::EnemyInfo(..))) {
+    if matches!(command_state.preview, PreviewCommand::SidebarState(UiState::EnemiesList {..})) {
         egui::Panel::right("right_panel_enemies_info").resizable(false).show(
             &mut viewport_ui,
             |ui| {
@@ -75,6 +66,56 @@ pub fn draw_sidebar(
     }
 
     Ok(())
+}
+
+fn draw_tower_info(
+    ui: &mut Ui, ctx: &mut EguiContexts, asset_server: &Res<AssetServer>,
+    texture_pack_settings: &Res<TexturePackSettings>, tower_type: TowerType,
+) {
+    let tower_attributes = tower_type.get_attributes();
+    let bullet_attributes = tower_attributes.bullet_type.get_attributes();
+
+    let image_handle =
+        asset_server.load(texture_pack_settings.get_asset_path(tower_attributes.preview_sprite));
+    let texture_id = ctx.add_image(EguiTextureHandle::Strong(image_handle));
+
+    ui.heading("assault-bober");
+    ui.separator();
+    ui.add(egui::Image::new(egui::load::SizedTexture::new(texture_id, [128.0, 128.0])));
+    ui.label(egui::RichText::new(format!("${}", tower_attributes.price)).size(32.0));
+    ui.separator();
+
+    ui.label(egui::RichText::new("Tower Attributes").strong());
+    ui.label(format!("Cooldown: {}ms", tower_attributes.cooldown_ms));
+    ui.label(format!("Range: {}m", tower_attributes.range));
+    ui.label(format!(
+        "Tower size: {}x{}m",
+        tower_attributes.size_tiles.x, tower_attributes.size_tiles.y
+    ));
+    ui.label(format!("Targeting type: {:?}", tower_attributes.targeting_type));
+
+    ui.separator();
+
+    ui.label(egui::RichText::new("Bullet Attributes").strong());
+    ui.label(format!("Damage: {}", bullet_attributes.damage));
+    ui.label(format!("Piercing: {}", bullet_attributes.health));
+    ui.label(format!("Speed: {}tps", tower_attributes.bullet_speed_tps));
+    ui.label(format!("Relative collider size: {}m", bullet_attributes.relative_collider_size));
+}
+
+fn draw_towers_list(
+    ui: &mut Ui, ctx: &mut EguiContexts, asset_server: &Res<AssetServer>,
+    texture_pack_settings: &Res<TexturePackSettings>,
+) {
+    ui.heading("Towers");
+    ui.separator();
+
+    egui::ScrollArea::vertical().show(ui, |ui| {
+        for tower in TowerType::iter() {
+            tower_entry(ui, ctx, asset_server, texture_pack_settings, tower)
+                .expect("Could not load tower into sidebar");
+        }
+    });
 }
 
 fn tower_entry(

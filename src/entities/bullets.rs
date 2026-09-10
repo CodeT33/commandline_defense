@@ -67,7 +67,7 @@ pub(crate) fn move_bullets(
         let velocity = bullet.rotation * Vec2::X * bullet.speed_tps * delta_time;
         tf.translation += velocity.extend(0.0);
 
-        tf.rotation = if bullet.bullet_type.get_stats().spins {
+        tf.rotation = if bullet.bullet_type.get_attributes().spins {
             Quat::from_rotation_z(
                 (creation_time.elapsed_ms(&time) % consts::BULLET_ROTATION_DURATION_MS) as f32
                     / consts::BULLET_ROTATION_DURATION_MS as f32
@@ -85,7 +85,7 @@ pub(crate) fn handle_bullet_spawns(
     asset_server: Res<AssetServer>, texture_pack_settings: Res<TexturePackSettings>,
 ) {
     for message in bullet_spawns.read() {
-        let stats = message.bullet_type.get_stats();
+        let stats = message.bullet_type.get_attributes();
         let mut bullet_entity = commands.spawn((
             Bullet(BulletData::new(message.bullet_type, message.direction, message.speed_tps)),
             HealthStats(HealthStatsInner::new(stats.health)),
@@ -118,7 +118,7 @@ pub(crate) fn handle_bullet_enemy_collisions(
         else {
             continue;
         };
-        enemy_health.change_health(-bullet.bullet_type.get_stats().damage);
+        enemy_health.change_health(-bullet.bullet_type.get_attributes().damage);
         if enemy_health.is_dead() {
             commands.entity(pair.type_a).try_despawn();
         }
@@ -140,7 +140,7 @@ pub(crate) fn bullet_spawn_observer(
     let Ok(mut enemy) = enemy_query.get_mut(*target_enemy.deref()) else {
         return;
     };
-    enemy.add_target_from_bullet(bullet_entity, bullet_data.bullet_type.get_stats().damage);
+    enemy.add_target_from_bullet(bullet_entity, bullet_data.bullet_type.get_attributes().damage);
 }
 
 pub(crate) fn bullet_despawn_observer(

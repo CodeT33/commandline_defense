@@ -73,7 +73,7 @@ pub(crate) enum TowerType {
     RocketTroop,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub(crate) enum TargetingType {
     #[allow(unused)]
     Basic,
