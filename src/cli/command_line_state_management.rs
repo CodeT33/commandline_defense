@@ -72,7 +72,7 @@ pub(crate) fn handle_command_line_state(
     //Preview
     if current_input != command_state.last_input {
         command_state.last_input = current_input.clone();
-        command_state.preview = parse_command_preview(&current_input);
+        command_state.preview = parse_command_preview(&current_input, &command_state);
         command_state.parse_output = parse_commandline_input(&current_input);
         if !command_state.parse_output.autocompletion.is_empty() {
             println!("{:?}", command_state.parse_output.autocompletion);
@@ -171,13 +171,17 @@ fn parse_to_sendable_commands(
         .collect()
 }
 
-fn parse_command_preview(input: &str) -> PreviewCommand {
-    let mut preview = PreviewCommand::None;
+fn parse_command_preview(input: &str, current_preview: &ResMut<CommandState>) -> PreviewCommand {
+    let mut preview = current_preview.preview.clone();
+
+    if input.is_empty() {
+        return PreviewCommand::None;
+    }
 
     for command_text in input.split(';') {
         let command_text = command_text.trim();
 
-        if command_text.is_empty() {
+        if input.is_empty() {
             continue;
         }
 
@@ -198,9 +202,7 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
                 let parts: Vec<&str> = menu_path.split('/').collect();
 
                 match parts.as_slice() {
-                    ["info"] => {
-                        return PreviewCommand::SidebarState(UiState::Menus)
-                    }
+                    ["info"] => return PreviewCommand::SidebarState(UiState::Menus),
                     ["info", "towers"] => {
                         return PreviewCommand::SidebarState(UiState::TowersList {
                             selected: None,
@@ -211,9 +213,7 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
                             Some(tower_type) => PreviewCommand::SidebarState(UiState::TowersList {
                                 selected: Option::from(tower_type),
                             }),
-                            None => {
-                                PreviewCommand::SidebarState(UiState::TowersList { selected: None })
-                            },
+                            None => preview,
                         }
                     },
                     ["info", "enemies"] => {
@@ -223,12 +223,12 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
                     },
                     ["info", "enemies", enemy_type_string] => {
                         preview = match parse_enemy_type(enemy_type_string) {
-                            Some(enemy_type) => PreviewCommand::SidebarState(UiState::EnemiesList {
+                            Some(enemy_type) => {
+                                PreviewCommand::SidebarState(UiState::EnemiesList {
                                     selected: Option::from(enemy_type),
-                                }),
-                            None => {
-                                PreviewCommand::SidebarState(UiState::EnemiesList { selected: None })
+                                })
                             },
+                            None => preview,
                         }
                     },
                     _ => {},
