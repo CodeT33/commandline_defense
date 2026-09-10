@@ -99,7 +99,6 @@ fn tower_entry(
     Ok(())
 }
 
-
 pub(crate) fn draw_tower_description(ui: &mut Ui, tower_type: TowerType) {
     let tower_name = tower_type
         .to_possible_value()
@@ -108,7 +107,7 @@ pub(crate) fn draw_tower_description(ui: &mut Ui, tower_type: TowerType) {
 
     ui.heading(tower_name);
     ui.separator();
-    ui.label("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet");
+    ui.label(tower_type.get_description());
 }
 
 pub(crate) fn draw_tower_upgrades(ui: &mut Ui, tower_type: TowerType) {
@@ -121,4 +120,3 @@ pub(crate) fn draw_tower_upgrades(ui: &mut Ui, tower_type: TowerType) {
     ui.separator();
     ui.label("Upgrade 1...");
 }
-

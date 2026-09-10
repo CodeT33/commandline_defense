@@ -234,6 +234,12 @@ impl TowerType {
             },
         }
     }
+    pub(crate) fn get_description(self) -> String {
+        match self {
+            TowerType::AssaultTower => "Normal ahh tower".to_string(),
+            _ => "No description...".to_string(),
+        }
+    }
 }
 
 impl EnemyType {
@@ -275,6 +281,12 @@ impl EnemyType {
                 texture_size_tiles: 1.0,
                 asset: TexturePackAssets::Enemies_Zapano_ZapanoFrontendLvl1,
             },
+        }
+    }
+    pub(crate) fn get_description(self) -> String {
+        match self {
+            EnemyType::Mausmeister => "Hail the master of mice!".to_string(),
+            _ => "No description...".to_string(),
         }
     }
 }

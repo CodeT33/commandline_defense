@@ -14,7 +14,7 @@ use crate::ui_overlay::info_sidebar::info_towers::{
 };
 use crate::ui_overlay::ui_state::{EnemyPage, TowerPage, UiState};
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{EguiContexts, egui};
 use egui::{LayerId, Pos2, Ui, UiBuilder};
 
 pub fn draw_gui(
@@ -30,7 +30,7 @@ pub fn draw_gui(
     );
 
     if let PreviewCommand::SidebarState(UiState::Menus) = command_state.preview {
-        egui::Panel::right("Right Panel Menus").resizable(true).default_size(160.0).show(
+        egui::Panel::right("Right Panel Menus").resizable(true).default_size(200.0).show(
             &mut viewport_ui,
             |ui| {
                 draw_menus_list(ui);
@@ -41,7 +41,7 @@ pub fn draw_gui(
     if let PreviewCommand::SidebarState(UiState::TowersList { selected, further_details }) =
         command_state.preview
     {
-        egui::Panel::right("Right Panel Tower List").resizable(true).default_size(160.0).show(
+        egui::Panel::right("Right Panel Tower List").resizable(true).default_size(200.0).show(
             &mut viewport_ui,
             |ui| {
                 draw_tower_list(ui, &mut contexts, &asset_server, &texture_pack_settings);
@@ -49,8 +49,8 @@ pub fn draw_gui(
         );
 
         if let Some(tower_type) = selected {
-            egui::Window::new("Tower Info")
-                .resizable(true)
+            egui::Window::new("Details")
+                .resizable(false)
                 .default_pos(Pos2 { x: 1120.0, y: 100.0 })
                 .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
                 .show(&viewport_ui, |ui| {
@@ -68,7 +68,7 @@ pub fn draw_gui(
             && further_details == TowerPage::Description
         {
             egui::Window::new("Description")
-                .resizable(true)
+                .resizable(false)
                 .default_pos(Pos2 { x: 900.0, y: 100.0 })
                 .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
                 .show(&viewport_ui, |ui| {
@@ -80,7 +80,7 @@ pub fn draw_gui(
             && further_details == TowerPage::Upgrades
         {
             egui::Window::new("Upgrades")
-                .resizable(true)
+                .resizable(false)
                 .default_pos(Pos2 { x: 900.0, y: 100.0 })
                 .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
                 .show(&viewport_ui, |ui| {
@@ -92,7 +92,7 @@ pub fn draw_gui(
     if let PreviewCommand::SidebarState(UiState::EnemiesList { selected, further_details }) =
         command_state.preview
     {
-        egui::Panel::right("Right Panel Enemies List").resizable(true).default_size(160.0).show(
+        egui::Panel::right("Right Panel Enemies List").resizable(true).default_size(200.0).show(
             &mut viewport_ui,
             |ui| {
                 draw_enemy_list(ui, &mut contexts, &asset_server, &texture_pack_settings);
@@ -100,8 +100,8 @@ pub fn draw_gui(
         );
 
         if let Some(enemy_type) = selected {
-            egui::Window::new("Enemy Info")
-                .resizable(true)
+            egui::Window::new("Details")
+                .resizable(false)
                 .default_pos(Pos2 { x: 1120.0, y: 100.0 })
                 .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
                 .show(&viewport_ui, |ui| {
@@ -118,8 +118,8 @@ pub fn draw_gui(
         if let Some(enemy_type) = selected
             && further_details == EnemyPage::Description
         {
-            egui::Window::new("Enemy Description")
-                .resizable(true)
+            egui::Window::new("Description")
+                .resizable(false)
                 .default_pos(Pos2 { x: 900.0, y: 100.0 })
                 .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
                 .show(&viewport_ui, |ui| {
