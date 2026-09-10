@@ -84,13 +84,16 @@ pub(crate) fn handle_command_line_state(
     if keys.just_pressed(KeyCode::Tab)
         && let [complete_to] = command_state.parse_output.autocompletion.as_slice()
         && let Some(last_command) = current_input.split(";").last()
-        && let Some(last_word) = last_command.replace("/", " ").split_whitespace().last()
+        && let Some(last_word) = last_command
+            .replace(consts::COMMAND_OPEN_SEPARATION_CHARACTER, " ")
+            .split_whitespace()
+            .last()
         && complete_to.len() >= last_word.len()
     {
         let mut new = complete_to.to_owned();
         println!("{}", last_command);
         if last_command.trim_start().starts_with("open ") {
-            new.push('/');
+            new.push(consts::COMMAND_OPEN_SEPARATION_CHARACTER);
         } else {
             new.push(' ');
         }
@@ -214,7 +217,8 @@ fn parse_command_preview(input: &str, current_preview: &ResMut<CommandState>) ->
                 }
             },
             ["open", menu_path] => {
-                let parts: Vec<&str> = menu_path.split('/').filter(|s| !s.is_empty()).collect();
+                let parts: Vec<&str> =
+                    menu_path.split(consts::COMMAND_OPEN_SEPARATION_CHARACTER).filter(|s| !s.is_empty()).collect();
 
                 match parts.as_slice() {
                     ["info"] => return PreviewCommand::SidebarState(UiState::Menus),
@@ -295,7 +299,10 @@ pub struct ParseOutput {
 }
 
 fn parse_commandline_input(input: &str) -> ParseOutput {
-    let split = input.split(';').map(|s| s.replace("/", " ")).collect::<Vec<_>>();
+    let split = input
+        .split(';')
+        .map(|s| s.replace(consts::COMMAND_OPEN_SEPARATION_CHARACTER, " "))
+        .collect::<Vec<_>>();
     let evaluated = split
         .iter()
         .map(|s| s.trim())

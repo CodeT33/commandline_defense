@@ -23,6 +23,8 @@ pub(crate) const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 
 pub(crate) const BULLET_ROTATION_DURATION_MS: u64 = 234;
 
+pub(crate) const COMMAND_OPEN_SEPARATION_CHARACTER: char = '/';
+
 /// Number of simulated seconds captured before the log is saved and the program is terminated.
 #[cfg(feature = "determinism")]
 pub(crate) const LOG_DURATION_SECS: u64 = 15;
