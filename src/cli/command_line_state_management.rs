@@ -282,7 +282,7 @@ fn parse_commandline_input(input: &str) -> ParseOutput {
     ParseOutput { evaluated, autocompletion }
 }
 
-#[derive(Parser, Debug, Clone)]
+#[derive(Parser, Debug, Clone, Copy)]
 #[command(
     no_binary_name = true,
     disable_help_subcommand = true,
@@ -307,7 +307,7 @@ pub(crate) enum CommandInput {
     Open(OpenCommand),
 }
 
-#[derive(Subcommand, Debug, Clone)]
+#[derive(Subcommand, Debug, Clone, Copy)]
 pub(crate) enum OpenCommand {
     Info {
         #[command(subcommand)]
@@ -315,7 +315,7 @@ pub(crate) enum OpenCommand {
     },
 }
 
-#[derive(Subcommand, Debug, Clone)]
+#[derive(Subcommand, Debug, Clone, Copy)]
 pub(crate) enum FurtherInfo {
     Enemies {
         enemy_type: Option<EnemyType>,
@@ -329,12 +329,12 @@ pub(crate) enum FurtherInfo {
     },
 }
 
-#[derive(ValueEnum, Debug, Clone)]
+#[derive(ValueEnum, Debug, Clone, Copy)]
 pub(crate) enum EnemyFurther {
     Description,
 }
 
-#[derive(ValueEnum, Debug, Clone)]
+#[derive(ValueEnum, Debug, Clone, Copy)]
 pub(crate) enum TowerFurther {
     Description,
     Upgrades,
