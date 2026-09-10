@@ -194,19 +194,19 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
                     None => PreviewCommand::ShowGrid,
                 }
             },
-            ["show", menu_path] => {
+            ["open", menu_path] => {
                 let parts: Vec<&str> = menu_path.split('/').collect();
 
                 match parts.as_slice() {
-                    ["menu"] => {
+                    ["info"] => {
                         return PreviewCommand::SidebarState(UiState::Menus)
                     }
-                    ["menu", "towers"] => {
+                    ["info", "towers"] => {
                         return PreviewCommand::SidebarState(UiState::TowersList {
                             selected: None,
                         });
                     },
-                    ["menu", "towers", tower_type_string] => {
+                    ["info", "towers", tower_type_string] => {
                         preview = match parse_tower_type(tower_type_string) {
                             Some(tower_type) => PreviewCommand::SidebarState(UiState::TowersList {
                                 selected: Option::from(tower_type),
@@ -216,12 +216,12 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
                             },
                         }
                     },
-                    ["menu", "enemies"] => {
+                    ["info", "enemies"] => {
                         return PreviewCommand::SidebarState(UiState::EnemiesList {
                             selected: None,
                         });
                     },
-                    ["menu", "enemies", enemy_type_string] => {
+                    ["info", "enemies", enemy_type_string] => {
                         preview = match parse_enemy_type(enemy_type_string) {
                             Some(enemy_type) => PreviewCommand::SidebarState(UiState::EnemiesList {
                                     selected: Option::from(enemy_type),
