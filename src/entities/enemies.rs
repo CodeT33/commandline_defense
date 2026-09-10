@@ -13,12 +13,13 @@ use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
 use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
+use clap::ValueEnum;
 use std::f32;
 use clap::ValueEnum;
 use strum::{EnumIter, EnumString, VariantNames};
 
 #[allow(unused)]
-#[derive(Debug, Clone, Copy, VariantNames, EnumString, ValueEnum, PartialEq, Eq, EnumIter)]
+#[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Eq)]
 pub(crate) enum EnemyType {
     WideBirb,
     Mausmeister,

@@ -12,7 +12,9 @@ use bevy::input_focus::InputFocus;
 use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor};
 use bevy::text::{EditableText, TextEdit};
 use clap::error::ErrorKind::MissingRequiredArgument;
-use clap::{Error, Parser, Subcommand};
+use clap::{Error, Parser, Subcommand, ValueEnum};
+use clap_complete::{ArgValueCompleter, CompletionCandidate};
+use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::ops::RangeBounds;
 use std::str::FromStr;
@@ -100,7 +102,7 @@ pub(crate) fn handle_command_line_state(
             .parse_output
             .evaluated
             .iter()
-            .map(|r| r.as_ref().map_err(|e| e.to_string()).copied())
+            .map(|r| r.as_ref().map_err(|e| e.to_string()).cloned())
             .collect::<Result<Vec<_>, String>>()
         {
             Ok(commands) => commands,
@@ -151,21 +153,21 @@ fn parse_to_sendable_commands(
 ) -> Result<Vec<CommandEvent>, &'static str> {
     input_commands
         .iter()
-        .copied()
         .map(|ic| {
             Ok(match ic {
                 CommandInput::Help => CommandEvent::Help,
                 CommandInput::Select { tile } => {
-                    *selected_tile = tile.into();
-                    CommandEvent::Select { tile }
+                    *selected_tile = (*tile).into();
+                    CommandEvent::Select { tile: *tile }
                 },
                 CommandInput::Place { tower_type } => selected_tile
-                    .map(|p| CommandEvent::Place { tower_type, tower_pos: p })
+                    .map(|p| CommandEvent::Place { tower_type: *tower_type, tower_pos: p })
                     .ok_or("No Tile selected")?,
                 CommandInput::Clear => CommandEvent::Clear,
                 CommandInput::Balance => CommandEvent::Balance,
                 CommandInput::ExitGame => CommandEvent::ExitGame,
-                CommandInput::Set(setting) => CommandEvent::Set(setting),
+                CommandInput::Set(setting) => CommandEvent::Set(*setting),
+                CommandInput::Show { path } => CommandEvent::Show { path: path.clone() },
             })
         })
         .collect()
@@ -260,7 +262,7 @@ fn parse_commandline_input(input: &str) -> ParseOutput {
     ParseOutput { evaluated, autocompletion }
 }
 
-#[derive(Parser, Debug, Clone, Copy)]
+#[derive(Parser, Debug, Clone)]
 #[command(
     no_binary_name = true,
     disable_help_subcommand = true,
@@ -281,6 +283,114 @@ pub(crate) enum CommandInput {
     ExitGame,
     #[command(subcommand)]
     Set(Settings),
+    Show {
+        #[arg(
+			value_parser = validate_path,
+			add = ArgValueCompleter::new(custom_completer)
+		)]
+        path: String,
+    },
+}
+
+fn custom_completer(current: &OsStr) -> Vec<CompletionCandidate> {
+    let Some(current_str) = current.to_str() else { return vec![] };
+    let split: Vec<_> = current_str.split('/').map(|s| s.trim()).collect();
+    match split.as_slice() {
+        ["towers", tower_name] => get_type_names::<TowerType>()
+            .iter()
+            .filter(|n| n.starts_with(tower_name))
+            .map(|tn| format!("towers/{tn}"))
+            .map(CompletionCandidate::new)
+            .collect(),
+        ["towers", tower_name, inner] => {
+            if get_type_names::<TowerType>().iter().all(|name| name != tower_name) {
+                return vec![];
+            }
+            ["upgrades", "description"]
+                .iter()
+                .filter(|n| n.starts_with(inner))
+                .map(|last| format!("towers/{tower_name}/{last}"))
+                .map(CompletionCandidate::new)
+                .collect()
+        },
+        ["enemies", tower_name] => get_type_names::<EnemyType>()
+            .iter()
+            .filter(|n| n.starts_with(tower_name))
+            .map(|en| format!("enemies/{en}"))
+            .map(CompletionCandidate::new)
+            .collect(),
+        ["enemies", enemy_name, inner] => {
+            if get_type_names::<EnemyType>().iter().all(|name| name != enemy_name) {
+                return vec![];
+            }
+            ["description"]
+                .iter()
+                .filter(|n| n.starts_with(inner))
+                .map(|last| format!("enemies/{enemy_name}/{last}"))
+                .map(CompletionCandidate::new)
+                .collect()
+        },
+        [first_word] => ["towers", "enemies", "commands"]
+            .iter()
+            .filter(|n| n.starts_with(first_word))
+            .map(CompletionCandidate::new)
+            .collect(),
+        _ => vec![],
+    }
+}
+
+fn validate_path(value: &str) -> Result<String, String> {
+    let mut split = value.split('/').map(|s| s.trim());
+    let error_str = "Invalid path, options ar [towers, enemies, commands]";
+    let level0 = split.next().ok_or(error_str)?;
+    match level0 {
+        "towers" => {
+            let Some(level1) = split.next() else {
+                return Ok(level0.to_owned());
+            };
+            let _ = TowerType::from_str(level1, false).map_err(|_| {
+                format!(
+                    "Invalid tower type, options are: [{}]",
+                    get_type_names::<TowerType>().join(", ")
+                )
+            })?;
+            let Some(level2) = split.next() else {
+                return Ok(format!("{}/{}", level0, level1));
+            };
+            match level2 {
+                "upgrades" => Ok(value.to_owned()),
+                "description" => Ok(value.to_owned()),
+                &_ => Err("Invalid path, options are [upgrades, description]".to_owned()),
+            }
+        },
+        "enemies" => {
+            let Some(level1) = split.next() else {
+                return Ok(level0.to_owned());
+            };
+            let _ = EnemyType::from_str(level1, false).map_err(|_| {
+                format!(
+                    "Invalid enemy type, options are: [{}]",
+                    get_type_names::<EnemyType>().join(", ")
+                )
+            })?;
+            let Some(level2) = split.next() else {
+                return Ok(format!("{}/{}", level0, level1));
+            };
+            match level2 {
+                "description" => Ok(value.to_owned()),
+                &_ => Err("Invalid path, options are [upgrades, description]".to_owned()),
+            }
+        },
+        "commands" => Err("command view not yet implemented".to_owned()),
+        _ => Err(error_str.to_string()),
+    }
+}
+
+fn get_type_names<T: ValueEnum>() -> Vec<String> {
+    T::value_variants()
+        .iter()
+        .filter_map(|v| v.to_possible_value().map(|pv| pv.get_name().to_owned()))
+        .collect::<Vec<_>>()
 }
 
 fn parse_tile(s: &str) -> Result<GridCoordinate, String> {
@@ -330,7 +440,7 @@ fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
 }
 
 fn parse_enemy_type(enemy_type_string: &str) -> Option<EnemyType> {
-    <EnemyType as clap::ValueEnum>::from_str(enemy_type_string, true)
+    EnemyType::from_str(enemy_type_string, false)
         .map_err(|_| println!("Unknown enemy type: {:?}", enemy_type_string))
         .ok()
 }
