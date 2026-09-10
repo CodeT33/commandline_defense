@@ -1,4 +1,4 @@
-use crate::cli::command_line_state_management::Settings;
+use crate::cli::command_input::Settings;
 use crate::collision::CollisionPair;
 use crate::coordinates::GridCoordinate;
 use crate::entities::bullets::BulletType;
