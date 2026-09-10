@@ -1,4 +1,4 @@
-use crate::cli::command_line_state_management::PreviewCommand;
+use crate::cli::command_line_state_management::{ParseOutput, PreviewCommand};
 use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::map::map_logic_parsing::GameMap;
@@ -17,6 +17,7 @@ pub(crate) struct CommandHistory {
 pub(crate) struct CommandState {
     pub(crate) preview: PreviewCommand,
     pub(crate) last_input: String,
+    pub(crate) parse_output: ParseOutput,
 }
 
 #[derive(Resource)]

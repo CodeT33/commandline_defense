@@ -19,6 +19,7 @@ use bevy::prelude::{
     Circle, Commands, Entity, MessageReader, MessageWriter, Query, Res, ResMut, Sprite,
     SpriteImageMode, SpriteScalingMode, Time, Transform, With, Without, default,
 };
+use clap::ValueEnum;
 use std::f32::consts::PI;
 use std::time::Duration;
 use strum::{EnumIter, EnumString, VariantNames};
@@ -48,36 +49,28 @@ enum Effect {
     BigBirbMode,
 }
 
-#[derive(Debug, Clone, Copy, VariantNames, EnumString, PartialEq, Eq, EnumIter)]
+#[derive(Debug, Clone, Copy, VariantNames, EnumString, ValueEnum, PartialEq, Eq, EnumIter)]
 pub(crate) enum TowerType {
-    #[strum(serialize = "assault-bober")]
+    #[clap(name = "assault-bober")]
     AssaultTower,
-    #[strum(serialize = "boom-bober")]
+    #[clap(name = "boom-bober")]
     BoomTower,
-    #[strum(serialize = "gatling-bober")]
+    #[clap(name = "gatling-bober")]
     GatlingTower,
-    #[strum(serialize = "sniper-bober")]
+    #[clap(name = "sniper-bober")]
     SniperTower,
-    #[strum(serialize = "rocket-bober")]
-    RocketTroop,
-    #[strum(serialize = "eitshtu")]
     Eitshtu,
-    #[strum(serialize = "acitonion")]
     Acitonion,
-    #[strum(serialize = "strorm")]
     Strorm,
-    #[strum(serialize = "infernon")]
     Infernon,
-    #[strum(serialize = "icebyte")]
     Icebyte,
-    #[strum(serialize = "goldt")]
     //Goldt,
-    #[strum(serialize = "copprina")]
     //Copprina,
 
     //meme stuff
     #[strum(serialize = "don-banano")]
     DonBanano,
+    RocketTroop,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]

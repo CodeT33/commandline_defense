@@ -38,7 +38,7 @@ pub(crate) struct CollisionSustained(pub(crate) CollisionPair);
 #[derive(Message, Deref, DerefMut)]
 pub(crate) struct CollisionEnded(pub(crate) CollisionPair);
 
-#[derive(Message, Debug)]
+#[derive(Message, Debug, PartialEq)]
 pub(crate) enum CommandEvent {
     Help,
     Select { tile: GridCoordinate },

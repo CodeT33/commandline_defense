@@ -333,6 +333,7 @@ impl BulletType {
 pub(crate) mod ui {
     use bevy::prelude::Color;
 
+    pub(crate) const CONSOLE_ERROR_COLOR: Color = Color::linear_rgb(1.0, 0.0, 0.0);
     pub(crate) const BOUNDING_BOX_DEBUG_COLOR: Color = Color::hsv(120.0, 1.0, 1.0);
     pub(crate) const BOUNDING_BOX_DEBUG_COLOR_ALT: Color = Color::hsv(0.0, 1.0, 1.0);
     /// How often the debug bounding box color toggles between the two colors.

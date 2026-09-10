@@ -1,3 +1,4 @@
+use crate::cli::auto_completion::Autocompletion;
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::CommandEvent;
 use crate::ecs_elements::resources::{CommandHistory, CommandState, SelectionState};
@@ -5,10 +6,13 @@ use crate::entities::enemies::EnemyType;
 use crate::entities::tower::TowerType;
 use crate::ui_overlay::grid::get_number_from_letter;
 use crate::ui_overlay::ui_state::UiState;
+use crate::consts;
 use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
-use bevy::prelude::{KeyCode, MessageWriter, Query, Res, ResMut};
-use bevy::text::EditableText;
+use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor};
+use bevy::text::{EditableText, TextEdit};
+use clap::error::ErrorKind::MissingRequiredArgument;
+use clap::{Error, Parser, ValueEnum};
 use std::str::FromStr;
 use strum::{EnumString, VariantNames};
 
@@ -33,44 +37,62 @@ pub(crate) enum PreviewCommand {
     },
 }
 
-#[derive(Debug, VariantNames, EnumString)]
+#[derive(Debug, VariantNames, EnumString, Copy, Clone, ValueEnum, PartialEq)]
 pub(crate) enum Settings {
-    #[strum(serialize = "bounding-boxes")]
     BoundingBoxes,
-    #[strum(serialize = "sim-speed")]
     SimSpeed,
-    #[strum(serialize = "enemy-spawn-interval")]
     EnemySpawnInterval,
 }
 
 pub(crate) fn handle_command_line_state(
-    focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
+    focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>,
+    mut inputs: Query<(&mut EditableText, &mut TextColor)>,
     mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
-    mut history: ResMut<CommandHistory>, selection_state: ResMut<SelectionState>,
+    mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
 ) {
     let Some(entity) = focus.get() else {
         return;
     };
-    let Ok(mut input) = inputs.get_mut(entity) else {
+    let Ok((mut input, mut text_color)) = inputs.get_mut(entity) else {
         return;
     };
 
-    let current_input = input.value().to_string();
+    let mut current_input = input.value().to_string();
 
     //Preview
     if current_input != command_state.last_input {
         command_state.last_input = current_input.clone();
         command_state.preview = parse_command_preview(&current_input);
+        command_state.parse_output = parse_commandline_input(&current_input);
+        if !command_state.parse_output.autocompletion.is_empty() {
+            println!("{:?}", command_state.parse_output.autocompletion);
+        }
+        let show_error = determine_show_error(&command_state, &current_input);
+        text_color.0 = if show_error { consts::ui::CONSOLE_ERROR_COLOR } else { Color::WHITE };
+    }
+
+    if keys.just_pressed(KeyCode::Tab)
+        && let [complete_to] = command_state.parse_output.autocompletion.as_slice()
+        && let Some(last_command) = current_input.split(";").last()
+        && let Some(last_word) = last_command.split_whitespace().last()
+        && complete_to.len() > last_word.len()
+    {
+        let new_len = current_input.len() - last_word.len();
+        current_input.truncate(new_len);
+        current_input.push_str(complete_to);
+        input.editor.set_text(&current_input);
+        input.queue_edit(TextEdit::TextEnd(false));
     }
 
     //Submit
     if keys.just_pressed(KeyCode::Enter) {
-        let output: Result<Vec<_>, _> =
-            parse_commandline_input(&current_input, selection_state.selected_tile)
-                .into_iter()
-                .collect::<Result<_, _>>();
-
-        let commands = match output {
+        let command_inputs = match command_state
+            .parse_output
+            .evaluated
+            .iter()
+            .map(|r| r.as_ref().map_err(|e| e.to_string()).copied())
+            .collect::<Result<Vec<_>, String>>()
+        {
             Ok(commands) => commands,
             Err(err) => {
                 println!("Failed to parse commands: {}", err);
@@ -78,7 +100,18 @@ pub(crate) fn handle_command_line_state(
             },
         };
 
-        for command in commands {
+        let mut local_selection_state = selection_state.selected_tile;
+        let sendable_commands =
+            match parse_to_sendable_commands(&command_inputs, &mut local_selection_state) {
+                Ok(commands) => commands,
+                Err(error) => {
+                    println!("{}", error);
+                    return;
+                },
+            };
+        selection_state.selected_tile = local_selection_state;
+
+        for command in sendable_commands {
             command_events.write(command);
             history.entries.push(current_input.clone());
             history.idx = history.entries.len();
@@ -89,6 +122,43 @@ pub(crate) fn handle_command_line_state(
         command_state.last_input.clear();
         command_state.preview = PreviewCommand::None;
     }
+}
+
+fn determine_show_error(command_state: &ResMut<CommandState>, current_input: &str) -> bool {
+    let evaluated = &command_state.parse_output.evaluated;
+    let autocompletion = &command_state.parse_output.autocompletion;
+    evaluated.iter().rev().skip(1).any(|r| r.is_err())
+        || evaluated.last().is_some_and(|l| {
+            l.as_ref().is_err_and(|err| {
+                current_input.trim().ends_with(";")
+                    || (err.kind() != MissingRequiredArgument && autocompletion.is_empty())
+            })
+        })
+}
+
+fn parse_to_sendable_commands(
+    input_commands: &[CommandInput], selected_tile: &mut Option<GridCoordinate>,
+) -> Result<Vec<CommandEvent>, &'static str> {
+    input_commands
+        .iter()
+        .copied()
+        .map(|ic| {
+            Ok(match ic {
+                CommandInput::Help => CommandEvent::Help,
+                CommandInput::Select { tile } => {
+                    *selected_tile = tile.into();
+                    CommandEvent::Select { tile }
+                },
+                CommandInput::Place { tower_type } => selected_tile
+                    .map(|p| CommandEvent::Place { tower_type, tower_pos: p })
+                    .ok_or("No Tile selected")?,
+                CommandInput::Clear => CommandEvent::Clear,
+                CommandInput::Balance => CommandEvent::Balance,
+                CommandInput::ExitGame => CommandEvent::ExitGame,
+                CommandInput::Set { setting, value } => CommandEvent::Set { setting, value },
+            })
+        })
+        .collect()
 }
 
 fn parse_command_preview(input: &str) -> PreviewCommand {
@@ -153,67 +223,70 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
     preview
 }
 
-fn parse_commandline_input(
-    input: &str, mut selected_tile: Option<GridCoordinate>,
-) -> Vec<Result<CommandEvent, String>> {
-    input
-        .split(';')
-        .filter_map(|command_text| {
-            parse_single_command(command_text, &mut selected_tile).transpose()
-        })
+#[derive(Default)]
+pub struct ParseOutput {
+    autocompletion: Vec<String>,
+    evaluated: Vec<Result<CommandInput, Error>>,
+}
+
+fn parse_commandline_input(input: &str) -> ParseOutput {
+    let split = input.split(';').collect::<Vec<_>>();
+    let evaluated = split
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .map(parse_single_command_new)
+        .collect::<Vec<Result<_, Error>>>();
+
+    let autocompletion: Vec<_> =
+        split.last().map(get_auto_completion_single_line).unwrap_or_default();
+    ParseOutput { evaluated, autocompletion }
+}
+
+#[derive(Parser, Debug, Clone, Copy)]
+#[command(
+    no_binary_name = true,
+    disable_help_subcommand = true,
+    disable_help_flag = true,
+    override_usage = "<COMMAND>"
+)]
+pub(crate) enum CommandInput {
+    Help,
+    Select { tile: GridCoordinate },
+    Place { tower_type: TowerType },
+    Clear,
+    Balance,
+    ExitGame,
+
+    Set { setting: Settings, value: f32 },
+}
+
+fn parse_single_command_new(input_str: impl AsRef<str>) -> Result<CommandInput, Error> {
+    CommandInput::try_parse_from(input_str.as_ref().split_whitespace())
+}
+
+fn get_auto_completion_single_line(input_str: impl AsRef<str>) -> Vec<String> {
+    CommandInput::get_autocompletion(input_str.as_ref())
+        .iter()
+        .map(|cc| cc.get_value().to_string_lossy().to_string())
         .collect()
 }
 
-fn parse_single_command(
-    input_str: &str, current_selected_tile: &mut Option<GridCoordinate>,
-) -> Result<Option<CommandEvent>, String> {
-    let command_text = input_str.trim();
-
-    if command_text.is_empty() {
-        return Ok(None);
-    }
-
-    let tokens: Vec<&str> = command_text.split_whitespace().collect();
-
-    Ok(Some(match tokens.as_slice() {
-        ["help"] => CommandEvent::Help,
-        ["select", position] => {
-            let tile = parse_tile_position(position)
-                .ok_or_else(|| format!("Invalid tile position: {:?}", position))?;
-            *current_selected_tile = Some(tile);
-            CommandEvent::Select { tile }
-        },
-        ["place", tower_type] => {
-            let tile = current_selected_tile
-                .ok_or_else(|| "Cannot place tower: no tile selected".to_string())?;
-            let tower_type = parse_tower_type(tower_type).ok_or_else(|| {
-                format!("Cannot place tower: unknown tower type: {:?}", tower_type)
-            })?;
-            CommandEvent::Place { tower_type, tower_pos: tile }
-        },
-        ["clear"] => {
-            *current_selected_tile = None;
-            CommandEvent::Clear
-        },
-        ["show", "balance"] => CommandEvent::Balance,
-        ["exit", "game"] => CommandEvent::ExitGame,
-        ["set", setting, value] => {
-            let value = value.parse::<f32>().map_err(|e| e.to_string())?;
-            let setting = Settings::from_str(setting).map_err(|_| {
-                format!(
-                    "Unknown setting: \"{}\", possible options are: {}",
-                    setting,
-                    Settings::VARIANTS.join(", ")
-                )
-            })?;
-            CommandEvent::Set { setting, value }
-        },
-        _ => Err(format!("Unknown command: \"{}\"", command_text))?,
-    }))
+#[test]
+fn test_input() {
+    let input = "set";
+    println!(
+        "{:?}",
+        match parse_single_command_new(input) {
+            Ok(val) => println!("Parsed: {:?}", val),
+            Err(err) => println!("Err: {}", err),
+        }
+    );
+    println!("{:?}", get_auto_completion_single_line(input));
 }
 
 fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
-    TowerType::from_str(tower_type_string)
+    <TowerType as clap::ValueEnum>::from_str(tower_type_string, true)
         .map_err(|_| println!("Unknown tower type: {:?}", tower_type_string))
         .ok()
 }
@@ -224,7 +297,7 @@ fn parse_enemy_type(enemy_type_string: &str) -> Option<EnemyType> {
         .ok()
 }
 
-fn parse_tile_position(position: &str) -> Option<GridCoordinate> {
+pub(crate) fn parse_tile_position(position: &str) -> Option<GridCoordinate> {
     let position = position.to_ascii_uppercase();
 
     let mut number = String::new();
