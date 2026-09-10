@@ -11,6 +11,8 @@ use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor
 use bevy::text::{EditableText, TextEdit};
 use clap::error::ErrorKind::MissingRequiredArgument;
 use clap::{Error, Parser, Subcommand};
+use std::fmt::Debug;
+use std::ops::RangeBounds;
 use std::str::FromStr;
 
 #[derive(Default)]
@@ -40,7 +42,7 @@ pub(crate) enum Settings {
         value: bool,
     },
     SimSpeed {
-        #[arg(value_parser = parse_f32_ranged(0.0..=consts::MAX_SIM_SPEED))]
+        #[arg(value_parser = float_range(0.0..=consts::MAX_SIM_SPEED))]
         value: f32,
     },
     EnemySpawnInterval {
@@ -245,15 +247,12 @@ fn parse_tile(s: &str) -> Result<GridCoordinate, String> {
         .ok_or_else(|| format!("tile {} is not on the map", s))
 }
 
-fn parse_f32_ranged(
-    range: std::ops::RangeInclusive<f32>,
-) -> impl Fn(&str) -> Result<f32, String> + Clone + Send + Sync + 'static {
+fn float_range<T: RangeBounds<f32> + Debug + Clone>(
+    range: T,
+) -> impl Fn(&str) -> Result<f32, String> + Clone {
     move |s: &str| {
         let value: f32 = s.parse().map_err(|_| "expected a number".to_string())?;
-        range
-            .contains(&value)
-            .then_some(value)
-            .ok_or_else(|| format!("must be in {}..={}", range.start(), range.end()))
+        range.contains(&value).then_some(value).ok_or_else(|| format!("must be in {:?}", range))
     }
 }
 
