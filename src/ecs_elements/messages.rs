@@ -46,7 +46,7 @@ pub(crate) enum CommandEvent {
     Clear,
     Balance,
     ExitGame,
-    Set { setting: Settings, value: f32 },
+    Set(Settings),
 }
 
 #[derive(Message)]

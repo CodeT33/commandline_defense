@@ -12,9 +12,10 @@ use bevy::input_focus::InputFocus;
 use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor};
 use bevy::text::{EditableText, TextEdit};
 use clap::error::ErrorKind::MissingRequiredArgument;
-use clap::{Error, Parser, ValueEnum};
+use clap::{Error, Parser, Subcommand};
+use std::fmt::Debug;
+use std::ops::RangeBounds;
 use std::str::FromStr;
-use strum::{EnumString, VariantNames};
 
 #[derive(Default, PartialEq, Clone, Eq)]
 pub(crate) enum PreviewCommand {
@@ -37,11 +38,20 @@ pub(crate) enum PreviewCommand {
     },
 }
 
-#[derive(Debug, VariantNames, EnumString, Copy, Clone, ValueEnum, PartialEq)]
+#[derive(Debug, PartialEq, Subcommand, Copy, Clone)]
 pub(crate) enum Settings {
-    BoundingBoxes,
-    SimSpeed,
-    EnemySpawnInterval,
+    BoundingBoxes {
+        #[arg(action = clap::ArgAction::Set, value_parser = clap::value_parser!(bool))]
+        value: bool,
+    },
+    SimSpeed {
+        #[arg(value_parser = float_range(0.0..=consts::MAX_SIM_SPEED))]
+        value: f32,
+    },
+    EnemySpawnInterval {
+        #[arg(value_parser = clap::value_parser!(u16).range(1..))]
+        value: u16,
+    },
 }
 
 pub(crate) fn handle_command_line_state(
@@ -67,7 +77,7 @@ pub(crate) fn handle_command_line_state(
         if !command_state.parse_output.autocompletion.is_empty() {
             println!("{:?}", command_state.parse_output.autocompletion);
         }
-        let show_error = determine_show_error(&command_state, &current_input);
+        let show_error = determine_show_error(&command_state.parse_output, &current_input);
         text_color.0 = if show_error { consts::ui::CONSOLE_ERROR_COLOR } else { Color::WHITE };
     }
 
@@ -124,9 +134,9 @@ pub(crate) fn handle_command_line_state(
     }
 }
 
-fn determine_show_error(command_state: &ResMut<CommandState>, current_input: &str) -> bool {
-    let evaluated = &command_state.parse_output.evaluated;
-    let autocompletion = &command_state.parse_output.autocompletion;
+fn determine_show_error(output: &ParseOutput, current_input: &str) -> bool {
+    let evaluated = &output.evaluated;
+    let autocompletion = &output.autocompletion;
     evaluated.iter().rev().skip(1).any(|r| r.is_err())
         || evaluated.last().is_some_and(|l| {
             l.as_ref().is_err_and(|err| {
@@ -155,7 +165,7 @@ fn parse_to_sendable_commands(
                 CommandInput::Clear => CommandEvent::Clear,
                 CommandInput::Balance => CommandEvent::Balance,
                 CommandInput::ExitGame => CommandEvent::ExitGame,
-                CommandInput::Set { setting, value } => CommandEvent::Set { setting, value },
+                CommandInput::Set(setting) => CommandEvent::Set(setting),
             })
         })
         .collect()
@@ -189,25 +199,35 @@ fn parse_command_preview(input: &str) -> PreviewCommand {
 
                 match parts.as_slice() {
                     ["menu", "towers"] => {
-                        return PreviewCommand::SidebarState(UiState::TowersList {selected: None});
+                        return PreviewCommand::SidebarState(UiState::TowersList {
+                            selected: None,
+                        });
                     },
                     ["menu", "towers", tower_type_string] => {
                         preview = match parse_tower_type(tower_type_string) {
-                            Some(tower_type) => {
-                                PreviewCommand::SidebarState(UiState::TowersList {selected: Option::from(tower_type) })
+                            Some(tower_type) => PreviewCommand::SidebarState(UiState::TowersList {
+                                selected: Option::from(tower_type),
+                            }),
+                            None => {
+                                PreviewCommand::SidebarState(UiState::TowersList { selected: None })
                             },
-                            None => PreviewCommand::SidebarState(UiState::TowersList {selected: None}),
                         }
                     },
                     ["menu", "enemies"] => {
-                        return PreviewCommand::SidebarState(UiState::EnemiesList {selected: None});
+                        return PreviewCommand::SidebarState(UiState::EnemiesList {
+                            selected: None,
+                        });
                     },
                     ["show", "menu", "enemies", enemy_type_string] => {
                         preview = match parse_enemy_type(enemy_type_string) {
                             Some(enemy_type) => {
-                                PreviewCommand::SidebarState(UiState::EnemiesList{selected: Option::from(enemy_type) })
+                                PreviewCommand::SidebarState(UiState::EnemiesList {
+                                    selected: Option::from(enemy_type),
+                                })
                             },
-                            None => PreviewCommand::SidebarState(UiState::EnemiesList {selected: None}),
+                            None => PreviewCommand::SidebarState(UiState::EnemiesList {
+                                selected: None,
+                            }),
                         }
                     },
                     _ => {},
@@ -248,13 +268,34 @@ fn parse_commandline_input(input: &str) -> ParseOutput {
 )]
 pub(crate) enum CommandInput {
     Help,
-    Select { tile: GridCoordinate },
-    Place { tower_type: TowerType },
+    Select {
+        #[arg(value_parser = parse_tile)]
+        tile: GridCoordinate,
+    },
+    Place {
+        tower_type: TowerType,
+    },
     Clear,
     Balance,
     ExitGame,
+    #[command(subcommand)]
+    Set(Settings),
+}
 
-    Set { setting: Settings, value: f32 },
+fn parse_tile(s: &str) -> Result<GridCoordinate, String> {
+    let tile = GridCoordinate::from_str(s)?;
+    tile.is_on_map(consts::MAP_SIZE_TILES)
+        .then_some(tile)
+        .ok_or_else(|| format!("tile {} is not on the map", s))
+}
+
+fn float_range<T: RangeBounds<f32> + Debug + Clone>(
+    range: T,
+) -> impl Fn(&str) -> Result<f32, String> + Clone {
+    move |s: &str| {
+        let value: f32 = s.parse().map_err(|_| "expected a number".to_string())?;
+        range.contains(&value).then_some(value).ok_or_else(|| format!("must be in {:?}", range))
+    }
 }
 
 fn parse_single_command_new(input_str: impl AsRef<str>) -> Result<CommandInput, Error> {
@@ -318,4 +359,51 @@ pub(crate) fn parse_tile_position(position: &str) -> Option<GridCoordinate> {
     let y: u16 = get_number_from_letter(letter?)?;
 
     Some(GridCoordinate::new(x, y))
+}
+
+#[test]
+#[ignore]
+fn probe_show_error() {
+    let cases: &[(&str, bool)] = &[
+        ("help", false),
+        ("help;", false),
+        ("badcmd", true),
+        ("badcmd; help", true),
+        ("help; badcmd", true),
+        ("se", false),
+        ("sh", true),
+        ("exit", false),
+        ("select", false),
+        ("select ", false),
+        ("select 3A", false),
+        ("select 3", false),
+        ("select A", false),
+        ("select 3A; select 3", false),
+        ("select AB", true),
+        ("select 3!", true),
+        ("select a3b", true),
+        ("place", false),
+        ("place ", false),
+        ("place assault", false),
+        ("place assault-bober", false),
+        ("place b", false),
+        ("place qwerty", true),
+        ("set", false),
+        ("set sim-speed ", false),
+        ("set sim-speed 2", false),
+        ("set nope 2", true),
+        ("select;", true),
+        ("place;", true),
+        ("select 3A; select", false),
+        ("select 3A; ; place assault", false),
+        ("set sim-speed nan", true),
+        ("set sim-speed -1", true),
+        ("show balance", true),
+        ("exit game", true),
+    ];
+    for (input, expected) in cases {
+        let output = parse_commandline_input(input);
+        let actual = determine_show_error(&output, input);
+        assert_eq!(actual, *expected, "input {:?}", input);
+    }
 }

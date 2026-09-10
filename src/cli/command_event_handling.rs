@@ -23,16 +23,15 @@ pub(crate) fn handle_command_events(
             CommandEvent::Clear => deselect_tile(&mut selection_state),
             CommandEvent::Balance => show_balance(&player_suite),
             CommandEvent::ExitGame => exit_game(),
-            CommandEvent::Set { setting, value } => match setting {
-                Settings::BoundingBoxes => {
-                    debug_settings.enable_bounding_boxes = *value != 0.0;
+            CommandEvent::Set(setting) => match setting {
+                Settings::BoundingBoxes { value } => {
+                    debug_settings.enable_bounding_boxes = *value;
                 },
-                Settings::SimSpeed => {
-                    let used_value = if !value.is_finite() { 0.0 } else { value.clamp(0.0, 20.0) };
-                    debug_settings.sim_speed = used_value;
+                Settings::SimSpeed { value } => {
+                    debug_settings.sim_speed = *value;
                 },
-                Settings::EnemySpawnInterval => {
-                    debug_settings.enemy_spawn_interval_ms = value.round().max(0.0) as u64;
+                Settings::EnemySpawnInterval { value } => {
+                    debug_settings.enemy_spawn_interval_ms = *value as u64;
                 },
             },
         }

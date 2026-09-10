@@ -1,4 +1,5 @@
 use clap::CommandFactory;
+use clap::error::ErrorKind;
 use clap_complete::CompletionCandidate;
 use clap_complete::engine::complete;
 
@@ -10,6 +11,17 @@ pub trait Autocompletion: CommandFactory {
             words.push("".into())
         }
         let last_word_idx = words.len() - 1;
+        if last_word_idx != 0
+            && let Err(err) = Self::command().try_get_matches_from(&words[..last_word_idx])
+            && !matches!(
+                err.kind(),
+                ErrorKind::MissingRequiredArgument
+                    | ErrorKind::MissingSubcommand
+                    | ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand
+            )
+        {
+            return vec![];
+        }
         complete(&mut command_object, words, last_word_idx, None).unwrap_or_default()
     }
 }

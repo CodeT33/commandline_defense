@@ -10,6 +10,7 @@ pub(crate) const WINDOW_TITLE: &str = "Commandline Defense";
 pub(crate) const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
 
 pub(crate) const PHYSICS_FRAME_RATE: u16 = 144 * 2;
+pub(crate) const MAX_SIM_SPEED: f32 = 20.0;
 
 pub(crate) const MAP_SIZE_TILES: U16Vec2 = U16Vec2 { x: 32, y: 16 };
 pub(crate) const TILE_SIZE: u16 = 16;
