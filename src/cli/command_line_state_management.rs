@@ -295,14 +295,14 @@ fn custom_completer(current: &OsStr) -> Vec<CompletionCandidate> {
     let Some(current_str) = current.to_str() else { return vec![] };
     let split: Vec<_> = current_str.split('/').map(|s| s.trim()).collect();
     match split.as_slice() {
-        ["towers", tower_name] => get_tower_names()
+        ["towers", tower_name] => get_type_names::<TowerType>()
             .iter()
             .filter(|n| n.starts_with(tower_name))
             .map(|tn| format!("towers/{tn}"))
             .map(CompletionCandidate::new)
             .collect(),
         ["towers", tower_name, inner] => {
-            if get_tower_names().iter().all(|name| name != tower_name) {
+            if get_type_names::<TowerType>().iter().all(|name| name != tower_name) {
                 return vec![];
             }
             ["upgrades", "description"]
@@ -312,14 +312,14 @@ fn custom_completer(current: &OsStr) -> Vec<CompletionCandidate> {
                 .map(CompletionCandidate::new)
                 .collect()
         },
-        ["enemies", tower_name] => get_enemy_names()
+        ["enemies", tower_name] => get_type_names::<EnemyType>()
             .iter()
             .filter(|n| n.starts_with(tower_name))
             .map(|en| format!("enemies/{en}"))
             .map(CompletionCandidate::new)
             .collect(),
         ["enemies", enemy_name, inner] => {
-            if get_enemy_names().iter().all(|name| name != enemy_name) {
+            if get_type_names::<EnemyType>().iter().all(|name| name != enemy_name) {
                 return vec![];
             }
             ["description"]
@@ -348,7 +348,10 @@ fn validate_path(value: &str) -> Result<String, String> {
                 return Ok(level0.to_owned());
             };
             let _ = TowerType::from_str(level1, false).map_err(|_| {
-                format!("Invalid tower type, options are: [{}]", get_tower_names().join(", "))
+                format!(
+                    "Invalid tower type, options are: [{}]",
+                    get_type_names::<TowerType>().join(", ")
+                )
             })?;
             let Some(level2) = split.next() else {
                 return Ok(format!("{}/{}", level0, level1));
@@ -364,7 +367,10 @@ fn validate_path(value: &str) -> Result<String, String> {
                 return Ok(level0.to_owned());
             };
             let _ = EnemyType::from_str(level1, false).map_err(|_| {
-                format!("Invalid enemy type, options are: [{}]", get_enemy_names().join(", "))
+                format!(
+                    "Invalid enemy type, options are: [{}]",
+                    get_type_names::<EnemyType>().join(", ")
+                )
             })?;
             let Some(level2) = split.next() else {
                 return Ok(format!("{}/{}", level0, level1));
@@ -379,15 +385,8 @@ fn validate_path(value: &str) -> Result<String, String> {
     }
 }
 
-fn get_enemy_names() -> Vec<String> {
-    EnemyType::value_variants()
-        .iter()
-        .filter_map(|v| v.to_possible_value().map(|pv| pv.get_name().to_owned()))
-        .collect::<Vec<_>>()
-}
-
-fn get_tower_names() -> Vec<String> {
-    TowerType::value_variants()
+fn get_type_names<T: ValueEnum>() -> Vec<String> {
+    T::value_variants()
         .iter()
         .filter_map(|v| v.to_possible_value().map(|pv| pv.get_name().to_owned()))
         .collect::<Vec<_>>()
