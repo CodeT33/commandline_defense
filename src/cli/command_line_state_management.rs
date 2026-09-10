@@ -62,7 +62,7 @@ pub(crate) fn handle_command_line_state(
         if !command_state.parse_output.autocompletion.is_empty() {
             println!("{:?}", command_state.parse_output.autocompletion);
         }
-        let show_error = determine_show_error(&mut command_state, &mut current_input);
+        let show_error = determine_show_error(&command_state, &current_input);
         text_color.0 = if show_error { consts::ui::CONSOLE_ERROR_COLOR } else { Color::WHITE };
     }
 
