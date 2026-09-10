@@ -89,12 +89,16 @@ pub(crate) fn handle_command_line_state(
     {
         let mut new = complete_to.to_owned();
         println!("{}", last_command);
-        if last_command.starts_with("open ") {
+        if last_command.trim_start().starts_with("open ") {
             new.push('/');
         } else {
             new.push(' ');
         }
-        let new_len = current_input.len() - last_word.len();
+        let new_len = if current_input.ends_with(" ") {
+            current_input.len()
+        } else {
+            current_input.len() - last_word.len()
+        };
         current_input.truncate(new_len);
 
         current_input.push_str(&new);
