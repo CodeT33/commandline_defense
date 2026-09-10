@@ -18,7 +18,7 @@ pub fn draw_sidebar(
         UiBuilder::new().layer_id(LayerId::background()).max_rect(ctx.viewport_rect()),
     );
 
-    if let PreviewCommand::SidebarState(UiState::TowersList {selected}) = command_state.preview {
+    if let PreviewCommand::SidebarState(UiState::TowersList { selected }) = command_state.preview {
         egui::Panel::right("right_panel_towers_list").resizable(true).default_size(160.0).show(
             &mut viewport_ui,
             |ui| {
@@ -55,7 +55,7 @@ pub fn draw_sidebar(
             .width();
     }
 
-    if matches!(command_state.preview, PreviewCommand::SidebarState(UiState::EnemiesList {..})) {
+    if matches!(command_state.preview, PreviewCommand::SidebarState(UiState::EnemiesList { .. })) {
         egui::Panel::right("right_panel_enemies_info").resizable(false).show(
             &mut viewport_ui,
             |ui| {

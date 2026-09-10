@@ -22,7 +22,7 @@ use bevy::prelude::{
 use clap::ValueEnum;
 use std::f32::consts::PI;
 use std::time::Duration;
-use strum::{EnumIter, EnumString, VariantNames};
+use strum::EnumIter;
 
 pub(crate) struct TowerDataInner {
     tower_type: TowerType,
@@ -49,7 +49,7 @@ enum Effect {
     BigBirbMode,
 }
 
-#[derive(Debug, Clone, Copy, VariantNames, EnumString, ValueEnum, PartialEq, Eq, EnumIter)]
+#[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Eq, EnumIter)]
 pub(crate) enum TowerType {
     #[clap(name = "assault-bober")]
     AssaultTower,
@@ -68,7 +68,6 @@ pub(crate) enum TowerType {
     //Copprina,
 
     //meme stuff
-    #[strum(serialize = "don-banano")]
     DonBanano,
     RocketTroop,
 }
