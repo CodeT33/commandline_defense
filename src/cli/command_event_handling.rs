@@ -23,7 +23,6 @@ pub(crate) fn handle_command_events(
             CommandEvent::Clear => deselect_tile(&mut selection_state),
             CommandEvent::Balance => show_balance(&player_suite),
             CommandEvent::ExitGame => exit_game(),
-            CommandEvent::Show { path } => show_path(path),
             CommandEvent::Set(setting) => match setting {
                 Settings::BoundingBoxes { value } => {
                     debug_settings.enable_bounding_boxes = *value;
@@ -75,8 +74,4 @@ fn show_balance(player_suite: &Res<PlayerSuiteResource>) {
 
 fn exit_game() {
     println!("Exiting game");
-}
-
-fn show_path(path: &str) {
-    println!("show {}", path);
 }
