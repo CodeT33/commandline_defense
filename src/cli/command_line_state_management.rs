@@ -115,7 +115,7 @@ pub(crate) fn handle_command_line_state(
             .parse_output
             .evaluated
             .iter()
-            .map(|r| r.as_ref().map_err(|e| e.to_string()).cloned())
+            .map(|r| r.as_ref().map_err(|e| e.to_string()).copied())
             .collect::<Result<Vec<_>, String>>()
         {
             Ok(commands) => commands,
