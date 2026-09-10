@@ -8,6 +8,7 @@ use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
 use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor};
 use bevy::text::{EditableText, TextEdit};
+use clap::error::ErrorKind::MissingRequiredArgument;
 use clap::{Error, Parser, ValueEnum};
 
 #[derive(Default)]
@@ -60,14 +61,8 @@ pub(crate) fn handle_command_line_state(
         if !command_state.parse_output.autocompletion.is_empty() {
             println!("{:?}", command_state.parse_output.autocompletion);
         }
-        text_color.0 = if command_state.parse_output.evaluated.iter().any(|l| l.is_err())
-            && (command_state.parse_output.autocompletion.is_empty()
-                || current_input.split(";").last().is_some_and(|s| s.is_empty()))
-        {
-            Color::linear_rgb(1.0, 0.0, 0.0)
-        } else {
-            Color::WHITE
-        };
+        let show_error = determine_show_error(&mut command_state, &mut current_input);
+        text_color.0 = if show_error { Color::linear_rgb(1.0, 0.0, 0.0) } else { Color::WHITE };
     }
 
     if keys.just_pressed(KeyCode::Tab)
@@ -121,6 +116,18 @@ pub(crate) fn handle_command_line_state(
         command_state.last_input.clear();
         command_state.preview = PreviewCommand::None;
     }
+}
+
+fn determine_show_error(command_state: &mut ResMut<CommandState>, current_input: &mut str) -> bool {
+    let evaluated = &command_state.parse_output.evaluated;
+    let autocompletion = &command_state.parse_output.autocompletion;
+    evaluated.iter().rev().skip(1).any(|r| r.is_err())
+        || evaluated.last().is_some_and(|l| {
+            l.as_ref().is_err_and(|err| {
+                current_input.trim().ends_with(";")
+                    || (err.kind() != MissingRequiredArgument && autocompletion.is_empty())
+            })
+        })
 }
 
 fn parse_to_sendable_commands(
