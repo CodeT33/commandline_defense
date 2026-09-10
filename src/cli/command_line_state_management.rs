@@ -13,6 +13,8 @@ use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor
 use bevy::text::{EditableText, TextEdit};
 use clap::error::ErrorKind::MissingRequiredArgument;
 use clap::{Error, Parser, Subcommand, ValueEnum};
+use clap_complete::{ArgValueCompleter, CompletionCandidate};
+use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::ops::RangeBounds;
 use std::str::FromStr;
@@ -281,9 +283,59 @@ pub(crate) enum CommandInput {
     #[command(subcommand)]
     Set(Settings),
     Show {
-        #[arg(value_parser = validate_path)]
+        #[arg(
+			value_parser = validate_path,
+			add = ArgValueCompleter::new(custom_completer)
+		)]
         path: String,
     },
+}
+
+fn custom_completer(current: &OsStr) -> Vec<CompletionCandidate> {
+    let Some(current_str) = current.to_str() else { return vec![] };
+    let split: Vec<_> = current_str.split('/').map(|s| s.trim()).collect();
+    match split.as_slice() {
+        ["towers", tower_name] => get_tower_names()
+            .iter()
+            .filter(|n| n.starts_with(tower_name))
+            .map(|tn| format!("towers/{tn}"))
+            .map(CompletionCandidate::new)
+            .collect(),
+        ["towers", tower_name, inner] => {
+            if get_tower_names().iter().all(|name| name != tower_name) {
+                return vec![];
+            }
+            ["upgrades", "description"]
+                .iter()
+                .filter(|n| n.starts_with(inner))
+                .map(|last| format!("towers/{tower_name}/{last}"))
+                .map(CompletionCandidate::new)
+                .collect()
+        },
+        ["enemies", tower_name] => get_enemy_names()
+            .iter()
+            .filter(|n| n.starts_with(tower_name))
+            .map(|en| format!("enemies/{en}"))
+            .map(CompletionCandidate::new)
+            .collect(),
+        ["enemies", enemy_name, inner] => {
+            if get_enemy_names().iter().all(|name| name != enemy_name) {
+                return vec![];
+            }
+            ["description"]
+                .iter()
+                .filter(|n| n.starts_with(inner))
+                .map(|last| format!("enemies/{enemy_name}/{last}"))
+                .map(CompletionCandidate::new)
+                .collect()
+        },
+        [first_word] => ["towers", "enemies", "commands"]
+            .iter()
+            .filter(|n| n.starts_with(first_word))
+            .map(CompletionCandidate::new)
+            .collect(),
+        _ => vec![],
+    }
 }
 
 fn validate_path(value: &str) -> Result<String, String> {
@@ -296,14 +348,7 @@ fn validate_path(value: &str) -> Result<String, String> {
                 return Ok(level0.to_owned());
             };
             let _ = TowerType::from_str(level1, false).map_err(|_| {
-                format!(
-                    "Invalid tower type, options are: [{}]",
-                    TowerType::value_variants()
-                        .iter()
-                        .filter_map(|v| v.to_possible_value().map(|pv| pv.get_name().to_owned()))
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                )
+                format!("Invalid tower type, options are: [{}]", get_tower_names().join(", "))
             })?;
             let Some(level2) = split.next() else {
                 return Ok(format!("{}/{}", level0, level1));
@@ -319,20 +364,12 @@ fn validate_path(value: &str) -> Result<String, String> {
                 return Ok(level0.to_owned());
             };
             let _ = EnemyType::from_str(level1, false).map_err(|_| {
-                format!(
-                    "Invalid enemy type, options are: [{}]",
-                    EnemyType::value_variants()
-                        .iter()
-                        .filter_map(|v| v.to_possible_value().map(|pv| pv.get_name().to_owned()))
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                )
+                format!("Invalid enemy type, options are: [{}]", get_enemy_names().join(", "))
             })?;
             let Some(level2) = split.next() else {
                 return Ok(format!("{}/{}", level0, level1));
             };
             match level2 {
-                "upgrades" => Ok(value.to_owned()),
                 "description" => Ok(value.to_owned()),
                 &_ => Err("Invalid path, options are [upgrades, description]".to_owned()),
             }
@@ -340,6 +377,20 @@ fn validate_path(value: &str) -> Result<String, String> {
         "commands" => Err("command view not yet implemented".to_owned()),
         _ => Err(error_str.to_string()),
     }
+}
+
+fn get_enemy_names() -> Vec<String> {
+    EnemyType::value_variants()
+        .iter()
+        .filter_map(|v| v.to_possible_value().map(|pv| pv.get_name().to_owned()))
+        .collect::<Vec<_>>()
+}
+
+fn get_tower_names() -> Vec<String> {
+    TowerType::value_variants()
+        .iter()
+        .filter_map(|v| v.to_possible_value().map(|pv| pv.get_name().to_owned()))
+        .collect::<Vec<_>>()
 }
 
 fn parse_tile(s: &str) -> Result<GridCoordinate, String> {
