@@ -4,7 +4,7 @@ use crate::entities::tower::{TargetingType, TowerAttributes, TowerType};
 use crate::texture_packs::TexturePackAssets;
 use crate::tiers::{ValueTiers, ValueType};
 use bevy::math::U16Vec2;
-use bevy::prelude::Vec2;
+use bevy::prelude::{Color, Vec2};
 
 pub(crate) const WINDOW_TITLE: &str = "Commandline Defense";
 pub(crate) const WINDOW_RESOLUTION: [u32; 2] = [800, 450];
@@ -23,6 +23,7 @@ pub(crate) const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 
 pub(crate) const BULLET_ROTATION_DURATION_MS: u64 = 234;
 
+pub(crate) const COMMANDLINE_BACKGROUND_COLOR: Color = Color::srgba(0.1, 0.1, 0.12, 0.9);
 pub(crate) const COMMAND_OPEN_SEPARATION_CHARACTER: char = '/';
 
 /// Number of simulated seconds captured before the log is saved and the program is terminated.
