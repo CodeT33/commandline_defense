@@ -45,6 +45,7 @@ pub(crate) struct DebugSettings {
     pub(crate) enable_bounding_boxes: bool,
     pub(crate) enemy_spawn_interval_ms: u64,
     pub(crate) sim_speed: f32,
+    pub(crate) paused: bool,
     pub(crate) enemy_type: EnemyType,
 }
 
@@ -54,6 +55,7 @@ impl Default for DebugSettings {
             enable_bounding_boxes: false,
             enemy_spawn_interval_ms: consts::ENEMY_SPAWN_INTERVAL_MS,
             sim_speed: 1.0,
+            paused: true,
             enemy_type: EnemyType::WideBirb,
         }
     }

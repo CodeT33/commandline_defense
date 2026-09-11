@@ -185,7 +185,6 @@ fn parse_to_sendable_commands(
         .iter()
         .map(|ic| {
             Ok(match ic {
-                CommandInput::Help => CommandEvent::Help,
                 CommandInput::Select { tile } => {
                     *selected_tile = (*tile).into();
                     CommandEvent::Select { tile: *tile }
@@ -194,7 +193,8 @@ fn parse_to_sendable_commands(
                     .map(|p| CommandEvent::Place { tower_type: *tower_type, tower_pos: p })
                     .ok_or("No Tile selected")?,
                 CommandInput::Clear => CommandEvent::Clear,
-                CommandInput::Balance => CommandEvent::Balance,
+                CommandInput::Pause => CommandEvent::Pause,
+                CommandInput::Resume => CommandEvent::Resume,
                 CommandInput::ExitGame => CommandEvent::ExitGame,
                 CommandInput::Set(setting) => CommandEvent::Set(*setting),
                 _ => {

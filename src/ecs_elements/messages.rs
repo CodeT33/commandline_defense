@@ -40,11 +40,11 @@ pub(crate) struct CollisionEnded(pub(crate) CollisionPair);
 
 #[derive(Message, Debug, PartialEq, Copy, Clone)]
 pub(crate) enum CommandEvent {
-    Help,
     Select { tile: GridCoordinate },
     Place { tower_type: TowerType, tower_pos: GridCoordinate },
     Clear,
-    Balance,
+    Pause,
+    Resume,
     ExitGame,
     Set(Settings),
 }

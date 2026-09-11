@@ -45,7 +45,8 @@ pub(crate) enum CommandInput {
         tower_type: TowerType,
     },
     Clear,
-    Balance,
+    Pause,
+    Resume,
     ExitGame,
     #[command(subcommand)]
     Set(Settings),

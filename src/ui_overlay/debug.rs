@@ -35,5 +35,9 @@ pub(crate) fn draw_bounding_boxes(
 pub(crate) fn set_simulation_speed(
     mut time: ResMut<Time<Virtual>>, debug_settings: Res<DebugSettings>,
 ) {
+    if debug_settings.paused {
+        time.set_relative_speed(0.0);
+        return;
+    }
     time.set_relative_speed(debug_settings.sim_speed);
 }
