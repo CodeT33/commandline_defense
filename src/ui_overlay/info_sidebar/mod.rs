@@ -29,7 +29,7 @@ pub fn draw_gui(
         UiBuilder::new().layer_id(LayerId::background()).max_rect(ctx.viewport_rect()),
     );
 
-    match command_state.preview {
+    match command_state.persistent_preview.as_ref().unwrap_or(&command_state.preview) {
         PreviewCommand::SidebarState(UiState::Menus) => {
             egui::Panel::right("Right Panel Menus").resizable(true).default_size(200.0).show(
                 &mut viewport_ui,
@@ -57,7 +57,7 @@ pub fn draw_gui(
                             &mut contexts,
                             &asset_server,
                             &texture_pack_settings,
-                            tower_type,
+                            *tower_type,
                         );
                     });
 
@@ -68,7 +68,7 @@ pub fn draw_gui(
                             .default_pos(Pos2 { x: 900.0, y: 100.0 })
                             .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
                             .show(&viewport_ui, |ui| {
-                                draw_tower_description(ui, tower_type);
+                                draw_tower_description(ui, *tower_type);
                             });
                     },
                     Some(TowerPage::Upgrades) => {
@@ -77,7 +77,7 @@ pub fn draw_gui(
                             .default_pos(Pos2 { x: 900.0, y: 100.0 })
                             .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
                             .show(&viewport_ui, |ui| {
-                                draw_tower_upgrades(ui, tower_type);
+                                draw_tower_upgrades(ui, *tower_type);
                             });
                     },
                     None => {},
@@ -103,7 +103,7 @@ pub fn draw_gui(
                             &mut contexts,
                             &asset_server,
                             &texture_pack_settings,
-                            enemy_type,
+                            *enemy_type,
                         );
                     });
 
@@ -114,7 +114,7 @@ pub fn draw_gui(
                             .default_pos(Pos2 { x: 900.0, y: 100.0 })
                             .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
                             .show(&viewport_ui, |ui| {
-                                draw_enemy_description(ui, enemy_type);
+                                draw_enemy_description(ui, *enemy_type);
                             });
                     },
                     None => {},
