@@ -62,7 +62,7 @@ impl TowerType {
                     TexturePackAssets::Troops_Assault_AssaultTroopLvl3,
                 ],
                 tower_rotates: true,
-                targeting_type: TargetingType::Predictive,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
             TowerType::BoomTower => TowerAttributes {
                 price: 320,
@@ -249,16 +249,16 @@ impl EnemyType {
         match self {
             EnemyType::WideBirb => EnemyStats {
                 reward: 80,
-                health: ValueTiers::A,
+                health: ValueTiers::C,
                 player_health_penalty: ValueTiers::A,
-                speed_tps: ValueTiers::A,
+                speed_tps: ValueTiers::B,
                 relative_collider_size: 0.25,
                 texture_size_tiles: 1.0,
                 asset: TexturePackAssets::WipSprites_Enemy,
             },
             EnemyType::Mausmeister => EnemyStats {
                 reward: 5000,
-                health: ValueTiers::A,
+                health: ValueTiers::D,
                 player_health_penalty: ValueTiers::A,
                 speed_tps: ValueTiers::A,
                 relative_collider_size: 0.25,
@@ -276,9 +276,9 @@ impl EnemyType {
             },
             EnemyType::Zapano => EnemyStats {
                 reward: 250,
-                health: ValueTiers::A,
+                health: ValueTiers::B,
                 player_health_penalty: ValueTiers::A,
-                speed_tps: ValueTiers::A,
+                speed_tps: ValueTiers::E,
                 relative_collider_size: 0.25,
                 texture_size_tiles: 1.0,
                 asset: TexturePackAssets::Enemies_Zapano_ZapanoFrontendLvl1,
@@ -338,7 +338,7 @@ impl BulletType {
             },
             BulletType::Rocket => BulletStats {
                 damage: ValueTiers::A,
-                pierce: ValueTiers::S,
+                pierce: ValueTiers::F,
                 spins: false,
                 relative_collider_size: 1.0,
                 texture_size_tiles: 1.0,
@@ -485,12 +485,12 @@ impl ValueTiers {
                 ValueTiers::F => 0.5,
             },
             ValueType::EnemyHealth => match self {
-                ValueTiers::S => 25.0,
-                ValueTiers::A => 15.0,
-                ValueTiers::B => 8.0,
-                ValueTiers::C => 5.0,
-                ValueTiers::D => 2.5,
-                ValueTiers::E => 1.5,
+                ValueTiers::S => 100.0,
+                ValueTiers::A => 25.0,
+                ValueTiers::B => 10.0,
+                ValueTiers::C => 7.0,
+                ValueTiers::D => 5.0,
+                ValueTiers::E => 2.0,
                 ValueTiers::F => 1.0,
             },
             ValueType::EnemyPlayerHealthPenalty => match self {
