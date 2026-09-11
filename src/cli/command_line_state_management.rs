@@ -94,7 +94,7 @@ pub(crate) fn handle_command_line_state(
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn handle_command_line_actions(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
-    command_state: Res<CommandState>, mut command_events: MessageWriter<CommandEvent>,
+    mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
     mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
     mut auto_completion_text: Query<&mut Node, With<CommandAutoCompletion>>,
 ) {
@@ -175,6 +175,10 @@ pub(crate) fn handle_command_line_actions(
         }
 
         input.clear();
+        command_state.last_input = "".to_owned();
+        if let Ok(mut node) = auto_completion_text.single_mut() {
+            node.display = Display::None;
+        }
     }
 }
 
