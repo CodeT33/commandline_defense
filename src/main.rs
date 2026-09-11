@@ -19,7 +19,9 @@ mod ui_overlay;
 use crate::camera::{camera_zoom_and_pan, set_camera_position};
 use crate::cli::command_event_handling::handle_command_events;
 use crate::cli::command_line::navigate_command_history;
-use crate::cli::command_line_state_management::handle_command_line_state;
+use crate::cli::command_line_state_management::{
+    handle_command_line_actions, handle_command_line_state,
+};
 use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
 use crate::ecs_elements::messages::EnemyReachedEnd;
@@ -147,7 +149,7 @@ fn register_systems(app: &mut App) {
                 update_grid_preview,
                 update_selected_tile,
                 handle_command_events,
-                handle_command_line_state,
+                (handle_command_line_state, handle_command_line_actions).chain(),
                 navigate_command_history,
                 handle_tower_placing_events,
                 set_simulation_speed,

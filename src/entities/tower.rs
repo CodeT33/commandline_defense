@@ -327,6 +327,7 @@ fn calculate_target_position(
     None
 }
 
+/// Written using AI
 /// - `vb` = bullet velocity
 /// - `ve` = enemy velocity
 /// - `d` = enemy_pos - tower_pos
