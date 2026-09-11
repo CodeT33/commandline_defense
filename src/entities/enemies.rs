@@ -11,12 +11,12 @@ use crate::entities::health::HealthStatsInner;
 use crate::map::map_logic_parsing::EnemyPath;
 use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
+use crate::tiers::ValueTiers;
+use crate::tiers::ValueType::{EnemyHealth, EnemyMovementSpeed, EnemyPlayerHealthPenalty};
 use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
 use clap::ValueEnum;
 use std::f32;
-use crate::tiers::ValueTiers;
-use crate::tiers::ValueType::{EnemyHealth, EnemyMovementSpeed, EnemyPlayerHealthPenalty};
 
 #[allow(unused)]
 #[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Eq)]
@@ -54,7 +54,8 @@ pub(crate) fn move_enemies(
     let path_len = map_resource.enemy_path().get_length();
 
     for (entity, mut transform, mut enemy, creation_time) in &mut enemy {
-        let path_duration_secs = path_len as f32 / enemy.enemy_type.get_attributes().speed_tps.get_value(EnemyMovementSpeed);
+        let path_duration_secs = path_len as f32
+            / enemy.enemy_type.get_attributes().speed_tps.get_value(EnemyMovementSpeed);
         let path_duration_ms = (path_duration_secs * 1000.0).round() as u64;
         let elapsed_ms = creation_time.elapsed_ms(&time);
         let progress = elapsed_ms.min(path_duration_ms) as f32 / path_duration_ms as f32;
@@ -183,8 +184,13 @@ pub(crate) fn handle_enemies_reaching_end(
         reached_end.read().filter_map(|e| enemies.get(e.0).ok().map(|d| (e.0, d)))
     {
         commands.entity(entity).try_despawn();
-        player.health =
-            player.health.saturating_sub(enemy.enemy_type.get_attributes().player_health_penalty.get_value(EnemyPlayerHealthPenalty) as u16);
+        player.health = player.health.saturating_sub(
+            enemy
+                .enemy_type
+                .get_attributes()
+                .player_health_penalty
+                .get_value(EnemyPlayerHealthPenalty) as u16,
+        );
     }
     if player.health == 0 {
         commands.trigger(PlayerHasDied);

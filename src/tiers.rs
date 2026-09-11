@@ -1,6 +1,5 @@
 #[allow(unused)]
 pub(crate) enum ValueType {
-    
     // Tower
     /// In `tiles`
     TowerRange,
@@ -8,15 +7,15 @@ pub(crate) enum ValueType {
     TowerReloadSpeed,
     /// In `tiles` which measures the diameter
     TowerAreaDamage,
-    
-    // Bullet 
+
+    // Bullet
     /// In `tiles per second`
     BulletSpeed,
     /// In `lives`
     BulletDamage,
     /// In `enemies to pass through`
     BulletPierce,
-    
+
     // Enemy
     /// In `tiles per second`
     EnemyMovementSpeed,

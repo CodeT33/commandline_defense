@@ -12,6 +12,10 @@ use crate::map::map_logic_parsing::EnemyPath;
 use crate::player_suite::TransactionReturnStatus;
 use crate::scheduling::TimePoint;
 use crate::texture_packs::TexturePackAssets;
+use crate::tiers::ValueTiers;
+use crate::tiers::ValueType::{
+    BulletPierce, BulletSpeed, EnemyMovementSpeed, TowerRange, TowerReloadSpeed,
+};
 use bevy::asset::AssetServer;
 use bevy::ecs::entity::EntityHashSet;
 use bevy::math::{Quat, Rot2, Vec2};
@@ -23,8 +27,6 @@ use clap::ValueEnum;
 use std::f32::consts::PI;
 use std::time::Duration;
 use strum::EnumIter;
-use crate::tiers::ValueTiers;
-use crate::tiers::ValueType::{BulletPierce, BulletSpeed, EnemyMovementSpeed, TowerRange, TowerReloadSpeed};
 
 pub(crate) struct TowerDataInner {
     tower_type: TowerType,
@@ -140,9 +142,11 @@ impl TowerData {
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()
         };
-        let bullet_emission_data =
-            BulletEmissionData(BulletEmissionDataInner::new(attributes.cooldown_ms.get_value(TowerReloadSpeed) as u32));
-        let collider_shape = ColliderShape::Circle(Circle::new(attributes.range.get_value(TowerRange)));
+        let bullet_emission_data = BulletEmissionData(BulletEmissionDataInner::new(
+            attributes.cooldown_ms.get_value(TowerReloadSpeed) as u32,
+        ));
+        let collider_shape =
+            ColliderShape::Circle(Circle::new(attributes.range.get_value(TowerRange)));
         _ = commands
             .spawn((
                 tower_data,
@@ -237,7 +241,11 @@ pub(crate) fn shoot_bullets(
                         tower_transform.translation.truncate(),
                         map.enemy_path(),
                         tower_attributes.bullet_speed_tps.get_value(BulletSpeed),
-                        target_enemy.get_type().get_attributes().speed_tps.get_value(EnemyMovementSpeed),
+                        target_enemy
+                            .get_type()
+                            .get_attributes()
+                            .speed_tps
+                            .get_value(EnemyMovementSpeed),
                     ) else {
                         continue;
                     };

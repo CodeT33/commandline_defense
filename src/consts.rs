@@ -301,9 +301,8 @@ impl EnemyType {
                 speed_tps: ValueTiers::B,
                 relative_collider_size: 0.5,
                 texture_size_tiles: 1.0,
-                asset: TexturePackAssets::Enemies_Zapano_ZapanoFrontendLvl1
+                asset: TexturePackAssets::Enemies_Zapano_ZapanoFrontendLvl1,
             },
-
         }
     }
     pub(crate) fn get_description(self) -> String {
@@ -317,7 +316,6 @@ impl EnemyType {
 impl BulletType {
     pub(crate) fn get_attributes(self) -> BulletStats {
         match self {
-
             // For boom-tower
             BulletType::MediumMetalBall => BulletStats {
                 damage: ValueTiers::B,
@@ -431,7 +429,6 @@ impl BulletType {
                 asset: TexturePackAssets::Projectiles_IcebyteProjectile,
             },
 
-
             // Memes
             BulletType::AppleBall => BulletStats {
                 damage: ValueTiers::E,
@@ -528,7 +525,6 @@ impl ValueTiers {
     #[allow(unused)]
     pub(crate) fn get_value(&self, value_type: ValueType) -> f32 {
         match value_type {
-
             // Tower
             ValueType::TowerRange => match self {
                 ValueTiers::S => 16.0,

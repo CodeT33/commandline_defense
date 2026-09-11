@@ -8,8 +8,8 @@ use crate::ecs_elements::resources::TexturePackSettings;
 use crate::entities::health::HealthStatsInner;
 use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
-use crate::tiers::ValueType::{BulletDamage, BulletPierce};
 use crate::tiers::ValueTiers;
+use crate::tiers::ValueType::{BulletDamage, BulletPierce};
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::f32::consts::PI;
@@ -17,7 +17,6 @@ use std::ops::Deref;
 
 #[derive(Copy, Clone, Debug)]
 pub(crate) enum BulletType {
-
     MediumMetalBall,
     BigMetalBall,
 
@@ -36,14 +35,10 @@ pub(crate) enum BulletType {
     InfernonProjectile,
     IcebyteProjectile,
 
-
     // meme stuff
     AppleBall,
     OrangeBall,
     DonsBananos,
-
-
-
 }
 
 pub(crate) struct BulletStats {
@@ -140,7 +135,8 @@ pub(crate) fn handle_bullet_enemy_collisions(
         else {
             continue;
         };
-        enemy_health.change_health(-bullet.bullet_type.get_attributes().damage.get_value(BulletDamage));
+        enemy_health
+            .change_health(-bullet.bullet_type.get_attributes().damage.get_value(BulletDamage));
         if enemy_health.is_dead() {
             commands.entity(pair.type_a).try_despawn();
         }
@@ -162,7 +158,10 @@ pub(crate) fn bullet_spawn_observer(
     let Ok(mut enemy) = enemy_query.get_mut(*target_enemy.deref()) else {
         return;
     };
-    enemy.add_target_from_bullet(bullet_entity, bullet_data.bullet_type.get_attributes().damage.get_value(BulletDamage));
+    enemy.add_target_from_bullet(
+        bullet_entity,
+        bullet_data.bullet_type.get_attributes().damage.get_value(BulletDamage),
+    );
 }
 
 pub(crate) fn bullet_despawn_observer(
