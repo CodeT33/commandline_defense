@@ -233,7 +233,7 @@ impl TowerType {
                     TexturePackAssets::WipSprites_DonBananoCool,
                     TexturePackAssets::WipSprites_DonBananoCool,
                 ],
-                tower_rotates: true,
+                tower_rotates: false,
                 targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
         }
