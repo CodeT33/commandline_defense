@@ -1,4 +1,4 @@
-use crate::cli::command_line_state_management::Settings;
+use crate::cli::command_input::Settings;
 use crate::collision::CollisionPair;
 use crate::coordinates::GridCoordinate;
 use crate::entities::bullets::BulletType;
@@ -38,7 +38,7 @@ pub(crate) struct CollisionSustained(pub(crate) CollisionPair);
 #[derive(Message, Deref, DerefMut)]
 pub(crate) struct CollisionEnded(pub(crate) CollisionPair);
 
-#[derive(Message, Debug, PartialEq)]
+#[derive(Message, Debug, PartialEq, Copy, Clone)]
 pub(crate) enum CommandEvent {
     Help,
     Select { tile: GridCoordinate },

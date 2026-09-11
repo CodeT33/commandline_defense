@@ -75,7 +75,7 @@ pub(crate) fn request_enemy_spawns(
     }
 
     while let Some(tick_time) = t.tick_if_ready(&time) {
-        enemy_spawns.write(SpawnEnemy { enemy_type: EnemyType::Rocher, time: tick_time });
+        enemy_spawns.write(SpawnEnemy { enemy_type: debug_settings.enemy_type, time: tick_time });
     }
 }
 
