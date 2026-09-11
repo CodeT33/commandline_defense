@@ -4,6 +4,8 @@ use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
 use bevy::input_focus::{AutoFocus, InputFocus};
 use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle, TextEdit};
+use bevy::ui::{ComputedNode, UiGlobalTransform, widget::TextScroll};
+use parley::{Affinity, Cursor};
 
 pub(crate) fn spawn_command_line(commands: &mut Commands) {
     commands
@@ -84,4 +86,28 @@ pub(crate) fn navigate_command_history(
 fn set_input_text(input: &mut EditableText, text: &str) {
     input.editor_mut().set_text(text);
     input.queue_edit(TextEdit::TextEnd(false));
+}
+
+/// Written using AI
+/// Window-space position of the caret sitting at `char_index` in `input`.
+///
+/// `char_index` counts characters (not bytes) into the input's text buffer.
+/// The entity's [`ComputedNode`], [`UiGlobalTransform`] and optional [`TextScroll`]
+/// are needed to lift the glyph-local caret position into window coordinates.
+/// Returns `None` until the text has been laid out at least once.
+pub(crate) fn cursor_screen_position(
+    char_index: usize, input: &EditableText, node: &ComputedNode, transform: &UiGlobalTransform,
+    scroll: Option<&TextScroll>,
+) -> Option<Vec2> {
+    let editor = input.editor();
+    let layout = editor.try_layout()?;
+    let text = editor.raw_text();
+    let byte_index = text.char_indices().nth(char_index).map_or(text.len(), |(index, _)| index);
+
+    let bounds =
+        Cursor::from_byte_index(layout, byte_index, Affinity::Downstream).geometry(layout, 0.0);
+    let local = Vec2::new(bounds.x0 as f32, bounds.y0 as f32);
+
+    let content_origin = node.content_box().min - scroll.map_or(Vec2::ZERO, |scroll| scroll.0);
+    Some(transform.affine().transform_point2(content_origin + local))
 }
