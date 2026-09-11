@@ -65,7 +65,7 @@ pub fn draw_gui(
         }
 
         if let Some(tower_type) = selected
-            && further_details == TowerPage::Description
+            && further_details == Some(TowerPage::Description)
         {
             egui::Window::new("Description")
                 .resizable(false)
@@ -77,7 +77,7 @@ pub fn draw_gui(
         }
 
         if let Some(tower_type) = selected
-            && further_details == TowerPage::Upgrades
+            && further_details == Some(TowerPage::Upgrades)
         {
             egui::Window::new("Upgrades")
                 .resizable(false)
@@ -116,7 +116,7 @@ pub fn draw_gui(
         }
 
         if let Some(enemy_type) = selected
-            && further_details == EnemyPage::Description
+            && further_details == Some(EnemyPage::Description)
         {
             egui::Window::new("Description")
                 .resizable(false)

@@ -187,24 +187,23 @@ fn parse_to_sendable_commands(
 ) -> Result<Vec<CommandEvent>, &'static str> {
     input_commands
         .iter()
+        .copied()
         .map(|ic| {
             Ok(match ic {
                 CommandInput::Select { tile } => {
-                    *selected_tile = (*tile).into();
-                    CommandEvent::Select { tile: *tile }
+                    *selected_tile = tile.into();
+                    CommandEvent::Select { tile }
                 },
                 CommandInput::Place { tower_type } => selected_tile
-                    .map(|p| CommandEvent::Place { tower_type: *tower_type, tower_pos: p })
+                    .map(|tower_pos| CommandEvent::Place { tower_type, tower_pos })
                     .ok_or("No Tile selected")?,
                 CommandInput::Clear => CommandEvent::Clear,
                 CommandInput::Pause => CommandEvent::Pause,
                 CommandInput::Resume => CommandEvent::Resume,
                 CommandInput::ExitGame => CommandEvent::ExitGame,
-                CommandInput::Set(setting) => CommandEvent::Set(*setting),
-                _ => {
-                    println!("juckt");
-                    Err("Leck Eier")?
-                },
+                CommandInput::Set(setting) => CommandEvent::Set(setting),
+                CommandInput::Open(open_command) => CommandEvent::Open(open_command),
+                CommandInput::Help => Err("Not implemented yet")?,
             })
         })
         .collect()

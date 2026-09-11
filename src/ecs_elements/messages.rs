@@ -1,4 +1,4 @@
-use crate::cli::command_input::Settings;
+use crate::cli::command_input::{OpenCommand, Settings};
 use crate::collision::CollisionPair;
 use crate::coordinates::GridCoordinate;
 use crate::entities::bullets::BulletType;
@@ -47,6 +47,7 @@ pub(crate) enum CommandEvent {
     Resume,
     ExitGame,
     Set(Settings),
+    Open(OpenCommand),
 }
 
 #[derive(Message)]

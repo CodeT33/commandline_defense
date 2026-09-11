@@ -69,14 +69,14 @@ pub(crate) fn parse_command_preview(
                     ["info", "towers"] => {
                         return PreviewCommand::SidebarState(UiState::TowersList {
                             selected: None,
-                            further_details: TowerPage::None,
+                            further_details: None,
                         });
                     },
                     ["info", "towers", tower_type_string] => {
                         preview = match parse_tower_type(tower_type_string) {
                             Some(tower_type) => PreviewCommand::SidebarState(UiState::TowersList {
                                 selected: Option::from(tower_type),
-                                further_details: TowerPage::None,
+                                further_details: None,
                             }),
                             None => preview,
                         }
@@ -85,7 +85,7 @@ pub(crate) fn parse_command_preview(
                         preview = match parse_tower_type(tower_type_string) {
                             Some(tower_type) => PreviewCommand::SidebarState(UiState::TowersList {
                                 selected: Option::from(tower_type),
-                                further_details: TowerPage::Upgrades,
+                                further_details: Some(TowerPage::Upgrades),
                             }),
                             None => preview,
                         }
@@ -94,7 +94,7 @@ pub(crate) fn parse_command_preview(
                         preview = match parse_tower_type(tower_type_string) {
                             Some(tower_type) => PreviewCommand::SidebarState(UiState::TowersList {
                                 selected: Option::from(tower_type),
-                                further_details: TowerPage::Description,
+                                further_details: Some(TowerPage::Description),
                             }),
                             None => preview,
                         }
@@ -102,7 +102,7 @@ pub(crate) fn parse_command_preview(
                     ["info", "enemies"] => {
                         return PreviewCommand::SidebarState(UiState::EnemiesList {
                             selected: None,
-                            further_details: EnemyPage::None,
+                            further_details: None,
                         });
                     },
                     ["info", "enemies", enemy_type_string] => {
@@ -110,7 +110,7 @@ pub(crate) fn parse_command_preview(
                             Some(enemy_type) => {
                                 PreviewCommand::SidebarState(UiState::EnemiesList {
                                     selected: Option::from(enemy_type),
-                                    further_details: EnemyPage::None,
+                                    further_details: None,
                                 })
                             },
                             None => preview,
@@ -121,7 +121,7 @@ pub(crate) fn parse_command_preview(
                             Some(enemy_type) => {
                                 PreviewCommand::SidebarState(UiState::EnemiesList {
                                     selected: Option::from(enemy_type),
-                                    further_details: EnemyPage::Description,
+                                    further_details: Some(EnemyPage::Description),
                                 })
                             },
                             None => preview,

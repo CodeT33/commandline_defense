@@ -3,8 +3,9 @@ use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::entities::enemies::EnemyType;
 use crate::entities::tower::TowerType;
+use crate::ui_overlay::ui_state::{EnemyPage, TowerPage};
 use clap::error::ErrorKind::MissingRequiredArgument;
-use clap::{Error, Parser, Subcommand, ValueEnum};
+use clap::{Error, Parser, Subcommand};
 use std::fmt::Debug;
 use std::ops::RangeBounds;
 use std::str::FromStr;
@@ -54,7 +55,7 @@ pub(crate) enum CommandInput {
     Open(OpenCommand),
 }
 
-#[derive(Subcommand, Debug, Clone, Copy)]
+#[derive(Subcommand, Debug, Clone, Copy, PartialEq)]
 pub(crate) enum OpenCommand {
     Info {
         #[command(subcommand)]
@@ -62,29 +63,18 @@ pub(crate) enum OpenCommand {
     },
 }
 
-#[derive(Subcommand, Debug, Clone, Copy)]
+#[derive(Subcommand, Debug, Clone, Copy, PartialEq)]
 pub(crate) enum FurtherInfo {
     Enemies {
         enemy_type: Option<EnemyType>,
         #[arg(requires = "enemy_type")]
-        further: Option<EnemyFurther>,
+        further: Option<EnemyPage>,
     },
     Towers {
         tower_type: Option<TowerType>,
         #[arg(requires = "tower_type")]
-        further: Option<TowerFurther>,
+        further: Option<TowerPage>,
     },
-}
-
-#[derive(ValueEnum, Debug, Clone, Copy)]
-pub(crate) enum EnemyFurther {
-    Description,
-}
-
-#[derive(ValueEnum, Debug, Clone, Copy)]
-pub(crate) enum TowerFurther {
-    Description,
-    Upgrades,
 }
 
 #[derive(Default)]

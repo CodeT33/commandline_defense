@@ -18,6 +18,7 @@ pub(crate) struct CommandHistory {
 #[derive(Resource, Default)]
 pub(crate) struct CommandState {
     pub(crate) preview: PreviewCommand,
+    pub(crate) persistent_preview: Option<PreviewCommand>,
     pub(crate) last_input: String,
     pub(crate) parse_output: ParseOutput,
 }
