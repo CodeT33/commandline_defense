@@ -24,7 +24,7 @@ pub(crate) fn handle_command_line_state(
 
     let mut current_input = input.value().to_string();
 
-    //Preview
+    // Preview
     if current_input != command_state.last_input {
         command_state.last_input = current_input.clone();
         command_state.preview = parse_command_preview(&current_input, &command_state);
@@ -64,7 +64,7 @@ pub(crate) fn handle_command_line_state(
         }
     }
 
-    //Submit
+    // Submit
     if keys.just_pressed(KeyCode::Enter) {
         let command_inputs = match command_state
             .parse_output
