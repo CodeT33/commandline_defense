@@ -105,8 +105,9 @@ pub(crate) fn parse_commandline_input(input: &str) -> ParseOutput {
         .map(parse_single_command_new)
         .collect::<Vec<Result<_, Error>>>();
 
-    let autocompletion: Vec<_> =
+    let mut autocompletion: Vec<_> =
         split.last().map(get_auto_completion_single_line).unwrap_or_default();
+    autocompletion.sort();
     ParseOutput { evaluated, autocompletion }
 }
 
