@@ -1,2 +1,12 @@
 #!/bin/sh
-echo "asdklfasdlökasjdölasdf"
+set -e
+curl -s --max-time 1 https://icanhazdadjoke.com/ || true
+echo
+echo
+echo Checking Formatting:
+cargo fmt --all --check 2>&1 || { echo "please fix ಠ_ಠ" >&2; exit 1; }
+echo "Passed \(ᵔᵕᵔ)/"
+echo
+echo Checking for Clippy Lints:
+cargo clippy --all-targets -- -D warnings || { echo "please fix ಠ_ಠ" >&2; exit 1; }
+echo "Passed \(ᵔᵕᵔ)/"
