@@ -2,16 +2,22 @@ use crate::cli::command_input::{CommandInput, determine_show_error, parse_comman
 use crate::cli::preview::{PreviewCommand, parse_command_preview};
 use crate::consts;
 use crate::coordinates::GridCoordinate;
+use crate::ecs_elements::components::CommandAutoCompletion;
 use crate::ecs_elements::messages::CommandEvent;
 use crate::ecs_elements::resources::{CommandHistory, CommandState, SelectionState};
 use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
-use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor};
+use bevy::prelude::{
+    Color, KeyCode, MessageWriter, Node, Query, Res, ResMut, Text, TextColor, With,
+};
 use bevy::text::{EditableText, TextEdit};
+use bevy::ui::Display;
 
+#[allow(clippy::too_many_arguments, clippy::type_complexity)]
 pub(crate) fn handle_command_line_state(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>,
     mut inputs: Query<(&mut EditableText, &mut TextColor)>,
+    mut auto_completion_text: Query<(&mut Text, &mut Node), With<CommandAutoCompletion>>,
     mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
     mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
 ) {
@@ -32,6 +38,15 @@ pub(crate) fn handle_command_line_state(
         if !command_state.parse_output.autocompletion.is_empty() {
             println!("{:?}", command_state.parse_output.autocompletion);
         }
+        if let Ok((mut ui_text, mut ui_node)) = auto_completion_text.single_mut() {
+            ui_text.0 = command_state.parse_output.autocompletion.join("\n");
+            ui_node.display = if command_state.parse_output.autocompletion.is_empty() {
+                Display::None
+            } else {
+                Display::Flex
+            };
+        }
+
         let show_error = determine_show_error(&command_state.parse_output, &current_input);
         text_color.0 = if show_error { consts::ui::CONSOLE_ERROR_COLOR } else { Color::WHITE };
     }

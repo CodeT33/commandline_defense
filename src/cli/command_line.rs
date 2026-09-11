@@ -1,3 +1,4 @@
+use crate::ecs_elements::components::CommandAutoCompletion;
 use crate::ecs_elements::resources::CommandHistory;
 use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
 use bevy::input_focus::{AutoFocus, InputFocus};
@@ -10,8 +11,9 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
-                justify_content: JustifyContent::Start,
-                align_items: AlignItems::End,
+                justify_content: JustifyContent::End,
+                flex_direction: FlexDirection::ColumnReverse,
+                align_items: AlignItems::Start,
                 padding: px(8).all(),
                 ..default()
             },
@@ -33,6 +35,21 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
                 TextCursorStyle::default(),
                 TabIndex(0),
                 AutoFocus,
+            ));
+            parent.spawn((
+                CommandAutoCompletion,
+                Node {
+                    padding: px(8).all(),
+                    border: px(2).all(),
+                    align_items: AlignItems::Center,
+                    display: Display::None,
+                    ..default()
+                },
+                BackgroundColor(Color::srgba(0.1, 0.1, 0.12, 0.9)),
+                Text("Hello\nidk".to_owned()),
+                TextFont { font_size: FontSize::Px(20.0), ..default() },
+                TextColor(Color::WHITE),
+                TextCursorStyle::default(),
             ));
         });
 }
