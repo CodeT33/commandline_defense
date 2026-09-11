@@ -88,7 +88,7 @@ pub(crate) fn handle_command_line_state(
 
 pub(crate) fn handle_command_line_actions(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
-    command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
+    command_state: Res<CommandState>, mut command_events: MessageWriter<CommandEvent>,
     mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
 ) {
     let Some(entity) = focus.get() else {
