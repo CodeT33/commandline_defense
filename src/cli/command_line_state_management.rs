@@ -1,40 +1,102 @@
 use crate::cli::command_input::{CommandInput, determine_show_error, parse_commandline_input};
+use crate::cli::command_line::cursor_screen_position;
 use crate::cli::preview::{PreviewCommand, parse_command_preview};
 use crate::consts;
 use crate::coordinates::GridCoordinate;
+use crate::ecs_elements::components::CommandAutoCompletion;
 use crate::ecs_elements::messages::CommandEvent;
 use crate::ecs_elements::resources::{CommandHistory, CommandState, SelectionState};
 use bevy::input::ButtonInput;
 use bevy::input_focus::InputFocus;
-use bevy::prelude::{Color, KeyCode, MessageWriter, Query, Res, ResMut, TextColor};
+use bevy::prelude::{
+    Color, ComputedNode, KeyCode, MessageWriter, Node, PositionType, Query, Res, ResMut, Single,
+    Text, TextColor, Val, Window, With,
+};
 use bevy::text::{EditableText, TextEdit};
+use bevy::ui::{Display, UiGlobalTransform, widget::TextScroll};
+
+/// Vertical gap between the autocompletion popup and the command line.
+const AUTOCOMPLETION_GAP: f32 = 4.0;
 
 pub(crate) fn handle_command_line_state(
-    focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>,
-    mut inputs: Query<(&mut EditableText, &mut TextColor)>,
-    mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
-    mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
+    focus: Res<InputFocus>, window: Single<&Window>,
+    mut inputs: Query<(
+        &mut EditableText,
+        &mut TextColor,
+        &ComputedNode,
+        &UiGlobalTransform,
+        Option<&TextScroll>,
+    )>,
+    mut auto_completion_text: Query<(&mut Text, &mut Node), With<CommandAutoCompletion>>,
+    mut command_state: ResMut<CommandState>,
 ) {
     let Some(entity) = focus.get() else {
         return;
     };
-    let Ok((mut input, mut text_color)) = inputs.get_mut(entity) else {
+    let Ok((input, mut text_color, node, transform, text_scroll)) = inputs.get_mut(entity) else {
         return;
     };
 
-    let mut current_input = input.value().to_string();
+    let current_input = input.value().to_string();
 
     // Preview
     if current_input != command_state.last_input {
         command_state.last_input = current_input.clone();
         command_state.preview = parse_command_preview(&current_input, &command_state);
         command_state.parse_output = parse_commandline_input(&current_input);
-        if !command_state.parse_output.autocompletion.is_empty() {
-            println!("{:?}", command_state.parse_output.autocompletion);
+
+        if let Ok((mut ui_text, mut ui_node)) = auto_completion_text.single_mut() {
+            if command_state.parse_output.autocompletion.is_empty() {
+                ui_node.display = Display::None;
+            } else {
+                ui_text.0 = command_state.parse_output.autocompletion.join("\n");
+                ui_node.display = Display::Flex;
+
+                let idx_from_end = if current_input.ends_with(" ") {
+                    0
+                } else {
+                    current_input
+                        .chars()
+                        .rev()
+                        .take_while(|&c| c != ' ' && c != consts::COMMAND_OPEN_SEPARATION_CHARACTER)
+                        .count()
+                };
+                let output_idx = current_input.chars().count() - idx_from_end;
+
+                if let Some(p) =
+                    cursor_screen_position(output_idx, &input, node, transform, text_scroll)
+                {
+                    let input_top = (transform.affine().translation.y - node.size().y * 0.5)
+                        * node.inverse_scale_factor();
+                    ui_node.position_type = PositionType::Absolute;
+                    if let (Val::Px(left_padding), Val::Px(border_left)) =
+                        (ui_node.padding.left, ui_node.border.left)
+                    {
+                        ui_node.left = Val::Px(p.x - left_padding - border_left);
+                    }
+                    ui_node.bottom = Val::Px(window.height() - input_top + AUTOCOMPLETION_GAP);
+                }
+            };
         }
+
         let show_error = determine_show_error(&command_state.parse_output, &current_input);
         text_color.0 = if show_error { consts::ui::CONSOLE_ERROR_COLOR } else { Color::WHITE };
     }
+}
+
+pub(crate) fn handle_command_line_actions(
+    focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
+    mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
+    mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
+) {
+    let Some(entity) = focus.get() else {
+        return;
+    };
+    let Ok(mut input) = inputs.get_mut(entity) else {
+        return;
+    };
+
+    let mut current_input = input.value().to_string();
 
     if keys.just_pressed(KeyCode::Tab) {
         let current_input_cleaned_up =

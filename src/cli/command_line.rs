@@ -1,8 +1,11 @@
+use crate::ecs_elements::components::CommandAutoCompletion;
 use crate::ecs_elements::resources::CommandHistory;
 use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
 use bevy::input_focus::{AutoFocus, InputFocus};
 use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle, TextEdit};
+use bevy::ui::{ComputedNode, UiGlobalTransform, widget::TextScroll};
+use parley::{Affinity, Cursor};
 
 pub(crate) fn spawn_command_line(commands: &mut Commands) {
     commands
@@ -10,9 +13,12 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
-                justify_content: JustifyContent::Start,
-                align_items: AlignItems::End,
-                padding: px(8).all(),
+                justify_content: JustifyContent::End,
+                flex_direction: FlexDirection::ColumnReverse,
+                align_items: AlignItems::Start,
+                padding: px(8.0).all(),
+                row_gap: px(0),
+                column_gap: px(0),
                 ..default()
             },
             TabGroup::new(0),
@@ -22,7 +28,7 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
                 Node {
                     width: Val::Percent(100.0),
                     padding: px(8).all(),
-                    border: px(2).all(),
+                    border: px(0).all(),
                     align_items: AlignItems::Center,
                     ..default()
                 },
@@ -33,6 +39,21 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
                 TextCursorStyle::default(),
                 TabIndex(0),
                 AutoFocus,
+            ));
+            parent.spawn((
+                CommandAutoCompletion,
+                Node {
+                    padding: px(8).all(),
+                    border: px(0).all(),
+                    align_items: AlignItems::Center,
+                    display: Display::None,
+                    ..default()
+                },
+                BackgroundColor(Color::srgba(0.1, 0.1, 0.12, 0.9)),
+                Text("Hello\nidk".to_owned()),
+                TextFont { font_size: FontSize::Px(20.0), ..default() },
+                TextColor(Color::WHITE),
+                TextCursorStyle::default(),
             ));
         });
 }
@@ -67,4 +88,32 @@ pub(crate) fn navigate_command_history(
 fn set_input_text(input: &mut EditableText, text: &str) {
     input.editor_mut().set_text(text);
     input.queue_edit(TextEdit::TextEnd(false));
+}
+
+/// Written using AI
+/// Logical window-space position of the caret sitting at `char_index` in `input`,
+/// in the same units as [`Val::Px`](bevy::ui::Val). Multiply-based UI positions
+/// (e.g. `Node.left`) take these directly; UI layout itself is physical, hence
+/// the [`ComputedNode::inverse_scale_factor`] at the end.
+///
+/// `char_index` counts characters (not bytes) into the input's text buffer.
+/// The entity's [`ComputedNode`], [`UiGlobalTransform`] and optional [`TextScroll`]
+/// are needed to lift the glyph-local caret position into window coordinates.
+/// Returns `None` until the text has been laid out at least once.
+pub(crate) fn cursor_screen_position(
+    char_index: usize, input: &EditableText, node: &ComputedNode, transform: &UiGlobalTransform,
+    scroll: Option<&TextScroll>,
+) -> Option<Vec2> {
+    let editor = input.editor();
+    let layout = editor.try_layout()?;
+    let text = editor.raw_text();
+    let byte_index = text.char_indices().nth(char_index).map_or(text.len(), |(index, _)| index);
+
+    let bounds =
+        Cursor::from_byte_index(layout, byte_index, Affinity::Downstream).geometry(layout, 0.0);
+    let local = Vec2::new(bounds.x0 as f32, bounds.y0 as f32);
+
+    let content_origin = node.content_box().min - scroll.map_or(Vec2::ZERO, |scroll| scroll.0);
+    let physical = transform.affine().transform_point2(content_origin + local);
+    Some(physical * node.inverse_scale_factor())
 }

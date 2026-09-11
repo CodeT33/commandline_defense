@@ -56,3 +56,6 @@ pub(crate) struct GridPositionLabel;
 
 #[derive(Component)]
 pub(crate) struct TileHighlight;
+
+#[derive(Component)]
+pub(crate) struct CommandAutoCompletion;

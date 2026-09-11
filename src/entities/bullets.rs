@@ -15,6 +15,7 @@ use bevy::prelude::*;
 use std::f32::consts::PI;
 use std::ops::Deref;
 
+#[allow(unused)]
 #[derive(Copy, Clone, Debug)]
 pub(crate) enum BulletType {
     MediumMetalBall,
