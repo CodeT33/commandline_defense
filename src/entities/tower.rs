@@ -13,9 +13,7 @@ use crate::player_suite::TransactionReturnStatus;
 use crate::scheduling::TimePoint;
 use crate::texture_packs::TexturePackAssets;
 use crate::tiers::ValueTiers;
-use crate::tiers::ValueType::{
-    BulletPierce, BulletSpeed, EnemyMovementSpeed, TowerRange, TowerReloadSpeed,
-};
+use crate::tiers::ValueType::{BulletSpeed, EnemyMovementSpeed, TowerRange, TowerReloadSpeed};
 use bevy::asset::AssetServer;
 use bevy::ecs::entity::EntityHashSet;
 use bevy::math::{Quat, Rot2, Vec2};
