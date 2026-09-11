@@ -15,6 +15,7 @@ pub(crate) mod scheduling;
 pub(crate) mod texture_packs;
 pub(crate) mod tiers;
 mod ui_overlay;
+pub mod waves;
 
 use crate::camera::{camera_zoom_and_pan, set_camera_position};
 use crate::cli::command_event_handling::handle_command_events;

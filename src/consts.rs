@@ -614,3 +614,22 @@ impl ValueTiers {
         }
     }
 }
+
+pub(crate) mod waves {
+    use crate::entities::enemies::EnemyType;
+    use crate::waves::{GameWaves, Wave, WaveItem};
+
+    pub(crate) fn get_game_waves() -> GameWaves {
+        GameWaves::new(vec![
+            Wave::new(
+                vec![
+                    WaveItem::new_enemy(EnemyType::Rocher, 3000, 3),
+                    WaveItem::new_enemy(EnemyType::Zapano, 1000, 10),
+                    WaveItem::new_pause(2000),
+                ],
+                500,
+            ),
+            Wave::new(vec![WaveItem::new_enemy(EnemyType::RocherOfTheNight, 5000, 3)], 250),
+        ])
+    }
+}
