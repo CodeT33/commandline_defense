@@ -11,3 +11,11 @@ A video game where you have to defend against enemies while you build a factory 
 `#ff0000` (red) restricted
 `#00ff00` (green) placeable
 `#0000ff` (blue) water
+
+## Development Setup
+
+Configure the repository to use project git hooks:
+
+```bash
+git config --local core.hooksPath .githooks
+```
