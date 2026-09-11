@@ -1,6 +1,6 @@
 use crate::cli::command_input::{CommandInput, determine_show_error, parse_commandline_input};
 use crate::cli::command_line::cursor_screen_position;
-use crate::cli::preview::{PreviewCommand, parse_command_preview};
+use crate::cli::preview::parse_command_preview;
 use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::components::CommandAutoCompletion;
@@ -58,7 +58,9 @@ pub(crate) fn handle_command_line_state(
                     current_input
                         .chars()
                         .rev()
-                        .take_while(|&c| c != ' ' && c != consts::COMMAND_OPEN_SEPARATION_CHARACTER)
+                        .take_while(|&c| {
+                            c != ' ' && c != ';' && c != consts::COMMAND_OPEN_SEPARATION_CHARACTER
+                        })
                         .count()
                 };
                 let output_idx = current_input.chars().count() - idx_from_end;
@@ -86,7 +88,7 @@ pub(crate) fn handle_command_line_state(
 
 pub(crate) fn handle_command_line_actions(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
-    mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
+    command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
     mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
 ) {
     let Some(entity) = focus.get() else {
@@ -160,9 +162,6 @@ pub(crate) fn handle_command_line_actions(
         }
 
         input.clear();
-
-        command_state.last_input.clear();
-        command_state.preview = PreviewCommand::None;
     }
 }
 
