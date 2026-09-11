@@ -13,31 +13,26 @@ use bevy::prelude::{
 use bevy::text::{EditableText, TextEdit};
 use bevy::ui::Display;
 
-#[allow(clippy::too_many_arguments, clippy::type_complexity)]
 pub(crate) fn handle_command_line_state(
-    focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>,
-    mut inputs: Query<(&mut EditableText, &mut TextColor)>,
+    focus: Res<InputFocus>, mut inputs: Query<(&mut EditableText, &mut TextColor)>,
     mut auto_completion_text: Query<(&mut Text, &mut Node), With<CommandAutoCompletion>>,
-    mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
-    mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
+    mut command_state: ResMut<CommandState>,
 ) {
     let Some(entity) = focus.get() else {
         return;
     };
-    let Ok((mut input, mut text_color)) = inputs.get_mut(entity) else {
+    let Ok((input, mut text_color)) = inputs.get_mut(entity) else {
         return;
     };
 
-    let mut current_input = input.value().to_string();
+    let current_input = input.value().to_string();
 
     // Preview
     if current_input != command_state.last_input {
         command_state.last_input = current_input.clone();
         command_state.preview = parse_command_preview(&current_input, &command_state);
         command_state.parse_output = parse_commandline_input(&current_input);
-        if !command_state.parse_output.autocompletion.is_empty() {
-            println!("{:?}", command_state.parse_output.autocompletion);
-        }
+
         if let Ok((mut ui_text, mut ui_node)) = auto_completion_text.single_mut() {
             ui_text.0 = command_state.parse_output.autocompletion.join("\n");
             ui_node.display = if command_state.parse_output.autocompletion.is_empty() {
@@ -50,6 +45,21 @@ pub(crate) fn handle_command_line_state(
         let show_error = determine_show_error(&command_state.parse_output, &current_input);
         text_color.0 = if show_error { consts::ui::CONSOLE_ERROR_COLOR } else { Color::WHITE };
     }
+}
+
+pub(crate) fn handle_command_line_actions(
+    focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
+    mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
+    mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
+) {
+    let Some(entity) = focus.get() else {
+        return;
+    };
+    let Ok(mut input) = inputs.get_mut(entity) else {
+        return;
+    };
+
+    let mut current_input = input.value().to_string();
 
     if keys.just_pressed(KeyCode::Tab) {
         let current_input_cleaned_up =
