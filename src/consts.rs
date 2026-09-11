@@ -53,7 +53,7 @@ impl TowerType {
                 range: ValueTiers::B,
                 cooldown_ms: ValueTiers::B,
                 bullet_speed_tps: ValueTiers::C,
-                bullet_type: BulletType::OrangeBall,
+                bullet_type: BulletType::SmallGoldBullet,
                 preview_sprite: TexturePackAssets::Troops_Assault_AssaultTroopLvl1,
                 sprites: [
                     TexturePackAssets::Troops_Assault_AssaultTroopLvl1,
@@ -70,7 +70,7 @@ impl TowerType {
                 range: ValueTiers::C,
                 cooldown_ms: ValueTiers::E,
                 bullet_speed_tps: ValueTiers::C,
-                bullet_type: BulletType::MetalBall,
+                bullet_type: BulletType::MediumMetalBall,
                 preview_sprite: TexturePackAssets::Troops_Boom_BoomTroopLvl1,
                 sprites: [
                     TexturePackAssets::Troops_Boom_BoomTroopLvl1,
@@ -87,7 +87,7 @@ impl TowerType {
                 range: ValueTiers::B,
                 cooldown_ms: ValueTiers::S,
                 bullet_speed_tps: ValueTiers::B,
-                bullet_type: BulletType::AppleBall,
+                bullet_type: BulletType::SmallCopperBullet,
                 preview_sprite: TexturePackAssets::Troops_Gatling_GatlingTroopLvl1,
                 sprites: [
                     TexturePackAssets::Troops_Gatling_GatlingTroopLvl1,
@@ -104,7 +104,7 @@ impl TowerType {
                 range: ValueTiers::S,
                 cooldown_ms: ValueTiers::F,
                 bullet_speed_tps: ValueTiers::S,
-                bullet_type: BulletType::Bullet,
+                bullet_type: BulletType::MediumGoldBullet,
                 preview_sprite: TexturePackAssets::Troops_Sniper_SniperTroopLvl1,
                 sprites: [
                     TexturePackAssets::Troops_Sniper_SniperTroopLvl1,
@@ -115,13 +115,30 @@ impl TowerType {
                 tower_rotates: true,
                 targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
+            TowerType::RocketTroop => TowerAttributes {
+                price: 0,
+                size_tiles: Vec2::splat(2.0),
+                range: ValueTiers::B,
+                cooldown_ms: ValueTiers::F,
+                bullet_speed_tps: ValueTiers::F,
+                bullet_type: BulletType::SmallOrangeRocket,
+                preview_sprite: TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                sprites: [
+                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                ],
+                tower_rotates: true,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+            },
             TowerType::Eitshtu => TowerAttributes {
                 price: 80,
                 size_tiles: Vec2::splat(1.0),
-                range: ValueTiers::A,
-                cooldown_ms: ValueTiers::A,
+                range: ValueTiers::C,
+                cooldown_ms: ValueTiers::S,
                 bullet_speed_tps: ValueTiers::A,
-                bullet_type: BulletType::Bullet,
+                bullet_type: BulletType::EitshtuProjectile,
                 preview_sprite: TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl1,
                 sprites: [
                     TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl1,
@@ -130,15 +147,15 @@ impl TowerType {
                     TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl4,
                 ],
                 tower_rotates: false,
-                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+                targeting_type: TargetingType::Basic,
             },
             TowerType::Acitonion => TowerAttributes {
                 price: 260,
                 size_tiles: Vec2::splat(1.0),
-                range: ValueTiers::A,
-                cooldown_ms: ValueTiers::A,
-                bullet_speed_tps: ValueTiers::A,
-                bullet_type: BulletType::Bullet,
+                range: ValueTiers::D,
+                cooldown_ms: ValueTiers::C,
+                bullet_speed_tps: ValueTiers::C,
+                bullet_type: BulletType::AcitonionProjectile,
                 preview_sprite: TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl1,
                 sprites: [
                     TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl1,
@@ -147,15 +164,15 @@ impl TowerType {
                     TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl4,
                 ],
                 tower_rotates: false,
-                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+                targeting_type: TargetingType::Basic,
             },
             TowerType::Strorm => TowerAttributes {
                 price: 420,
                 size_tiles: Vec2::splat(1.0),
                 range: ValueTiers::A,
-                cooldown_ms: ValueTiers::A,
+                cooldown_ms: ValueTiers::F,
                 bullet_speed_tps: ValueTiers::A,
-                bullet_type: BulletType::Bullet,
+                bullet_type: BulletType::StrormProjectile,
                 preview_sprite: TexturePackAssets::ElementalRunes_Strorm_StrormLvl1,
                 sprites: [
                     TexturePackAssets::ElementalRunes_Strorm_StrormLvl1,
@@ -169,10 +186,10 @@ impl TowerType {
             TowerType::Infernon => TowerAttributes {
                 price: 380,
                 size_tiles: Vec2::splat(1.0),
-                range: ValueTiers::A,
-                cooldown_ms: ValueTiers::A,
-                bullet_speed_tps: ValueTiers::A,
-                bullet_type: BulletType::AppleBall,
+                range: ValueTiers::B,
+                cooldown_ms: ValueTiers::D,
+                bullet_speed_tps: ValueTiers::E,
+                bullet_type: BulletType::InfernonProjectile,
                 preview_sprite: TexturePackAssets::ElementalRunes_Infernon_InfernonLvl1,
                 sprites: [
                     TexturePackAssets::ElementalRunes_Infernon_InfernonLvl2,
@@ -186,10 +203,10 @@ impl TowerType {
             TowerType::Icebyte => TowerAttributes {
                 price: 95,
                 size_tiles: Vec2::splat(1.0),
-                range: ValueTiers::A,
-                cooldown_ms: ValueTiers::A,
+                range: ValueTiers::B,
+                cooldown_ms: ValueTiers::C,
                 bullet_speed_tps: ValueTiers::A,
-                bullet_type: BulletType::DonsBananos,
+                bullet_type: BulletType::IcebyteProjectile,
                 preview_sprite: TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl1,
                 sprites: [
                     TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl2,
@@ -198,8 +215,10 @@ impl TowerType {
                     TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl4,
                 ],
                 tower_rotates: false,
-                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+                targeting_type: TargetingType::Basic,
             },
+
+            // Memes
             TowerType::DonBanano => TowerAttributes {
                 price: 0,
                 size_tiles: Vec2::splat(3.0),
@@ -213,23 +232,6 @@ impl TowerType {
                     TexturePackAssets::WipSprites_DonBananoCool,
                     TexturePackAssets::WipSprites_DonBananoCool,
                     TexturePackAssets::WipSprites_DonBananoCool,
-                ],
-                tower_rotates: true,
-                targeting_type: TargetingType::PredictiveWithLoadBalancing,
-            },
-            TowerType::RocketTroop => TowerAttributes {
-                price: 0,
-                size_tiles: Vec2::splat(2.0),
-                range: ValueTiers::A,
-                cooldown_ms: ValueTiers::E,
-                bullet_speed_tps: ValueTiers::F,
-                bullet_type: BulletType::Rocket,
-                preview_sprite: TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
-                sprites: [
-                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
-                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
-                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
-                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
                 ],
                 tower_rotates: true,
                 targeting_type: TargetingType::PredictiveWithLoadBalancing,
@@ -265,7 +267,7 @@ impl EnemyType {
                 texture_size_tiles: 1.0,
                 asset: TexturePackAssets::WipSprites_MausMeister,
             },
-            EnemyType::Rocher => EnemyStats {
+            EnemyType::RocherOfTheNight => EnemyStats {
                 reward: 500,
                 health: ValueTiers::S,
                 player_health_penalty: ValueTiers::A,
@@ -274,15 +276,34 @@ impl EnemyType {
                 texture_size_tiles: 2.0,
                 asset: TexturePackAssets::Enemies_Rocher_RocherDarkmodeLvl1,
             },
-            EnemyType::Zapano => EnemyStats {
+            EnemyType::Rocher => EnemyStats {
+                reward: 500,
+                health: ValueTiers::A,
+                player_health_penalty: ValueTiers::B,
+                speed_tps: ValueTiers::D,
+                relative_collider_size: 0.5,
+                texture_size_tiles: 2.0,
+                asset: TexturePackAssets::Enemies_Rocher_RocherLvl1,
+            },
+            EnemyType::ZapanoOfTheNight => EnemyStats {
                 reward: 250,
-                health: ValueTiers::B,
+                health: ValueTiers::C,
                 player_health_penalty: ValueTiers::A,
-                speed_tps: ValueTiers::E,
+                speed_tps: ValueTiers::C,
                 relative_collider_size: 0.25,
                 texture_size_tiles: 1.0,
-                asset: TexturePackAssets::Enemies_Zapano_ZapanoFrontendLvl1,
+                asset: TexturePackAssets::Enemies_Zapano_ZapanoDarkmodeFrontendLvl1,
             },
+            EnemyType::Zapano => EnemyStats {
+                reward: 250,
+                health: ValueTiers::D,
+                player_health_penalty: ValueTiers::E,
+                speed_tps: ValueTiers::B,
+                relative_collider_size: 0.5,
+                texture_size_tiles: 1.0,
+                asset: TexturePackAssets::Enemies_Zapano_ZapanoFrontendLvl1
+            },
+
         }
     }
     pub(crate) fn get_description(self) -> String {
@@ -296,15 +317,9 @@ impl EnemyType {
 impl BulletType {
     pub(crate) fn get_attributes(self) -> BulletStats {
         match self {
-            BulletType::Bullet => BulletStats {
-                damage: ValueTiers::S,
-                pierce: ValueTiers::F,
-                spins: false,
-                relative_collider_size: 0.25,
-                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
-                asset: TexturePackAssets::Projectiles_NormalMunition,
-            },
-            BulletType::MetalBall => BulletStats {
+
+            // For boom-tower
+            BulletType::MediumMetalBall => BulletStats {
                 damage: ValueTiers::B,
                 pierce: ValueTiers::B,
                 spins: true,
@@ -312,6 +327,112 @@ impl BulletType {
                 texture_size_tiles: PROJECTILE_SIZE_TILES.x,
                 asset: TexturePackAssets::Projectiles_MetalBall,
             },
+            BulletType::BigMetalBall => BulletStats {
+                damage: ValueTiers::A,
+                pierce: ValueTiers::B,
+                spins: true,
+                relative_collider_size: 0.5,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_BigMetalBall,
+            },
+
+            // For assault-tower
+            BulletType::SmallGoldBullet => BulletStats {
+                damage: ValueTiers::D,
+                pierce: ValueTiers::E,
+                spins: false,
+                relative_collider_size: 0.25,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_SmallGoldBullet,
+            },
+            // For sniper-tower
+            BulletType::MediumGoldBullet => BulletStats {
+                damage: ValueTiers::A,
+                pierce: ValueTiers::F,
+                spins: false,
+                relative_collider_size: 0.25,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_MediumGoldBullet,
+            },
+            // For gatling-tower
+            BulletType::SmallCopperBullet => BulletStats {
+                damage: ValueTiers::D,
+                pierce: ValueTiers::F,
+                spins: false,
+                relative_collider_size: 0.5,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_SmallCopperBullet,
+            },
+            BulletType::MediumCopperBullet => BulletStats {
+                damage: ValueTiers::C,
+                pierce: ValueTiers::F,
+                spins: false,
+                relative_collider_size: 0.5,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_MediumCopperBullet,
+            },
+            BulletType::SmallOrangeRocket => BulletStats {
+                damage: ValueTiers::B,
+                pierce: ValueTiers::F,
+                spins: false,
+                relative_collider_size: 0.5,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_SmallOrangeRocket,
+            },
+            // For rocket-tower
+            BulletType::MediumOrangeRocket => BulletStats {
+                damage: ValueTiers::S,
+                pierce: ValueTiers::F,
+                spins: false,
+                relative_collider_size: 0.5,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_MediumOrangeRocket,
+            },
+
+            // Elemental rune projectiles
+            BulletType::EitshtuProjectile => BulletStats {
+                damage: ValueTiers::E,
+                pierce: ValueTiers::F,
+                spins: false,
+                relative_collider_size: 0.5,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_EitshtuProjectile,
+            },
+            BulletType::AcitonionProjectile => BulletStats {
+                damage: ValueTiers::C,
+                pierce: ValueTiers::B,
+                spins: false,
+                relative_collider_size: 0.5,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_AcitonionProjectile,
+            },
+            BulletType::StrormProjectile => BulletStats {
+                damage: ValueTiers::A,
+                pierce: ValueTiers::F,
+                spins: false,
+                relative_collider_size: 0.5,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_StrormProjectile,
+            },
+            BulletType::InfernonProjectile => BulletStats {
+                damage: ValueTiers::A,
+                pierce: ValueTiers::F,
+                spins: false,
+                relative_collider_size: 1.0,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_InfernonProjectile,
+            },
+            BulletType::IcebyteProjectile => BulletStats {
+                damage: ValueTiers::C,
+                pierce: ValueTiers::S,
+                spins: true,
+                relative_collider_size: 1.0,
+                texture_size_tiles: PROJECTILE_SIZE_TILES.x,
+                asset: TexturePackAssets::Projectiles_IcebyteProjectile,
+            },
+
+
+            // Memes
             BulletType::AppleBall => BulletStats {
                 damage: ValueTiers::E,
                 pierce: ValueTiers::F,
@@ -335,14 +456,6 @@ impl BulletType {
                 relative_collider_size: 1.0,
                 texture_size_tiles: 1.0,
                 asset: TexturePackAssets::WipSprites_Banana,
-            },
-            BulletType::Rocket => BulletStats {
-                damage: ValueTiers::A,
-                pierce: ValueTiers::F,
-                spins: false,
-                relative_collider_size: 1.0,
-                texture_size_tiles: 1.0,
-                asset: TexturePackAssets::Projectiles_OrangeRocket,
             },
         }
     }

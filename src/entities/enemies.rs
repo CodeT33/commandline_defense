@@ -21,10 +21,12 @@ use crate::tiers::ValueType::{EnemyHealth, EnemyMovementSpeed, EnemyPlayerHealth
 #[allow(unused)]
 #[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Eq)]
 pub(crate) enum EnemyType {
+    Zapano,
+    ZapanoOfTheNight,
+    Rocher,
+    RocherOfTheNight,
     WideBirb,
     Mausmeister,
-    Zapano,
-    Rocher,
 }
 
 pub(crate) struct EnemyData {

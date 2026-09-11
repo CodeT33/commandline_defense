@@ -8,22 +8,42 @@ use crate::ecs_elements::resources::TexturePackSettings;
 use crate::entities::health::HealthStatsInner;
 use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
+use crate::tiers::ValueType::{BulletDamage, BulletPierce};
+use crate::tiers::ValueTiers;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::f32::consts::PI;
 use std::ops::Deref;
-use crate::tiers::{ValueTiers, ValueType};
-use crate::tiers::ValueType::{BulletDamage, BulletPierce};
 
 #[derive(Copy, Clone, Debug)]
 pub(crate) enum BulletType {
+
+    MediumMetalBall,
+    BigMetalBall,
+
+    SmallGoldBullet,
+    MediumGoldBullet,
+
+    SmallCopperBullet,
+    MediumCopperBullet,
+
+    SmallOrangeRocket,
+    MediumOrangeRocket,
+
+    EitshtuProjectile,
+    AcitonionProjectile,
+    StrormProjectile,
+    InfernonProjectile,
+    IcebyteProjectile,
+
+
     // meme stuff
-    Bullet,
-    MetalBall,
     AppleBall,
     OrangeBall,
     DonsBananos,
-    Rocket,
+
+
+
 }
 
 pub(crate) struct BulletStats {
