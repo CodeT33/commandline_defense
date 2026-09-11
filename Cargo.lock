@@ -5851,6 +5851,7 @@ dependencies = [
  "egui",
  "image",
  "macros",
+ "parley",
  "strum",
 ]
 
