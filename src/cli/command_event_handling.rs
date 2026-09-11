@@ -19,7 +19,10 @@ pub(crate) fn handle_command_events(
             CommandEvent::Place { tower_type, tower_pos } => {
                 place_tower(&mut messages, tower_type, tower_pos, &game_map)
             },
-            CommandEvent::Clear => deselect_tile(&mut selection_state),
+            CommandEvent::Clear => {
+                deselect_tile(&mut selection_state);
+                command_state.persistent_preview = None;
+            },
             CommandEvent::Pause => pause_game(&mut debug_settings),
             CommandEvent::Resume => resume_game(&mut debug_settings),
             CommandEvent::ExitGame => exit_game(),
