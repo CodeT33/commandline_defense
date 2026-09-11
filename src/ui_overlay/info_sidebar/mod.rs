@@ -29,103 +29,99 @@ pub fn draw_gui(
         UiBuilder::new().layer_id(LayerId::background()).max_rect(ctx.viewport_rect()),
     );
 
-    if let PreviewCommand::SidebarState(UiState::Menus) = command_state.preview {
-        egui::Panel::right("Right Panel Menus").resizable(true).default_size(200.0).show(
-            &mut viewport_ui,
-            |ui| {
-                draw_menus_list(ui);
-            },
-        );
-    }
+    match command_state.preview {
+        PreviewCommand::SidebarState(UiState::Menus) => {
+            egui::Panel::right("Right Panel Menus").resizable(true).default_size(200.0).show(
+                &mut viewport_ui,
+                |ui| {
+                    draw_menus_list(ui);
+                },
+            );
+        },
+        PreviewCommand::SidebarState(UiState::TowersList { selected, further_details }) => {
+            egui::Panel::right("Right Panel Tower List").resizable(true).default_size(200.0).show(
+                &mut viewport_ui,
+                |ui| {
+                    draw_tower_list(ui, &mut contexts, &asset_server, &texture_pack_settings);
+                },
+            );
 
-    if let PreviewCommand::SidebarState(UiState::TowersList { selected, further_details }) =
-        command_state.preview
-    {
-        egui::Panel::right("Right Panel Tower List").resizable(true).default_size(200.0).show(
-            &mut viewport_ui,
-            |ui| {
-                draw_tower_list(ui, &mut contexts, &asset_server, &texture_pack_settings);
-            },
-        );
+            if let Some(tower_type) = selected {
+                egui::Window::new("Details")
+                    .resizable(false)
+                    .default_pos(Pos2 { x: 1120.0, y: 100.0 })
+                    .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
+                    .show(&viewport_ui, |ui| {
+                        draw_tower_info(
+                            ui,
+                            &mut contexts,
+                            &asset_server,
+                            &texture_pack_settings,
+                            tower_type,
+                        );
+                    });
 
-        if let Some(tower_type) = selected {
-            egui::Window::new("Details")
-                .resizable(false)
-                .default_pos(Pos2 { x: 1120.0, y: 100.0 })
-                .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
-                .show(&viewport_ui, |ui| {
-                    draw_tower_info(
-                        ui,
-                        &mut contexts,
-                        &asset_server,
-                        &texture_pack_settings,
-                        tower_type,
-                    );
+                match further_details {
+                    Some(TowerPage::Description) => {
+                        egui::Window::new("Description")
+                            .resizable(false)
+                            .default_pos(Pos2 { x: 900.0, y: 100.0 })
+                            .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
+                            .show(&viewport_ui, |ui| {
+                                draw_tower_description(ui, tower_type);
+                            });
+                    },
+                    Some(TowerPage::Upgrades) => {
+                        egui::Window::new("Upgrades")
+                            .resizable(false)
+                            .default_pos(Pos2 { x: 900.0, y: 100.0 })
+                            .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
+                            .show(&viewport_ui, |ui| {
+                                draw_tower_upgrades(ui, tower_type);
+                            });
+                    },
+                    None => {},
+                }
+            }
+        },
+        PreviewCommand::SidebarState(UiState::EnemiesList { selected, further_details }) => {
+            egui::Panel::right("Right Panel Enemies List")
+                .resizable(true)
+                .default_size(200.0)
+                .show(&mut viewport_ui, |ui| {
+                    draw_enemy_list(ui, &mut contexts, &asset_server, &texture_pack_settings);
                 });
-        }
 
-        if let Some(tower_type) = selected
-            && further_details == Some(TowerPage::Description)
-        {
-            egui::Window::new("Description")
-                .resizable(false)
-                .default_pos(Pos2 { x: 900.0, y: 100.0 })
-                .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
-                .show(&viewport_ui, |ui| {
-                    draw_tower_description(ui, tower_type);
-                });
-        }
+            if let Some(enemy_type) = selected {
+                egui::Window::new("Details")
+                    .resizable(false)
+                    .default_pos(Pos2 { x: 1120.0, y: 100.0 })
+                    .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
+                    .show(&viewport_ui, |ui| {
+                        draw_enemy_info(
+                            ui,
+                            &mut contexts,
+                            &asset_server,
+                            &texture_pack_settings,
+                            enemy_type,
+                        );
+                    });
 
-        if let Some(tower_type) = selected
-            && further_details == Some(TowerPage::Upgrades)
-        {
-            egui::Window::new("Upgrades")
-                .resizable(false)
-                .default_pos(Pos2 { x: 900.0, y: 100.0 })
-                .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
-                .show(&viewport_ui, |ui| {
-                    draw_tower_upgrades(ui, tower_type);
-                });
-        }
-    }
-
-    if let PreviewCommand::SidebarState(UiState::EnemiesList { selected, further_details }) =
-        command_state.preview
-    {
-        egui::Panel::right("Right Panel Enemies List").resizable(true).default_size(200.0).show(
-            &mut viewport_ui,
-            |ui| {
-                draw_enemy_list(ui, &mut contexts, &asset_server, &texture_pack_settings);
-            },
-        );
-
-        if let Some(enemy_type) = selected {
-            egui::Window::new("Details")
-                .resizable(false)
-                .default_pos(Pos2 { x: 1120.0, y: 100.0 })
-                .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
-                .show(&viewport_ui, |ui| {
-                    draw_enemy_info(
-                        ui,
-                        &mut contexts,
-                        &asset_server,
-                        &texture_pack_settings,
-                        enemy_type,
-                    );
-                });
-        }
-
-        if let Some(enemy_type) = selected
-            && further_details == Some(EnemyPage::Description)
-        {
-            egui::Window::new("Description")
-                .resizable(false)
-                .default_pos(Pos2 { x: 900.0, y: 100.0 })
-                .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
-                .show(&viewport_ui, |ui| {
-                    draw_enemy_description(ui, enemy_type);
-                });
-        }
+                match further_details {
+                    Some(EnemyPage::Description) => {
+                        egui::Window::new("Description")
+                            .resizable(false)
+                            .default_pos(Pos2 { x: 900.0, y: 100.0 })
+                            .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
+                            .show(&viewport_ui, |ui| {
+                                draw_enemy_description(ui, enemy_type);
+                            });
+                    },
+                    None => {},
+                }
+            }
+        },
+        _ => {},
     }
     Ok(())
 }
