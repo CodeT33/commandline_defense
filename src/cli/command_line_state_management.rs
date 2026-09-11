@@ -64,7 +64,7 @@ pub(crate) fn handle_command_line_state(
         }
     }
 
-    //Submit
+    // Submit
     if keys.just_pressed(KeyCode::Enter) {
         let command_inputs = match command_state
             .parse_output
