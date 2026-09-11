@@ -29,8 +29,18 @@ pub fn draw_gui(
         UiBuilder::new().layer_id(LayerId::background()).max_rect(ctx.viewport_rect()),
     );
 
-    match command_state.persistent_preview.as_ref().unwrap_or(&command_state.preview) {
-        PreviewCommand::SidebarState(UiState::Menus) => {
+    let ui_state = match &command_state.preview {
+        PreviewCommand::SidebarState(sidebar_state) => sidebar_state,
+        _ => {
+            let Some(sidebar_state) = command_state.persistent_preview.as_ref() else {
+                return Ok(());
+            };
+            sidebar_state
+        },
+    };
+
+    match ui_state {
+        UiState::Menus => {
             egui::Panel::right("Right Panel Menus").resizable(true).default_size(200.0).show(
                 &mut viewport_ui,
                 |ui| {
@@ -38,7 +48,7 @@ pub fn draw_gui(
                 },
             );
         },
-        PreviewCommand::SidebarState(UiState::TowersList { selected, further_details }) => {
+        UiState::TowersList { selected, further_details } => {
             egui::Panel::right("Right Panel Tower List").resizable(true).default_size(200.0).show(
                 &mut viewport_ui,
                 |ui| {
@@ -84,7 +94,7 @@ pub fn draw_gui(
                 }
             }
         },
-        PreviewCommand::SidebarState(UiState::EnemiesList { selected, further_details }) => {
+        UiState::EnemiesList { selected, further_details } => {
             egui::Panel::right("Right Panel Enemies List")
                 .resizable(true)
                 .default_size(200.0)

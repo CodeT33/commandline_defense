@@ -1,5 +1,4 @@
 use crate::cli::command_input::{FurtherInfo, OpenCommand, Settings};
-use crate::cli::preview::PreviewCommand;
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::{CommandEvent, PlaceTowerMessage};
 use crate::ecs_elements::resources::{CommandState, DebugSettings, MapResource, SelectionState};
@@ -39,7 +38,7 @@ pub(crate) fn handle_command_events(
                 Settings::EnemyType { enemy_type } => debug_settings.enemy_type = enemy_type,
             },
             CommandEvent::Open(open_thing) => {
-                command_state.persistent_preview = PreviewCommand::SidebarState(match open_thing {
+                command_state.persistent_preview = match open_thing {
                     OpenCommand::Info { further: None } => UiState::Menus,
                     OpenCommand::Info { further: Some(further) } => match further {
                         FurtherInfo::Enemies { enemy_type, further } => {
@@ -49,7 +48,7 @@ pub(crate) fn handle_command_events(
                             UiState::TowersList { selected: tower_type, further_details: further }
                         },
                     },
-                })
+                }
                 .into()
             },
         }
