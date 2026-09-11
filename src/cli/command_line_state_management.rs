@@ -31,6 +31,9 @@ pub(crate) fn handle_command_line_state(
     mut command_state: ResMut<CommandState>,
 ) {
     let Some(entity) = focus.get() else {
+        if let Ok((_, mut ui_node)) = auto_completion_text.single_mut() {
+            ui_node.display = Display::None;
+        }
         return;
     };
     let Ok((input, mut text_color, node, transform, text_scroll)) = inputs.get_mut(entity) else {
@@ -46,9 +49,9 @@ pub(crate) fn handle_command_line_state(
         command_state.parse_output = parse_commandline_input(&current_input);
 
         if let Ok((mut ui_text, mut ui_node)) = auto_completion_text.single_mut() {
-            if command_state.parse_output.autocompletion.is_empty() {
-                ui_node.display = Display::None;
-            } else {
+            if !command_state.parse_output.autocompletion.is_empty()
+                && focus.get().is_some_and(|f| f == entity)
+            {
                 ui_text.0 = command_state.parse_output.autocompletion.join("\n");
                 ui_node.display = Display::Flex;
 
@@ -78,6 +81,8 @@ pub(crate) fn handle_command_line_state(
                     }
                     ui_node.bottom = Val::Px(window.height() - input_top + AUTOCOMPLETION_GAP);
                 }
+            } else {
+                ui_node.display = Display::None;
             };
         }
 
@@ -86,10 +91,12 @@ pub(crate) fn handle_command_line_state(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn handle_command_line_actions(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
     command_state: Res<CommandState>, mut command_events: MessageWriter<CommandEvent>,
     mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
+    mut auto_completion_text: Query<&mut Node, With<CommandAutoCompletion>>,
 ) {
     let Some(entity) = focus.get() else {
         return;
@@ -99,6 +106,12 @@ pub(crate) fn handle_command_line_actions(
     };
 
     let mut current_input = input.value().to_string();
+
+    if keys.just_pressed(KeyCode::Escape)
+        && let Ok(mut node) = auto_completion_text.single_mut()
+    {
+        node.display = Display::None;
+    }
 
     if keys.just_pressed(KeyCode::Tab) {
         let current_input_cleaned_up =
