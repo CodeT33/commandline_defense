@@ -66,9 +66,14 @@ pub(crate) fn handle_command_line_state(
                 if let Some(p) =
                     cursor_screen_position(output_idx, &input, node, transform, text_scroll)
                 {
-                    let input_top = transform.affine().translation.y - node.size().y * 0.5;
+                    let input_top = (transform.affine().translation.y - node.size().y * 0.5)
+                        * node.inverse_scale_factor();
                     ui_node.position_type = PositionType::Absolute;
-                    ui_node.left = Val::Px(p.x);
+                    if let (Val::Px(left_padding), Val::Px(border_left)) =
+                        (ui_node.padding.left, ui_node.border.left)
+                    {
+                        ui_node.left = Val::Px(p.x - left_padding - border_left);
+                    }
                     ui_node.bottom = Val::Px(window.height() - input_top + AUTOCOMPLETION_GAP);
                 }
             };

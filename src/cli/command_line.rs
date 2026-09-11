@@ -16,7 +16,9 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
                 justify_content: JustifyContent::End,
                 flex_direction: FlexDirection::ColumnReverse,
                 align_items: AlignItems::Start,
-                padding: px(8).all(),
+                padding: px(8.0).all(),
+                row_gap: px(0),
+                column_gap: px(0),
                 ..default()
             },
             TabGroup::new(0),
@@ -26,7 +28,7 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
                 Node {
                     width: Val::Percent(100.0),
                     padding: px(8).all(),
-                    border: px(2).all(),
+                    border: px(0).all(),
                     align_items: AlignItems::Center,
                     ..default()
                 },
@@ -42,7 +44,7 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
                 CommandAutoCompletion,
                 Node {
                     padding: px(8).all(),
-                    border: px(2).all(),
+                    border: px(0).all(),
                     align_items: AlignItems::Center,
                     display: Display::None,
                     ..default()
@@ -89,7 +91,10 @@ fn set_input_text(input: &mut EditableText, text: &str) {
 }
 
 /// Written using AI
-/// Window-space position of the caret sitting at `char_index` in `input`.
+/// Logical window-space position of the caret sitting at `char_index` in `input`,
+/// in the same units as [`Val::Px`](bevy::ui::Val). Multiply-based UI positions
+/// (e.g. `Node.left`) take these directly; UI layout itself is physical, hence
+/// the [`ComputedNode::inverse_scale_factor`] at the end.
 ///
 /// `char_index` counts characters (not bytes) into the input's text buffer.
 /// The entity's [`ComputedNode`], [`UiGlobalTransform`] and optional [`TextScroll`]
@@ -109,5 +114,6 @@ pub(crate) fn cursor_screen_position(
     let local = Vec2::new(bounds.x0 as f32, bounds.y0 as f32);
 
     let content_origin = node.content_box().min - scroll.map_or(Vec2::ZERO, |scroll| scroll.0);
-    Some(transform.affine().transform_point2(content_origin + local))
+    let physical = transform.affine().transform_point2(content_origin + local);
+    Some(physical * node.inverse_scale_factor())
 }
