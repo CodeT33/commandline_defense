@@ -2,6 +2,7 @@ use crate::cli::command_input::ParseOutput;
 use crate::cli::preview::PreviewCommand;
 use crate::consts;
 use crate::coordinates::GridCoordinate;
+use crate::entities::enemies::EnemyType;
 use crate::map::map_logic_parsing::GameMap;
 use bevy::prelude::{Deref, DerefMut, Resource};
 
@@ -44,6 +45,7 @@ pub(crate) struct DebugSettings {
     pub(crate) enable_bounding_boxes: bool,
     pub(crate) enemy_spawn_interval_ms: u64,
     pub(crate) sim_speed: f32,
+    pub(crate) enemy_type: EnemyType,
 }
 
 impl Default for DebugSettings {
@@ -52,6 +54,7 @@ impl Default for DebugSettings {
             enable_bounding_boxes: false,
             enemy_spawn_interval_ms: consts::ENEMY_SPAWN_INTERVAL_MS,
             sim_speed: 1.0,
+            enemy_type: EnemyType::WideBirb,
         }
     }
 }
