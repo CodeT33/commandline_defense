@@ -15,6 +15,8 @@ use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
 use clap::ValueEnum;
 use std::f32;
+use crate::tiers::ValueTiers;
+use crate::tiers::ValueType::{EnemyHealth, EnemyMovementSpeed, EnemyPlayerHealthPenalty};
 
 #[allow(unused)]
 #[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Eq)]
@@ -34,9 +36,9 @@ pub(crate) struct EnemyData {
 #[derive(Copy, Clone, Debug)]
 pub(crate) struct EnemyStats {
     pub(crate) reward: i16,
-    pub(crate) health: f32,
-    pub(crate) player_health_penalty: u16,
-    pub(crate) speed_tps: f32,
+    pub(crate) health: ValueTiers,
+    pub(crate) player_health_penalty: ValueTiers,
+    pub(crate) speed_tps: ValueTiers,
     pub(crate) relative_collider_size: f32,
     pub(crate) texture_size_tiles: f32,
     pub(crate) asset: TexturePackAssets,
@@ -50,7 +52,7 @@ pub(crate) fn move_enemies(
     let path_len = map_resource.enemy_path().get_length();
 
     for (entity, mut transform, mut enemy, creation_time) in &mut enemy {
-        let path_duration_secs = path_len as f32 / enemy.enemy_type.get_attributes().speed_tps;
+        let path_duration_secs = path_len as f32 / enemy.enemy_type.get_attributes().speed_tps.get_value(EnemyMovementSpeed);
         let path_duration_ms = (path_duration_secs * 1000.0).round() as u64;
         let elapsed_ms = creation_time.elapsed_ms(&time);
         let progress = elapsed_ms.min(path_duration_ms) as f32 / path_duration_ms as f32;
@@ -86,7 +88,7 @@ pub(crate) fn handle_enemy_spawns(
         let stats = message.enemy_type.get_attributes();
         commands.spawn((
             Enemy(EnemyData::new(message.enemy_type)),
-            HealthStats(HealthStatsInner::new(stats.health)),
+            HealthStats(HealthStatsInner::new(stats.health.get_value(EnemyHealth))),
             CreationTime(message.time),
             ColliderTypeA,
             ColliderShape::circle(stats.texture_size_tiles * stats.relative_collider_size / 2.0),
@@ -180,7 +182,7 @@ pub(crate) fn handle_enemies_reaching_end(
     {
         commands.entity(entity).try_despawn();
         player.health =
-            player.health.saturating_sub(enemy.enemy_type.get_attributes().player_health_penalty);
+            player.health.saturating_sub(enemy.enemy_type.get_attributes().player_health_penalty.get_value(EnemyPlayerHealthPenalty) as u16);
     }
     if player.health == 0 {
         commands.trigger(PlayerHasDied);

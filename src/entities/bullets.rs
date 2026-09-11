@@ -12,6 +12,8 @@ use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::f32::consts::PI;
 use std::ops::Deref;
+use crate::tiers::{ValueTiers, ValueType};
+use crate::tiers::ValueType::{BulletDamage, BulletPierce};
 
 #[derive(Copy, Clone, Debug)]
 pub(crate) enum BulletType {
@@ -25,8 +27,8 @@ pub(crate) enum BulletType {
 }
 
 pub(crate) struct BulletStats {
-    pub(crate) damage: f32,
-    pub(crate) health: f32,
+    pub(crate) damage: ValueTiers,
+    pub(crate) pierce: ValueTiers,
     pub(crate) spins: bool,
     pub(crate) relative_collider_size: f32,
     pub(crate) texture_size_tiles: f32,
@@ -88,7 +90,7 @@ pub(crate) fn handle_bullet_spawns(
         let stats = message.bullet_type.get_attributes();
         let mut bullet_entity = commands.spawn((
             Bullet(BulletData::new(message.bullet_type, message.direction, message.speed_tps)),
-            HealthStats(HealthStatsInner::new(stats.health)),
+            HealthStats(HealthStatsInner::new(stats.pierce.get_value(BulletPierce))),
             CreationTime(message.time),
             ColliderTypeB,
             ColliderShape::circle(stats.texture_size_tiles * stats.relative_collider_size / 2.0),
@@ -118,7 +120,7 @@ pub(crate) fn handle_bullet_enemy_collisions(
         else {
             continue;
         };
-        enemy_health.change_health(-bullet.bullet_type.get_attributes().damage);
+        enemy_health.change_health(-bullet.bullet_type.get_attributes().damage.get_value(BulletDamage));
         if enemy_health.is_dead() {
             commands.entity(pair.type_a).try_despawn();
         }
@@ -140,7 +142,7 @@ pub(crate) fn bullet_spawn_observer(
     let Ok(mut enemy) = enemy_query.get_mut(*target_enemy.deref()) else {
         return;
     };
-    enemy.add_target_from_bullet(bullet_entity, bullet_data.bullet_type.get_attributes().damage);
+    enemy.add_target_from_bullet(bullet_entity, bullet_data.bullet_type.get_attributes().damage.get_value(BulletDamage));
 }
 
 pub(crate) fn bullet_despawn_observer(

@@ -30,8 +30,8 @@ pub(crate) fn draw_enemy_info(
     ui.separator();
 
     ui.label(egui::RichText::new("Enemy Attributes").strong());
-    ui.label(format!("Health: {}", enemy_attributes.health));
-    ui.label(format!("Speed: {}tps", enemy_attributes.speed_tps));
+    ui.label(format!("Health: {:?}", enemy_attributes.health));
+    ui.label(format!("Speed: {:?}", enemy_attributes.speed_tps));
     ui.label(format!(
         "Enemy size: {}x{}m",
         enemy_attributes.texture_size_tiles, enemy_attributes.texture_size_tiles

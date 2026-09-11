@@ -23,6 +23,8 @@ use clap::ValueEnum;
 use std::f32::consts::PI;
 use std::time::Duration;
 use strum::EnumIter;
+use crate::tiers::ValueTiers;
+use crate::tiers::ValueType::{BulletPierce, BulletSpeed, EnemyMovementSpeed, TowerRange, TowerReloadSpeed};
 
 pub(crate) struct TowerDataInner {
     tower_type: TowerType,
@@ -80,9 +82,9 @@ pub(crate) enum TargetingType {
 pub(crate) struct TowerAttributes {
     pub(crate) price: u16,
     pub(crate) size_tiles: Vec2,
-    pub(crate) range: f32,
-    pub(crate) cooldown_ms: u32,
-    pub(crate) bullet_speed_tps: f32,
+    pub(crate) range: ValueTiers,
+    pub(crate) cooldown_ms: ValueTiers,
+    pub(crate) bullet_speed_tps: ValueTiers,
     pub(crate) bullet_type: BulletType,
     pub(crate) preview_sprite: TexturePackAssets,
     pub(crate) sprites: [TexturePackAssets; 4],
@@ -139,8 +141,8 @@ impl TowerData {
             ..default()
         };
         let bullet_emission_data =
-            BulletEmissionData(BulletEmissionDataInner::new(attributes.cooldown_ms));
-        let collider_shape = ColliderShape::Circle(Circle::new(attributes.range));
+            BulletEmissionData(BulletEmissionDataInner::new(attributes.cooldown_ms.get_value(TowerReloadSpeed) as u32));
+        let collider_shape = ColliderShape::Circle(Circle::new(attributes.range.get_value(TowerRange)));
         _ = commands
             .spawn((
                 tower_data,
@@ -234,8 +236,8 @@ pub(crate) fn shoot_bullets(
                         shoot_time,
                         tower_transform.translation.truncate(),
                         map.enemy_path(),
-                        tower_attributes.bullet_speed_tps,
-                        target_enemy.get_type().get_attributes().speed_tps,
+                        tower_attributes.bullet_speed_tps.get_value(BulletSpeed),
+                        target_enemy.get_type().get_attributes().speed_tps.get_value(EnemyMovementSpeed),
                     ) else {
                         continue;
                     };
@@ -257,7 +259,7 @@ pub(crate) fn shoot_bullets(
                     time: shoot_time,
                     position: tower_transform.translation.truncate(),
                     direction: shoot_direction,
-                    speed_tps: tower_attributes.bullet_speed_tps,
+                    speed_tps: tower_attributes.bullet_speed_tps.get_value(BulletSpeed),
                     target_entity: matches!(
                         tower_attributes.targeting_type,
                         TargetingType::PredictiveWithLoadBalancing
