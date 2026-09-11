@@ -110,13 +110,38 @@ pub(crate) fn draw_tower_description(ui: &mut Ui, tower_type: TowerType) {
     ui.label(tower_type.get_description());
 }
 
-pub(crate) fn draw_tower_upgrades(ui: &mut Ui, tower_type: TowerType) {
+pub(crate) fn draw_tower_upgrades(ui: &mut Ui, ctx: &mut EguiContexts, asset_server: &AssetServer, texture_pack_settings: &TexturePackSettings, tower_type: TowerType) {
     let tower_name = tower_type
         .to_possible_value()
         .map(|pv| pv.get_name().to_owned())
         .expect("value skipped by Clap");
 
+    let tower_attributes = tower_type.get_attributes();
+
+    let image_handle0 =
+        asset_server.load(texture_pack_settings.get_asset_path(tower_attributes.sprites[0]));
+    let texture_id0 = ctx.add_image(EguiTextureHandle::Strong(image_handle0));
+
+    let image_handle1 =
+        asset_server.load(texture_pack_settings.get_asset_path(tower_attributes.sprites[1]));
+    let texture_id1 = ctx.add_image(EguiTextureHandle::Strong(image_handle1));
+
+    let image_handle2 =
+        asset_server.load(texture_pack_settings.get_asset_path(tower_attributes.sprites[2]));
+    let texture_id2 = ctx.add_image(EguiTextureHandle::Strong(image_handle2));
+
+    let image_handle3 =
+        asset_server.load(texture_pack_settings.get_asset_path(tower_attributes.sprites[3]));
+    let texture_id3 = ctx.add_image(EguiTextureHandle::Strong(image_handle3));
+
     ui.heading(tower_name);
     ui.separator();
-    ui.label("Upgrade 1...");
+    ui.label("Level 1");
+    ui.add(egui::Image::new(egui::load::SizedTexture::new(texture_id0, [64.0, 64.0])));
+    ui.label("Level 2");
+    ui.add(egui::Image::new(egui::load::SizedTexture::new(texture_id1, [64.0, 64.0])));
+    ui.label("Level 3");
+    ui.add(egui::Image::new(egui::load::SizedTexture::new(texture_id2, [64.0, 64.0])));
+    ui.label("Level 4");
+    ui.add(egui::Image::new(egui::load::SizedTexture::new(texture_id3, [64.0, 64.0])));
 }
