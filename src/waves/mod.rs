@@ -5,12 +5,10 @@ use crate::scheduling::IntervalTimer;
 use bevy::prelude::{Local, MessageWriter, Res, Time};
 
 impl WaveItem {
-    pub(crate) fn new_enemy(enemy_type: EnemyType, spawn_cooldown: u16, spawn_amount: u16) -> WaveItem {
-        WaveItem::Enemy {
-            enemy_type,
-            spawn_cooldown,
-            spawn_amount,
-        }
+    pub(crate) fn new_enemy(
+        enemy_type: EnemyType, spawn_cooldown: u16, spawn_amount: u16,
+    ) -> WaveItem {
+        WaveItem::Enemy { enemy_type, spawn_cooldown, spawn_amount }
     }
     pub(crate) fn new_pause(milliseconds: u16) -> WaveItem {
         WaveItem::Pause { milliseconds }
@@ -19,18 +17,13 @@ impl WaveItem {
 
 impl Wave {
     pub(crate) fn new(wave_items: Vec<WaveItem>, finishing_reward: u16) -> Self {
-        Wave {
-            wave_items,
-            finishing_reward,
-        }
+        Wave { wave_items, finishing_reward }
     }
 }
 
 impl GameWaves {
     pub(crate) fn new(waves: Vec<Wave>) -> Self {
-        GameWaves {
-            waves,
-        }
+        GameWaves { waves }
     }
 }
 
@@ -47,7 +40,6 @@ pub(crate) struct Wave {
 pub(crate) struct GameWaves {
     pub(crate) waves: Vec<Wave>,
 }
-
 
 pub(crate) fn handle_wave_enemy_spawns(
     mut enemy_spawns: MessageWriter<SpawnEnemy>, mut timer: Local<Option<IntervalTimer>>,
