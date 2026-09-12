@@ -4,7 +4,7 @@ use crate::ecs_elements::messages::SpawnEnemy;
 use crate::ecs_elements::resources::{DebugSettings, GameState};
 use crate::entities::enemies::EnemyType;
 use crate::scheduling::IntervalTimer;
-use bevy::prelude::{Local, MessageWriter, Res, Time};
+use bevy::prelude::{Local, MessageWriter, Res, ResMut, Time};
 
 impl WaveItem {
     pub(crate) fn new_enemy(
@@ -25,7 +25,15 @@ impl Wave {
 
 impl GameWaves {
     pub(crate) fn new(waves: Vec<Wave>) -> Self {
-        GameWaves { waves }
+        GameWaves {
+            waves,
+            cursor: Some(WavesCursor {
+                current_wave: 0,
+                current_item: 0,
+                current_enemy_idx: 0,
+                paused: false,
+            }),
+        }
     }
 }
 
@@ -39,28 +47,63 @@ pub(crate) struct Wave {
     pub(crate) finishing_reward: u16,
 }
 
-pub(crate) struct GameWaves {
-    pub(crate) waves: Vec<Wave>,
+pub(crate) struct WavesCursor {
+    current_wave: usize,
+    current_item: usize,
+    current_enemy_idx: usize,
+    paused: bool,
 }
 
-pub(crate) fn handle_wave_enemy_spawns(
-    mut enemy_spawns: MessageWriter<SpawnEnemy>, mut timer: Local<Option<IntervalTimer>>,
-    time: Res<Time>, debug_settings: Res<DebugSettings>,
-) {
-    let t = timer
-        .get_or_insert_with(|| IntervalTimer::new(debug_settings.enemy_spawn_interval_ms as u32));
+pub(crate) struct GameWaves {
+    waves: Vec<Wave>,
+    cursor: Option<WavesCursor>,
+}
 
-    if t.get_interval_ms() as u64 != debug_settings.enemy_spawn_interval_ms {
-        t.set_interval_ms(debug_settings.enemy_spawn_interval_ms as u32);
+pub(crate) fn enemy_wave_handler(
+    mut enemy_spawns: MessageWriter<SpawnEnemy>, mut local_timer: Local<Option<IntervalTimer>>,
+    time: Res<Time>, debug_settings: Res<DebugSettings>, mut game_state: ResMut<GameState>,
+) {
+    let timer = local_timer.get_or_insert_with(|| IntervalTimer::new(0));
+
+    if game_state.waiting {
+        return;
     }
 
-    while let Some(tick_time) = t.tick_if_ready(&time) {
-        enemy_spawns.write(SpawnEnemy { enemy_type: debug_settings.enemy_type, time: tick_time });
+    while let Some(tick_time) = timer.tick_if_ready(&time) {
+        let Ok(increment) = game_state.waves.increment_cursor() else {
+            println!("Hey you finished the game. Congratulations!");
+            return;
+        };
+        match increment {
+            Increment::GameRunning { enemy, cooldown } => {
+                timer.set_interval_ms(cooldown as u32);
+
+                if let Some(enemy_type) = enemy {
+                    enemy_spawns.write(SpawnEnemy { enemy_type, time: tick_time });
+                }
+            },
+            Increment::WaitingForNextWave { reward, next_wave: wave_idx } => {
+                game_state.waiting = true;
+                timer.set_resume_immediately()
+            },
+        }
     }
 }
 
 impl Default for GameState {
     fn default() -> Self {
-        Self { waves: GameWaves::current_default() }
+        Self { waves: GameWaves::current_default(), waiting: false }
+    }
+}
+
+pub(crate) enum Increment {
+    GameRunning { enemy: Option<EnemyType>, cooldown: u16 },
+    WaitingForNextWave { next_wave: usize, reward: Option<u16> },
+}
+
+impl GameWaves {
+    /// Returns the WaveItem and the optional reward
+    pub(crate) fn increment_cursor(&mut self) -> Result<Increment, ()> {
+        todo!()
     }
 }

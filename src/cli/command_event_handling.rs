@@ -1,7 +1,9 @@
 use crate::cli::command_input::{FurtherInfo, OpenCommand, Settings};
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::{CommandEvent, PlaceTowerMessage};
-use crate::ecs_elements::resources::{CommandState, DebugSettings, MapResource, SelectionState};
+use crate::ecs_elements::resources::{
+    CommandState, DebugSettings, GameState, MapResource, SelectionState,
+};
 use crate::entities::tower::TowerType;
 use crate::map::map_logic_parsing::TileType;
 use crate::ui_overlay::ui_state::UiState;
@@ -11,6 +13,7 @@ pub(crate) fn handle_command_events(
     mut messages: MessageWriter<PlaceTowerMessage>, mut events: MessageReader<CommandEvent>,
     mut selection_state: ResMut<SelectionState>, game_map: Res<MapResource>,
     mut debug_settings: ResMut<DebugSettings>, mut command_state: ResMut<CommandState>,
+    mut game_state: ResMut<GameState>,
 ) {
     for event in events.read().copied() {
         match event {
@@ -22,8 +25,17 @@ pub(crate) fn handle_command_events(
                 deselect_tile(&mut selection_state);
                 command_state.persistent_preview = None;
             },
-            CommandEvent::Pause => pause_game(&mut debug_settings),
-            CommandEvent::Resume => resume_game(&mut debug_settings),
+            CommandEvent::Pause => {
+                if !game_state.waiting {
+                    debug_settings.paused = true;
+                }
+            },
+            CommandEvent::Resume => {
+                if game_state.waiting {
+                    game_state.waiting = false;
+                }
+                debug_settings.paused = false;
+            },
             CommandEvent::ExitGame => exit_game(),
             CommandEvent::Set(setting) => match setting {
                 Settings::BoundingBoxes { value } => {
@@ -53,14 +65,6 @@ pub(crate) fn handle_command_events(
             },
         }
     }
-}
-
-fn resume_game(debug_settings: &mut ResMut<DebugSettings>) {
-    debug_settings.paused = false;
-}
-
-fn pause_game(debug_settings: &mut ResMut<DebugSettings>) {
-    debug_settings.paused = true;
 }
 
 fn select_tile(selection_state: &mut SelectionState, tile: GridCoordinate) {
