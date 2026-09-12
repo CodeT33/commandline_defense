@@ -33,10 +33,16 @@ pub(crate) fn update_player_suite_ui(
 ) {
     let paused_text = if debug_settings.paused { "\n\nGame paused" } else { "" };
 
+    let wave_text = if debug_settings.paused {
+        format!("Next wave: {}", player_suite.next_wave)
+    } else {
+        format!("Current wave: {}", player_suite.next_wave)
+    };
+
     for mut text in &mut query {
         **text = format!(
-            "Balance: ${}\nHealth: {}{}",
-            player_suite.money, player_suite.health, paused_text
+            "Balance: ${}\nHealth: {}\n{}{}",
+            player_suite.money, player_suite.health, wave_text, paused_text
         );
     }
 }

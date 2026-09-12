@@ -2,12 +2,6 @@ use crate::ecs_elements::events::PlayerHasDied;
 use crate::ecs_elements::resources::PlayerSuiteResource;
 use bevy::prelude::On;
 
-impl Default for PlayerSuiteResource {
-    fn default() -> Self {
-        PlayerSuiteResource { health: 100, shield: 0, points: 0, money: 10000 }
-    }
-}
-
 #[derive(PartialEq, Eq)]
 pub(crate) enum TransactionReturnStatus {
     Success,
@@ -18,6 +12,12 @@ pub(crate) enum TransactionReturnStatus {
 pub(crate) enum ReturnStatus {
     Positive,
     NotPositive,
+}
+
+impl Default for PlayerSuiteResource {
+    fn default() -> Self {
+        PlayerSuiteResource { health: 100, shield: 0, points: 0, money: 320 , next_wave: 0}
+    }
 }
 
 #[allow(unused)]

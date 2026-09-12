@@ -45,10 +45,6 @@ pub(crate) fn handle_command_events(
                 Settings::SimSpeed { value } => {
                     debug_settings.sim_speed = value;
                 },
-                Settings::SpawnInterval { value } => {
-                    debug_settings.enemy_spawn_interval_ms = value as u64;
-                },
-                Settings::EnemyType { enemy_type } => debug_settings.enemy_type = enemy_type,
             },
             CommandEvent::Open(open_thing) => {
                 command_state.persistent_preview = match open_thing {

@@ -20,13 +20,6 @@ pub(crate) enum Settings {
         #[arg(value_parser = float_range(0.0..=consts::MAX_SIM_SPEED))]
         value: f32,
     },
-    SpawnInterval {
-        #[arg(value_parser = clap::value_parser!(u16).range(1..))]
-        value: u16,
-    },
-    EnemyType {
-        enemy_type: EnemyType,
-    },
 }
 
 #[derive(Parser, Debug, Clone, Copy)]

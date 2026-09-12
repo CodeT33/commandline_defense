@@ -4,12 +4,9 @@ use crate::ecs_elements::components::{
 };
 use crate::ecs_elements::events::PlayerHasDied;
 use crate::ecs_elements::messages::{EnemyReachedEnd, SpawnEnemy};
-use crate::ecs_elements::resources::{
-    DebugSettings, MapResource, PlayerSuiteResource, TexturePackSettings,
-};
+use crate::ecs_elements::resources::{MapResource, PlayerSuiteResource, TexturePackSettings};
 use crate::entities::health::HealthStatsInner;
 use crate::map::map_logic_parsing::EnemyPath;
-use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
 use crate::tiers::ValueTiers;
 use crate::tiers::ValueType::{EnemyHealth, EnemyMovementSpeed, EnemyPlayerHealthPenalty};
@@ -17,12 +14,17 @@ use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
 use clap::ValueEnum;
 use std::f32;
+use crate::waves::WaveItem;
 
 #[allow(unused)]
 #[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Eq)]
 pub(crate) enum EnemyType {
     Zapano,
+    ZapanoBody,
+    ZapanoBackend,
     ZapanoOfTheNight,
+    ZapanoOfTheNightBody,
+    ZapanoOfTheNightBackend,
     Rocher,
     RocherOfTheNight,
     WideBirb,
@@ -30,7 +32,7 @@ pub(crate) enum EnemyType {
 }
 
 pub(crate) struct EnemyData {
-    enemy_type: EnemyType,
+    pub(crate) enemy_type: EnemyType,
     path_progress: f32,
     targeted_by: EntityHashMap<f32>,
 }
@@ -64,22 +66,6 @@ pub(crate) fn move_enemies(
             reached_end_writer.write(EnemyReachedEnd(entity));
         }
         *transform = get_enemy_transform(progress, map_resource.enemy_path());
-    }
-}
-
-#[allow(unused)]
-pub(crate) fn request_enemy_spawns(
-    mut enemy_spawns: MessageWriter<SpawnEnemy>, mut timer: Local<Option<IntervalTimer>>,
-    time: Res<Time>, debug_settings: Res<DebugSettings>,
-) {
-    let t = timer
-        .get_or_insert_with(|| IntervalTimer::new(debug_settings.enemy_spawn_interval_ms as u32));
-    if t.get_interval_ms() as u64 != debug_settings.enemy_spawn_interval_ms {
-        t.set_interval_ms(debug_settings.enemy_spawn_interval_ms as u32);
-    }
-
-    while let Some(tick_time) = t.tick_if_ready(&time) {
-        enemy_spawns.write(SpawnEnemy { enemy_type: debug_settings.enemy_type, time: tick_time });
     }
 }
 

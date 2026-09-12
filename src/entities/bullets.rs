@@ -4,7 +4,7 @@ use crate::ecs_elements::components::{
     TargetEnemy,
 };
 use crate::ecs_elements::messages::{CollisionStarted, SpawnBullet};
-use crate::ecs_elements::resources::TexturePackSettings;
+use crate::ecs_elements::resources::{PlayerSuiteResource, TexturePackSettings};
 use crate::entities::health::HealthStatsInner;
 use crate::scheduling::IntervalTimer;
 use crate::texture_packs::TexturePackAssets;
@@ -128,17 +128,20 @@ pub(crate) fn handle_bullet_spawns(
 pub(crate) fn handle_bullet_enemy_collisions(
     mut commands: Commands, mut collision_reader: MessageReader<CollisionStarted>,
     mut bullet_query: Query<(&mut HealthStats, &Bullet), Without<Enemy>>,
-    mut enemy_query: Query<&mut HealthStats, With<Enemy>>,
+    mut enemy_query: Query<(&mut HealthStats, &Enemy), With<Enemy>>,
+    mut player_suite: ResMut<PlayerSuiteResource>,
 ) {
     for pair in collision_reader.read() {
-        let (Ok((mut bullet_health, bullet)), Ok(mut enemy_health)) =
+        let (Ok((mut bullet_health, bullet)), Ok((mut enemy_health, enemy))) =
             (bullet_query.get_mut(pair.type_b), enemy_query.get_mut(pair.type_a))
         else {
             continue;
         };
+
         enemy_health
             .change_health(-bullet.bullet_type.get_attributes().damage.get_value(BulletDamage));
         if enemy_health.is_dead() {
+            player_suite.add_money(enemy.0.enemy_type.get_attributes().reward as u16);
             commands.entity(pair.type_a).try_despawn();
         }
         bullet_health.change_health(-1.0);

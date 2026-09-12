@@ -46,6 +46,7 @@ impl IntervalTimer {
         Self { last_occurrence_ms: None, paused: false, interval_ms: interval_ms.max(1) }
     }
 
+    #[allow(unused)]
     pub(crate) fn get_interval_ms(&self) -> u32 {
         self.interval_ms
     }

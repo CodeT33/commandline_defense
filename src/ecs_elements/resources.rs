@@ -1,7 +1,6 @@
 use crate::cli::command_input::ParseOutput;
 use crate::cli::preview::PreviewCommand;
 use crate::coordinates::GridCoordinate;
-use crate::entities::enemies::EnemyType;
 use crate::map::map_logic_parsing::GameMap;
 use crate::ui_overlay::ui_state::UiState;
 use crate::waves::GameWaves;
@@ -30,6 +29,7 @@ pub(crate) struct PlayerSuiteResource {
     pub(crate) shield: u16,
     pub(crate) points: u16,
     pub(crate) money: u16,
+    pub(crate) next_wave: u16, 
 }
 
 #[derive(Resource)]
@@ -45,10 +45,8 @@ pub(crate) struct SelectionState {
 #[derive(Resource)]
 pub(crate) struct DebugSettings {
     pub(crate) enable_bounding_boxes: bool,
-    pub(crate) enemy_spawn_interval_ms: u64,
     pub(crate) sim_speed: f32,
     pub(crate) paused: bool,
-    pub(crate) enemy_type: EnemyType,
 }
 
 #[allow(unused)]

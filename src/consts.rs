@@ -15,8 +15,6 @@ pub(crate) const MAX_SIM_SPEED: f32 = 20.0;
 pub(crate) const MAP_SIZE_TILES: U16Vec2 = U16Vec2 { x: 32, y: 16 };
 pub(crate) const TILE_SIZE: u16 = 16;
 
-pub(crate) const ENEMY_SPAWN_INTERVAL_MS: u64 = 2000;
-
 pub(crate) const TOWER_COOLDOWN_MS: u32 = 1000;
 
 pub(crate) const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
@@ -51,11 +49,11 @@ impl TowerType {
     pub(crate) fn get_attributes(self) -> TowerAttributes {
         match self {
             TowerType::AssaultTower => TowerAttributes {
-                price: 100,
+                price: 120,
                 size_tiles: Vec2::splat(1.0),
                 range: ValueTiers::B,
                 cooldown_ms: ValueTiers::B,
-                bullet_speed_tps: ValueTiers::C,
+                bullet_speed_tps: ValueTiers::B,
                 bullet_type: BulletType::SmallGoldBullet,
                 preview_sprite: TexturePackAssets::Troops_Assault_AssaultTroopLvl1,
                 sprites: [
@@ -65,10 +63,10 @@ impl TowerType {
                     TexturePackAssets::Troops_Assault_AssaultTroopLvl3,
                 ],
                 tower_rotates: true,
-                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+                targeting_type: TargetingType::Predictive,
             },
             TowerType::BoomTower => TowerAttributes {
-                price: 320,
+                price: 280,
                 size_tiles: Vec2::splat(1.0),
                 range: ValueTiers::C,
                 cooldown_ms: ValueTiers::E,
@@ -85,7 +83,7 @@ impl TowerType {
                 targeting_type: TargetingType::Basic,
             },
             TowerType::GatlingTower => TowerAttributes {
-                price: 210,
+                price: 240,
                 size_tiles: Vec2::splat(1.0),
                 range: ValueTiers::B,
                 cooldown_ms: ValueTiers::S,
@@ -102,7 +100,7 @@ impl TowerType {
                 targeting_type: TargetingType::Basic,
             },
             TowerType::SniperTower => TowerAttributes {
-                price: 160,
+                price: 520,
                 size_tiles: Vec2::splat(1.0),
                 range: ValueTiers::S,
                 cooldown_ms: ValueTiers::F,
@@ -119,12 +117,12 @@ impl TowerType {
                 targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
             TowerType::RocketTroop => TowerAttributes {
-                price: 0,
+                price: 1028,
                 size_tiles: Vec2::splat(2.0),
-                range: ValueTiers::B,
+                range: ValueTiers::S,
                 cooldown_ms: ValueTiers::F,
                 bullet_speed_tps: ValueTiers::F,
-                bullet_type: BulletType::SmallOrangeRocket,
+                bullet_type: BulletType::MediumOrangeRocket,
                 preview_sprite: TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
                 sprites: [
                     TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
@@ -136,7 +134,7 @@ impl TowerType {
                 targeting_type: TargetingType::PredictiveWithLoadBalancing,
             },
             TowerType::Eitshtu => TowerAttributes {
-                price: 80,
+                price: 160,
                 size_tiles: Vec2::splat(1.0),
                 range: ValueTiers::C,
                 cooldown_ms: ValueTiers::S,
@@ -223,11 +221,11 @@ impl TowerType {
 
             // Memes
             TowerType::DonBanano => TowerAttributes {
-                price: 0,
+                price: 10000,
                 size_tiles: Vec2::splat(3.0),
-                range: ValueTiers::A,
-                cooldown_ms: ValueTiers::A,
-                bullet_speed_tps: ValueTiers::A,
+                range: ValueTiers::S,
+                cooldown_ms: ValueTiers::S,
+                bullet_speed_tps: ValueTiers::S,
                 bullet_type: BulletType::DonsBananos,
                 preview_sprite: TexturePackAssets::WipSprites_DonBananoCool,
                 sprites: [
@@ -262,49 +260,85 @@ impl EnemyType {
                 asset: TexturePackAssets::WipSprites_Enemy,
             },
             EnemyType::Mausmeister => EnemyStats {
-                reward: 5000,
-                health: ValueTiers::D,
-                player_health_penalty: ValueTiers::A,
-                speed_tps: ValueTiers::A,
-                relative_collider_size: 0.25,
+                reward: 100,
+                health: ValueTiers::S,
+                player_health_penalty: ValueTiers::S,
+                speed_tps: ValueTiers::C,
+                relative_collider_size: 1.0,
                 texture_size_tiles: 1.0,
                 asset: TexturePackAssets::WipSprites_MausMeister,
             },
             EnemyType::RocherOfTheNight => EnemyStats {
-                reward: 500,
+                reward: 50,
                 health: ValueTiers::S,
-                player_health_penalty: ValueTiers::A,
+                player_health_penalty: ValueTiers::C,
                 speed_tps: ValueTiers::E,
                 relative_collider_size: 0.5,
                 texture_size_tiles: 2.0,
                 asset: TexturePackAssets::Enemies_Rocher_RocherDarkmodeLvl1,
             },
             EnemyType::Rocher => EnemyStats {
-                reward: 500,
+                reward: 20,
                 health: ValueTiers::A,
-                player_health_penalty: ValueTiers::B,
+                player_health_penalty: ValueTiers::D,
                 speed_tps: ValueTiers::D,
                 relative_collider_size: 0.5,
                 texture_size_tiles: 2.0,
                 asset: TexturePackAssets::Enemies_Rocher_RocherLvl1,
             },
             EnemyType::ZapanoOfTheNight => EnemyStats {
-                reward: 250,
+                reward: 10,
                 health: ValueTiers::C,
-                player_health_penalty: ValueTiers::A,
+                player_health_penalty: ValueTiers::D,
                 speed_tps: ValueTiers::C,
-                relative_collider_size: 0.25,
+                relative_collider_size: 1.0,
                 texture_size_tiles: 1.0,
                 asset: TexturePackAssets::Enemies_Zapano_ZapanoDarkmodeFrontendLvl1,
             },
+            EnemyType::ZapanoOfTheNightBody => EnemyStats {
+                reward: 5,
+                health: ValueTiers::D,
+                player_health_penalty: ValueTiers::D,
+                speed_tps: ValueTiers::C,
+                relative_collider_size: 1.0,
+                texture_size_tiles: 1.0,
+                asset: TexturePackAssets::Enemies_Zapano_ZapanoDarkmodeBodyLvl1,
+            },
+            EnemyType::ZapanoOfTheNightBackend => EnemyStats {
+                reward: 5,
+                health: ValueTiers::D,
+                player_health_penalty: ValueTiers::D,
+                speed_tps: ValueTiers::C,
+                relative_collider_size: 1.0,
+                texture_size_tiles: 1.0,
+                asset: TexturePackAssets::Enemies_Zapano_ZapanoDarkmodeBackendLvl1,
+            },
             EnemyType::Zapano => EnemyStats {
-                reward: 250,
+                reward: 5,
                 health: ValueTiers::D,
                 player_health_penalty: ValueTiers::E,
                 speed_tps: ValueTiers::B,
-                relative_collider_size: 0.5,
+                relative_collider_size: 1.0,
                 texture_size_tiles: 1.0,
                 asset: TexturePackAssets::Enemies_Zapano_ZapanoFrontendLvl1,
+            },
+            EnemyType::ZapanoBody => EnemyStats {
+                reward: 2,
+                health: ValueTiers::F,
+                player_health_penalty: ValueTiers::E,
+                speed_tps: ValueTiers::B,
+                relative_collider_size: 1.0,
+                texture_size_tiles: 1.0,
+                asset: TexturePackAssets::Enemies_Zapano_ZapanoBodyLvl1,
+            },
+            EnemyType::ZapanoBackend => EnemyStats {
+                reward: 2,
+                health: ValueTiers::F,
+                player_health_penalty: ValueTiers::E,
+                speed_tps: ValueTiers::B,
+                relative_collider_size: 1.0,
+                texture_size_tiles: 1.0,
+                asset: TexturePackAssets::Enemies_Zapano_ZapanoBackendLvl1,
             },
         }
     }
@@ -340,7 +374,7 @@ impl BulletType {
             // For assault-tower
             BulletType::SmallGoldBullet => BulletStats {
                 damage: ValueTiers::D,
-                pierce: ValueTiers::E,
+                pierce: ValueTiers::F,
                 spins: false,
                 relative_collider_size: 0.25,
                 texture_size_tiles: PROJECTILE_SIZE_TILES.x,
@@ -374,7 +408,7 @@ impl BulletType {
             },
             BulletType::SmallOrangeRocket => BulletStats {
                 damage: ValueTiers::B,
-                pierce: ValueTiers::F,
+                pierce: ValueTiers::D,
                 spins: false,
                 relative_collider_size: 0.5,
                 texture_size_tiles: PROJECTILE_SIZE_TILES.x,
@@ -383,7 +417,7 @@ impl BulletType {
             // For rocket-tower
             BulletType::MediumOrangeRocket => BulletStats {
                 damage: ValueTiers::S,
-                pierce: ValueTiers::F,
+                pierce: ValueTiers::D,
                 spins: false,
                 relative_collider_size: 0.5,
                 texture_size_tiles: PROJECTILE_SIZE_TILES.x,
@@ -392,7 +426,7 @@ impl BulletType {
 
             // Elemental rune projectiles
             BulletType::EitshtuProjectile => BulletStats {
-                damage: ValueTiers::E,
+                damage: ValueTiers::F,
                 pierce: ValueTiers::F,
                 spins: false,
                 relative_collider_size: 0.5,
@@ -450,8 +484,8 @@ impl BulletType {
                 asset: TexturePackAssets::WipSprites_Enemy,
             },
             BulletType::DonsBananos => BulletStats {
-                damage: ValueTiers::A,
-                pierce: ValueTiers::A,
+                damage: ValueTiers::S,
+                pierce: ValueTiers::S,
                 spins: true,
                 relative_collider_size: 1.0,
                 texture_size_tiles: 1.0,
@@ -559,12 +593,12 @@ impl ValueTiers {
 
             // Bullet
             ValueType::BulletSpeed => match self {
-                ValueTiers::S => 15.0,
-                ValueTiers::A => 10.0,
-                ValueTiers::B => 6.0,
-                ValueTiers::C => 4.0,
-                ValueTiers::D => 3.0,
-                ValueTiers::E => 2.0,
+                ValueTiers::S => 20.0,
+                ValueTiers::A => 14.0,
+                ValueTiers::B => 10.0,
+                ValueTiers::C => 7.0,
+                ValueTiers::D => 5.0,
+                ValueTiers::E => 3.0,
                 ValueTiers::F => 1.0,
             },
             ValueType::BulletDamage => match self {
@@ -606,20 +640,20 @@ impl ValueTiers {
                 ValueTiers::F => 1.0,
             },
             ValueType::EnemyPlayerHealthPenalty => match self {
-                ValueTiers::S => 1.0,
-                ValueTiers::A => 1.0,
-                ValueTiers::B => 1.0,
-                ValueTiers::C => 1.0,
-                ValueTiers::D => 1.0,
+                ValueTiers::S => 25.0,
+                ValueTiers::A => 10.0,
+                ValueTiers::B => 5.0,
+                ValueTiers::C => 3.0,
+                ValueTiers::D => 2.0,
                 ValueTiers::E => 1.0,
-                ValueTiers::F => 1.0,
+                ValueTiers::F => 0.0,
             },
         }
     }
 }
 
 pub(crate) mod waves {
-    use crate::entities::enemies::EnemyType;
+    use crate::entities::enemies::EnemyType::{Mausmeister, Rocher, RocherOfTheNight, Zapano, ZapanoOfTheNight};
     use crate::waves::{GameWaves, Wave, WaveItem};
 
     impl GameWaves {
@@ -628,13 +662,86 @@ pub(crate) mod waves {
             GameWaves::build(vec![
                 Wave::new(
                     vec![
-                        WaveItem::new_enemy(EnemyType::Rocher, 3000, 3),
-                        WaveItem::new_enemy(EnemyType::Zapano, 1000, 10),
-                        WaveItem::new_pause(2000),
+                        WaveItem::new_enemy(Zapano, 0, 1),
                     ],
-                    500,
+                    50
                 ),
-                Wave::new(vec![WaveItem::new_enemy(EnemyType::RocherOfTheNight, 5000, 3)], 250),
+                Wave::new(
+                    vec![
+                        WaveItem::new_enemy(Zapano, 0, 5),
+                        WaveItem::new_pause(2000),
+                        WaveItem::new_enemy(Rocher, 1000, 1),
+                    ],
+                    100,
+                ),
+                Wave::new(
+                    vec![
+                        WaveItem::new_enemy(Zapano, 0, 3),
+                        WaveItem::new_enemy(Rocher, 3000, 1),
+                        WaveItem::new_enemy(Zapano, 0, 20),
+                        WaveItem::new_pause(2000),
+                        WaveItem::new_enemy(Rocher, 2000, 3),
+                    ],
+                    100,
+                ),
+                Wave::new(
+                    vec![
+                        WaveItem::new_enemy(Zapano, 0, 1),
+                        WaveItem::new_pause(2000),
+                        WaveItem::new_enemy(Zapano, 0, 10),
+                    ],
+                    200,
+                ),
+                Wave::new(
+                    vec![
+                        WaveItem::new_enemy(Rocher, 1000, 5),
+                        WaveItem::new_enemy(Zapano, 0, 5),
+                        WaveItem::new_pause(2000),
+                        WaveItem::new_enemy(Rocher, 200, 3),
+                    ],
+                    200,
+                ),
+                Wave::new(
+                    vec![
+                        WaveItem::new_enemy(Rocher, 1000, 10),
+                        WaveItem::new_enemy(Zapano, 0, 10),
+                        WaveItem::new_pause(2000),
+                        WaveItem::new_enemy(Zapano, 0, 10),
+                        WaveItem::new_pause(2000),
+                        WaveItem::new_enemy(ZapanoOfTheNight, 0, 5),
+                    ],
+                    200,
+                ),
+                Wave::new(
+                    vec![
+                        WaveItem::new_enemy(ZapanoOfTheNight, 0, 5),
+                        WaveItem::new_pause(5000),
+                        WaveItem::new_enemy(ZapanoOfTheNight, 0, 10),
+                    ],
+                    200,
+                ),
+                Wave::new(
+                    vec![
+                        WaveItem::new_enemy(RocherOfTheNight, 0, 1),
+                    ], 200
+                ),
+                Wave::new(
+                    vec![
+                        WaveItem::new_enemy(RocherOfTheNight, 500, 3),
+                        WaveItem::new_enemy(ZapanoOfTheNight, 0, 20),
+                    ], 250
+                ),
+                Wave::new(
+                    vec![
+                        WaveItem::new_enemy(Mausmeister, 100, 3),
+                    ], 25000
+                ),
+                Wave::new(
+                    vec![
+                        WaveItem::new_enemy(RocherOfTheNight, 500, 3),
+                        WaveItem::new_enemy(ZapanoOfTheNight, 0, 20),
+                    ], 250
+                ),
             ])
         }
     }

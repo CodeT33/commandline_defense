@@ -1,7 +1,6 @@
 use crate::consts;
 use crate::ecs_elements::components::ColliderShape;
 use crate::ecs_elements::resources::DebugSettings;
-use crate::entities::enemies::EnemyType;
 use bevy::math::Isometry2d;
 use bevy::prelude::{Gizmos, Query, Real, Res, ResMut, Time, Transform, Virtual};
 
@@ -45,12 +44,6 @@ pub(crate) fn set_simulation_speed(
 
 impl Default for DebugSettings {
     fn default() -> Self {
-        Self {
-            enable_bounding_boxes: false,
-            enemy_spawn_interval_ms: consts::ENEMY_SPAWN_INTERVAL_MS,
-            sim_speed: 1.0,
-            paused: false,
-            enemy_type: EnemyType::WideBirb,
-        }
+        Self { enable_bounding_boxes: false, sim_speed: 1.0, paused: true }
     }
 }

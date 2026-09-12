@@ -53,10 +53,14 @@ enum Effect {
 
 #[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Eq, EnumIter)]
 pub(crate) enum TowerType {
+    // bober
     AssaultTower,
     BoomTower,
     GatlingTower,
     SniperTower,
+    RocketTroop,
+
+    // runes
     Eitshtu,
     Acitonion,
     Strorm,
@@ -67,7 +71,6 @@ pub(crate) enum TowerType {
 
     //meme stuff
     DonBanano,
-    RocketTroop,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
