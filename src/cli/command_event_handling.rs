@@ -1,15 +1,16 @@
-use crate::cli::command_input::Settings;
+use crate::cli::command_input::{FurtherInfo, OpenCommand, Settings};
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::{CommandEvent, PlaceTowerMessage};
-use crate::ecs_elements::resources::{DebugSettings, MapResource, SelectionState};
+use crate::ecs_elements::resources::{CommandState, DebugSettings, MapResource, SelectionState};
 use crate::entities::tower::TowerType;
 use crate::map::map_logic_parsing::TileType;
+use crate::ui_overlay::ui_state::UiState;
 use bevy::prelude::{MessageReader, MessageWriter, Res, ResMut};
 
 pub(crate) fn handle_command_events(
     mut messages: MessageWriter<PlaceTowerMessage>, mut events: MessageReader<CommandEvent>,
     mut selection_state: ResMut<SelectionState>, game_map: Res<MapResource>,
-    mut debug_settings: ResMut<DebugSettings>,
+    mut debug_settings: ResMut<DebugSettings>, mut command_state: ResMut<CommandState>,
 ) {
     for event in events.read().copied() {
         match event {
@@ -17,7 +18,10 @@ pub(crate) fn handle_command_events(
             CommandEvent::Place { tower_type, tower_pos } => {
                 place_tower(&mut messages, tower_type, tower_pos, &game_map)
             },
-            CommandEvent::Clear => deselect_tile(&mut selection_state),
+            CommandEvent::Clear => {
+                deselect_tile(&mut selection_state);
+                command_state.persistent_preview = None;
+            },
             CommandEvent::Pause => pause_game(&mut debug_settings),
             CommandEvent::Resume => resume_game(&mut debug_settings),
             CommandEvent::ExitGame => exit_game(),
@@ -32,6 +36,20 @@ pub(crate) fn handle_command_events(
                     debug_settings.enemy_spawn_interval_ms = value as u64;
                 },
                 Settings::EnemyType { enemy_type } => debug_settings.enemy_type = enemy_type,
+            },
+            CommandEvent::Open(open_thing) => {
+                command_state.persistent_preview = match open_thing {
+                    OpenCommand::Info { further: None } => UiState::Menus,
+                    OpenCommand::Info { further: Some(further) } => match further {
+                        FurtherInfo::Enemies { enemy_type, further } => {
+                            UiState::EnemiesList { selected: enemy_type, further_details: further }
+                        },
+                        FurtherInfo::Towers { tower_type, further } => {
+                            UiState::TowersList { selected: tower_type, further_details: further }
+                        },
+                    },
+                }
+                .into()
             },
         }
     }

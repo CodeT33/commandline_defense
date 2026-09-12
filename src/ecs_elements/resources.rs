@@ -4,6 +4,7 @@ use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::entities::enemies::EnemyType;
 use crate::map::map_logic_parsing::GameMap;
+use crate::ui_overlay::ui_state::UiState;
 use bevy::prelude::{Deref, DerefMut, Resource};
 
 #[derive(Resource, Deref, DerefMut)]
@@ -18,6 +19,7 @@ pub(crate) struct CommandHistory {
 #[derive(Resource, Default)]
 pub(crate) struct CommandState {
     pub(crate) preview: PreviewCommand,
+    pub(crate) persistent_preview: Option<UiState>,
     pub(crate) last_input: String,
     pub(crate) parse_output: ParseOutput,
 }

@@ -5,7 +5,6 @@ use crate::entities::enemies::EnemyType;
 use crate::entities::tower::TowerType;
 use crate::ui_overlay::grid::get_number_from_letter;
 use crate::ui_overlay::ui_state::{EnemyPage, TowerPage, UiState};
-use bevy::prelude::ResMut;
 use clap::ValueEnum;
 
 #[derive(Default, PartialEq, Clone, Eq)]
@@ -28,114 +27,118 @@ pub(crate) enum PreviewCommand {
         tile: GridCoordinate,
     },
 }
-
-pub(crate) fn parse_command_preview(
-    input: &str, current_preview: &ResMut<CommandState>,
-) -> PreviewCommand {
-    let mut preview = current_preview.preview.clone();
-
-    if input.is_empty() {
-        return PreviewCommand::None;
-    }
-
-    for command_text in input.split(';') {
-        let command_text = command_text.trim();
+impl CommandState {
+    pub(crate) fn parse_command_preview(&mut self, input: &str) -> PreviewCommand {
+        let mut preview = self.preview.clone();
 
         if input.is_empty() {
-            continue;
+            return PreviewCommand::None;
         }
 
-        let tokens: Vec<&str> = command_text.split_whitespace().collect();
+        for command_text in input.split(';') {
+            let command_text = command_text.trim();
 
-        match tokens.as_slice() {
-            ["show", "grid"] => return PreviewCommand::ShowGrid,
-            ["select"] => {
-                return PreviewCommand::ShowGrid;
-            },
-            ["select", position] => {
-                preview = match parse_tile_position(position) {
-                    Some(tile) => PreviewCommand::HighlightTile { tile },
-                    None => PreviewCommand::ShowGrid,
-                }
-            },
-            ["open", menu_path] => {
-                let parts: Vec<&str> = menu_path
-                    .split(consts::COMMAND_OPEN_SEPARATION_CHARACTER)
-                    .filter(|s| !s.is_empty())
-                    .collect();
+            if input.is_empty() {
+                continue;
+            }
 
-                match parts.as_slice() {
-                    ["info"] => return PreviewCommand::SidebarState(UiState::Menus),
-                    ["info", "towers"] => {
-                        return PreviewCommand::SidebarState(UiState::TowersList {
-                            selected: None,
-                            further_details: TowerPage::None,
-                        });
-                    },
-                    ["info", "towers", tower_type_string] => {
-                        preview = match parse_tower_type(tower_type_string) {
-                            Some(tower_type) => PreviewCommand::SidebarState(UiState::TowersList {
-                                selected: Option::from(tower_type),
-                                further_details: TowerPage::None,
-                            }),
-                            None => preview,
-                        }
-                    },
-                    ["info", "towers", tower_type_string, "upgrades"] => {
-                        preview = match parse_tower_type(tower_type_string) {
-                            Some(tower_type) => PreviewCommand::SidebarState(UiState::TowersList {
-                                selected: Option::from(tower_type),
-                                further_details: TowerPage::Upgrades,
-                            }),
-                            None => preview,
-                        }
-                    },
-                    ["info", "towers", tower_type_string, "description"] => {
-                        preview = match parse_tower_type(tower_type_string) {
-                            Some(tower_type) => PreviewCommand::SidebarState(UiState::TowersList {
-                                selected: Option::from(tower_type),
-                                further_details: TowerPage::Description,
-                            }),
-                            None => preview,
-                        }
-                    },
-                    ["info", "enemies"] => {
-                        return PreviewCommand::SidebarState(UiState::EnemiesList {
-                            selected: None,
-                            further_details: EnemyPage::None,
-                        });
-                    },
-                    ["info", "enemies", enemy_type_string] => {
-                        preview = match parse_enemy_type(enemy_type_string) {
-                            Some(enemy_type) => {
-                                PreviewCommand::SidebarState(UiState::EnemiesList {
-                                    selected: Option::from(enemy_type),
-                                    further_details: EnemyPage::None,
-                                })
-                            },
-                            None => preview,
-                        }
-                    },
-                    ["info", "enemies", enemy_type_string, "description"] => {
-                        preview = match parse_enemy_type(enemy_type_string) {
-                            Some(enemy_type) => {
-                                PreviewCommand::SidebarState(UiState::EnemiesList {
-                                    selected: Option::from(enemy_type),
-                                    further_details: EnemyPage::Description,
-                                })
-                            },
-                            None => preview,
-                        }
-                    },
-                    _ => {},
-                }
-            },
-            _ => {},
+            let tokens: Vec<&str> = command_text.split_whitespace().collect();
+
+            match tokens.as_slice() {
+                ["show", "grid"] => return PreviewCommand::ShowGrid,
+                ["select"] => {
+                    return PreviewCommand::ShowGrid;
+                },
+                ["select", position] => {
+                    preview = match parse_tile_position(position) {
+                        Some(tile) => PreviewCommand::HighlightTile { tile },
+                        None => PreviewCommand::ShowGrid,
+                    }
+                },
+                ["open", menu_path] => {
+                    let parts: Vec<&str> = menu_path
+                        .split(consts::COMMAND_OPEN_SEPARATION_CHARACTER)
+                        .filter(|s| !s.is_empty())
+                        .collect();
+
+                    match parts.as_slice() {
+                        ["info"] => return PreviewCommand::SidebarState(UiState::Menus),
+                        ["info", "towers"] => {
+                            return PreviewCommand::SidebarState(UiState::TowersList {
+                                selected: None,
+                                further_details: None,
+                            });
+                        },
+                        ["info", "towers", tower_type_string] => {
+                            preview = match parse_tower_type(tower_type_string) {
+                                Some(tower_type) => {
+                                    PreviewCommand::SidebarState(UiState::TowersList {
+                                        selected: Option::from(tower_type),
+                                        further_details: None,
+                                    })
+                                },
+                                None => preview,
+                            }
+                        },
+                        ["info", "towers", tower_type_string, "upgrades"] => {
+                            preview = match parse_tower_type(tower_type_string) {
+                                Some(tower_type) => {
+                                    PreviewCommand::SidebarState(UiState::TowersList {
+                                        selected: Option::from(tower_type),
+                                        further_details: Some(TowerPage::Upgrades),
+                                    })
+                                },
+                                None => preview,
+                            }
+                        },
+                        ["info", "towers", tower_type_string, "description"] => {
+                            preview = match parse_tower_type(tower_type_string) {
+                                Some(tower_type) => {
+                                    PreviewCommand::SidebarState(UiState::TowersList {
+                                        selected: Option::from(tower_type),
+                                        further_details: Some(TowerPage::Description),
+                                    })
+                                },
+                                None => preview,
+                            }
+                        },
+                        ["info", "enemies"] => {
+                            return PreviewCommand::SidebarState(UiState::EnemiesList {
+                                selected: None,
+                                further_details: None,
+                            });
+                        },
+                        ["info", "enemies", enemy_type_string] => {
+                            preview = match parse_enemy_type(enemy_type_string) {
+                                Some(enemy_type) => {
+                                    PreviewCommand::SidebarState(UiState::EnemiesList {
+                                        selected: Option::from(enemy_type),
+                                        further_details: None,
+                                    })
+                                },
+                                None => preview,
+                            }
+                        },
+                        ["info", "enemies", enemy_type_string, "description"] => {
+                            preview = match parse_enemy_type(enemy_type_string) {
+                                Some(enemy_type) => {
+                                    PreviewCommand::SidebarState(UiState::EnemiesList {
+                                        selected: Option::from(enemy_type),
+                                        further_details: Some(EnemyPage::Description),
+                                    })
+                                },
+                                None => preview,
+                            }
+                        },
+                        _ => {},
+                    }
+                },
+                _ => {},
+            }
         }
+        preview
     }
-    preview
 }
-
 fn parse_tower_type(tower_type_string: &str) -> Option<TowerType> {
     <TowerType as clap::ValueEnum>::from_str(tower_type_string, true)
         .map_err(|_| println!("Unknown tower type: {:?}", tower_type_string))

@@ -1,6 +1,5 @@
 use crate::cli::command_input::{CommandInput, determine_show_error, parse_commandline_input};
 use crate::cli::command_line::cursor_screen_position;
-use crate::cli::preview::parse_command_preview;
 use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::components::CommandAutoCompletion;
@@ -44,9 +43,7 @@ pub(crate) fn handle_command_line_state(
 
     // Preview
     if current_input != command_state.last_input {
-        command_state.last_input = current_input.clone();
-        command_state.preview = parse_command_preview(&current_input, &command_state);
-        command_state.parse_output = parse_commandline_input(&current_input);
+        command_state.update_from_input(&current_input);
 
         if let Ok((mut ui_text, mut ui_node)) = auto_completion_text.single_mut() {
             if !command_state.parse_output.autocompletion.is_empty()
@@ -175,7 +172,7 @@ pub(crate) fn handle_command_line_actions(
         }
 
         input.clear();
-        command_state.last_input = "".to_owned();
+        command_state.update_from_input(&input.value().to_string());
         if let Ok(mut node) = auto_completion_text.single_mut() {
             node.display = Display::None;
         }
@@ -187,25 +184,32 @@ fn parse_to_sendable_commands(
 ) -> Result<Vec<CommandEvent>, &'static str> {
     input_commands
         .iter()
+        .copied()
         .map(|ic| {
             Ok(match ic {
                 CommandInput::Select { tile } => {
-                    *selected_tile = (*tile).into();
-                    CommandEvent::Select { tile: *tile }
+                    *selected_tile = tile.into();
+                    CommandEvent::Select { tile }
                 },
                 CommandInput::Place { tower_type } => selected_tile
-                    .map(|p| CommandEvent::Place { tower_type: *tower_type, tower_pos: p })
+                    .map(|tower_pos| CommandEvent::Place { tower_type, tower_pos })
                     .ok_or("No Tile selected")?,
                 CommandInput::Clear => CommandEvent::Clear,
                 CommandInput::Pause => CommandEvent::Pause,
                 CommandInput::Resume => CommandEvent::Resume,
                 CommandInput::ExitGame => CommandEvent::ExitGame,
-                CommandInput::Set(setting) => CommandEvent::Set(*setting),
-                _ => {
-                    println!("juckt");
-                    Err("Leck Eier")?
-                },
+                CommandInput::Set(setting) => CommandEvent::Set(setting),
+                CommandInput::Open(open_command) => CommandEvent::Open(open_command),
+                CommandInput::Help => Err("Not implemented yet")?,
             })
         })
         .collect()
+}
+
+impl CommandState {
+    fn update_from_input(&mut self, input: &str) {
+        self.last_input = input.to_owned();
+        self.preview = self.parse_command_preview(input);
+        self.parse_output = parse_commandline_input(input);
+    }
 }
