@@ -623,7 +623,7 @@ pub(crate) mod waves {
     impl GameWaves {
         #[allow(unused)]
         pub(crate) fn current_default() -> GameWaves {
-            GameWaves::new(vec![
+            GameWaves::build(vec![
                 Wave::new(
                     vec![
                         WaveItem::new_enemy(EnemyType::Rocher, 3000, 3),

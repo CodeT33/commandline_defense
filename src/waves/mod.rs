@@ -1,13 +1,9 @@
-#![allow(unused)]
+pub mod system;
 
-pub mod cursor;
-
-use crate::ecs_elements::messages::SpawnEnemy;
-use crate::ecs_elements::resources::{DebugSettings, GameState};
+use crate::ecs_elements::resources::GameState;
 use crate::entities::enemies::EnemyType;
-use crate::scheduling::IntervalTimer;
-use bevy::prelude::{Local, MessageWriter, Res, ResMut, Time};
-use cursor::WavesCursor;
+use std::cmp::PartialEq;
+use std::collections::VecDeque;
 
 impl WaveItem {
     pub(crate) fn new_enemy(
@@ -26,12 +22,6 @@ impl Wave {
     }
 }
 
-impl GameWaves {
-    pub(crate) fn new(waves: Vec<Wave>) -> Self {
-        GameWaves { waves, cursor: Some(WavesCursor::default()), paused: true }
-    }
-}
-
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum WaveItem {
     Enemy { enemy_type: EnemyType, spawn_cooldown: u16, spawn_amount: u16 },
@@ -43,41 +33,17 @@ pub(crate) struct Wave {
     pub(crate) finishing_reward: u16,
 }
 
-pub(crate) struct GameWaves {
-    waves: Vec<Wave>,
-    cursor: Option<WavesCursor>,
-    paused: bool,
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub(crate) enum Task {
+    WaitForResume,
+    WaitDurationMs(u16),
+    SpawnEnemy { enemy_type: EnemyType, cooldown: u16 },
+    WaitForEnemiesDead,
+    RoundFinished { finished_round: usize, reward: u16 },
 }
 
-pub(crate) fn enemy_wave_handler(
-    mut enemy_spawns: MessageWriter<SpawnEnemy>, mut local_timer: Local<Option<IntervalTimer>>,
-    time: Res<Time>, debug_settings: Res<DebugSettings>, mut game_state: ResMut<GameState>,
-) {
-    let timer = local_timer.get_or_insert_with(|| IntervalTimer::new(0));
-
-    if game_state.waves.is_paused() || game_state.waves.is_finished() {
-        return;
-    }
-
-    while let Some(tick_time) = timer.tick_if_ready(&time) {
-        let Ok(increment) = game_state.waves.increment_cursor() else {
-            println!("Hey you finished the game. Congratulations!");
-            return;
-        };
-        match increment {
-            Increment::GameRunning { enemy, cooldown } => {
-                timer.set_interval_ms(cooldown as u32);
-
-                if let Some(enemy_type) = enemy {
-                    enemy_spawns.write(SpawnEnemy { enemy_type, time: tick_time });
-                }
-            },
-            Increment::WaitingForRoundToFinish => {
-                timer.set_resume_immediately();
-                break;
-            },
-        }
-    }
+pub(crate) struct GameWaves {
+    tasks: VecDeque<Task>,
 }
 
 impl Default for GameState {
@@ -86,55 +52,48 @@ impl Default for GameState {
     }
 }
 
-pub(crate) enum Increment {
-    GameRunning { enemy: Option<EnemyType>, cooldown: u16 },
-    WaitingForRoundToFinish,
-}
-
 impl GameWaves {
-    /// Returns the WaveItem and the optional reward.
-    /// Resumes the game.
-    pub(crate) fn increment_cursor(&mut self) -> Result<Increment, ()> {
-        if let Some(cursor) = &mut self.cursor {
-            let Some(current_wave) = self.waves.get(cursor.wave_idx()) else {
-                self.cursor = None;
-                return Err(());
-            };
-            let Some(&wave_item) = current_wave.wave_items.get(cursor.item_idx()) else {
-                cursor.increment_wave();
-                self.paused = true;
-
-                return Ok(Increment::WaitingForRoundToFinish);
-            };
-            match wave_item {
-                WaveItem::Pause { duration_ms } => {
-                    cursor.increment_item();
-                    Ok(Increment::GameRunning { cooldown: duration_ms, enemy: None })
-                },
-                WaveItem::Enemy { enemy_type, spawn_cooldown, spawn_amount } => {
-                    if cursor.item_inner_idx() + 1 >= spawn_amount as usize {
-                        cursor.increment_item()
-                    } else {
-                        cursor.increment_item_inner()
-                    }
-                    Ok(Increment::GameRunning {
-                        cooldown: spawn_cooldown,
-                        enemy: enemy_type.into(),
-                    })
-                },
+    pub(crate) fn build(waves: Vec<Wave>) -> Self {
+        let mut actions = VecDeque::new();
+        for (wave_idx, wave) in waves.into_iter().enumerate() {
+            actions.push_back(Task::WaitForResume);
+            for item in wave.wave_items {
+                match item {
+                    WaveItem::Enemy { enemy_type, spawn_cooldown, spawn_amount } => {
+                        actions.extend(std::iter::repeat_n(
+                            Task::SpawnEnemy { enemy_type, cooldown: spawn_cooldown },
+                            spawn_amount as usize,
+                        ))
+                    },
+                    WaveItem::Pause { duration_ms } => {
+                        actions.push_back(Task::WaitDurationMs(duration_ms));
+                    },
+                }
             }
-        } else {
-            Err(())
+            actions.push_back(Task::WaitForEnemiesDead);
+            actions.push_back(Task::RoundFinished {
+                reward: wave.finishing_reward,
+                finished_round: wave_idx,
+            })
+        }
+        Self { tasks: actions }
+    }
+
+    pub(crate) fn current_task(&self) -> Option<Task> {
+        self.tasks.front().copied()
+    }
+
+    pub(crate) fn resume(&mut self) {
+        if self.tasks.front().copied() == Some(Task::WaitForResume) {
+            self.tasks.pop_front();
         }
     }
 
-    pub(crate) fn is_paused(&self) -> bool {
-        self.paused
+    pub(crate) fn is_waiting_for_resume(&self) -> bool {
+        self.tasks.front().copied() == Some(Task::WaitForResume)
     }
-    pub(crate) fn is_finished(&self) -> bool {
-        self.cursor.is_none()
-    }
-    pub(crate) fn resume(&mut self) {
-        self.paused = false;
+
+    pub(crate) fn pop_front(&mut self) {
+        self.tasks.pop_front();
     }
 }

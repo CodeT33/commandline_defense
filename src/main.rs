@@ -40,7 +40,6 @@ use crate::ui_overlay::health_bars::draw_health_bars;
 use crate::ui_overlay::info_sidebar::draw_gui;
 use crate::ui_overlay::selection::update_selected_tile;
 use crate::ui_overlay::spawn_ui_overlay;
-use crate::waves::enemy_wave_handler;
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
@@ -57,6 +56,7 @@ use ecs_elements::resources::{
 use entities::bullets::{handle_bullet_enemy_collisions, handle_bullet_spawns, move_bullets};
 use entities::enemies::move_enemies;
 use entities::tower::{handle_tower_placing_events, update_enemies_in_range};
+use waves::system::enemy_wave_handler;
 
 fn main() {
     let mut app = App::new();
