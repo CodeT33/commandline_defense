@@ -1,4 +1,3 @@
-use std::process::exit;
 use crate::cli::command_input::{FurtherInfo, OpenCommand, Settings};
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::{CommandEvent, PlaceTowerMessage};
@@ -7,6 +6,7 @@ use crate::entities::tower::TowerType;
 use crate::map::map_logic_parsing::TileType;
 use crate::ui_overlay::ui_state::UiState;
 use bevy::prelude::{MessageReader, MessageWriter, Res, ResMut};
+use std::process::exit;
 
 pub(crate) fn handle_command_events(
     mut messages: MessageWriter<PlaceTowerMessage>, mut events: MessageReader<CommandEvent>,
