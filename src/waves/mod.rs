@@ -72,8 +72,9 @@ pub(crate) fn enemy_wave_handler(
                     enemy_spawns.write(SpawnEnemy { enemy_type, time: tick_time });
                 }
             },
-            Increment::WaitingForNextWave { reward, next_wave: wave_idx } => {
-                timer.set_resume_immediately()
+            Increment::WaitingForRoundToFinish => {
+                timer.set_resume_immediately();
+                break;
             },
         }
     }
@@ -87,7 +88,7 @@ impl Default for GameState {
 
 pub(crate) enum Increment {
     GameRunning { enemy: Option<EnemyType>, cooldown: u16 },
-    WaitingForNextWave { next_wave: usize, reward: u16 },
+    WaitingForRoundToFinish,
 }
 
 impl GameWaves {
@@ -103,10 +104,7 @@ impl GameWaves {
                 cursor.increment_wave();
                 self.paused = true;
 
-                return Ok(Increment::WaitingForNextWave {
-                    next_wave: cursor.wave_idx(),
-                    reward: current_wave.finishing_reward,
-                });
+                return Ok(Increment::WaitingForRoundToFinish);
             };
             match wave_item {
                 WaveItem::Pause { duration_ms } => {
