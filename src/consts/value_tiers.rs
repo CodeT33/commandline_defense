@@ -96,13 +96,13 @@ impl ValueTiers {
 
     pub(crate) fn get_tier_color(&self) -> Color32 {
         match self {
-            ValueTiers::S => Color32::from_rgb(255, 255, 0),
-            ValueTiers::A => Color32::from_rgb(255, 0, 255),
-            ValueTiers::B => Color32::from_rgb(150, 150, 255),
-            ValueTiers::C => Color32::from_rgb(100, 100, 255),
-            ValueTiers::D => Color32::from_rgb(150, 255, 150),
-            ValueTiers::E => Color32::from_rgb(100, 255, 100),
-            ValueTiers::F => Color32::from_rgb(200, 200, 200),
+            ValueTiers::S => Color32::from_rgb(0x79, 0xff, 0xf4), // aqua
+            ValueTiers::A => Color32::from_rgb(0xfa, 0xda, 0x4b), // yellow
+            ValueTiers::B => Color32::from_rgb(0xf7, 0x6a, 0x12), // orange
+            ValueTiers::C => Color32::from_rgb(0xa7, 0x45, 0xce), // purple
+            ValueTiers::D => Color32::from_rgb(0x4e, 0x5a, 0xfe), // blue
+            ValueTiers::E => Color32::from_rgb(0x1f, 0xdc, 0x1d), // green
+            ValueTiers::F => Color32::from_rgb(0xbd, 0xbd, 0xb5), // grey
         }
     }
 }
