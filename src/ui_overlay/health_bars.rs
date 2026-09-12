@@ -11,6 +11,10 @@ pub(crate) fn draw_health_bars(
     mut painter: ShapePainter, query: Query<(&Transform, &HealthStats), Without<Bullet>>,
 ) {
     for (transform, health) in &query {
+        if health.current_health == health.max_health {
+            continue;
+        }
+
         let ratio = health.ratio();
         let base_pos = transform
             .translation

@@ -1,4 +1,4 @@
-use crate::consts::{BEVY_UI_BACKGROUND_COLOR, BEVY_UI_BORDER_RADIUS};
+use crate::consts;
 use crate::ecs_elements::resources::{DebugSettings, GameState, PlayerSuiteResource};
 use bevy::input_focus::tab_navigation::TabGroup;
 use bevy::prelude::{
@@ -16,13 +16,13 @@ pub(crate) fn spawn_player_suite_ui(commands: &mut Commands) {
             margin: px(8.0).all(),
             row_gap: px(0),
             column_gap: px(0),
-            border_radius: BEVY_UI_BORDER_RADIUS,
+            border_radius: consts::ui::BEVY_UI_BORDER_RADIUS,
             ..default()
         },
         TabGroup::new(0),
         Text("...".parse().unwrap()),
         TextFont { font_size: FontSize::Px(20.0), ..default() },
-        BackgroundColor(BEVY_UI_BACKGROUND_COLOR),
+        BackgroundColor(consts::ui::BEVY_UI_BACKGROUND_COLOR),
         PlayerSuiteUi,
     ));
 }

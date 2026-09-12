@@ -1,7 +1,7 @@
 use crate::ecs_elements::resources::TexturePackSettings;
 use crate::entities::tower::{TargetingType, TowerType};
 use crate::tiers::{Formatting, ValueTiers};
-use crate::ui_overlay::info_sidebar::draw_navigation_box;
+use crate::ui_overlay::info_sidebar::{colored_attribute, draw_navigation_box, tier_list};
 use bevy::asset::AssetServer;
 use bevy::prelude::Res;
 use bevy_egui::{EguiContexts, EguiTextureHandle};
@@ -32,8 +32,8 @@ pub(crate) fn draw_tower_info(
     ui.separator();
 
     ui.label(egui::RichText::new("Tower Attributes").strong());
-    ui.label(format!("Reload speed: {:?}", tower_attributes.cooldown_ms));
-    ui.label(format!("Range: {:?}", tower_attributes.range));
+    colored_attribute(ui, "Reload speed", tower_attributes.cooldown_ms);
+    colored_attribute(ui, "Range", tower_attributes.range);
     ui.label(format!(
         "Tower size: {}x{}m",
         tower_attributes.size_tiles.x, tower_attributes.size_tiles.y
@@ -43,10 +43,12 @@ pub(crate) fn draw_tower_info(
     ui.separator();
 
     ui.label(egui::RichText::new("Bullet Attributes").strong());
-    ui.label(format!("Damage: {:?}", bullet_attributes.damage));
-    ui.label(format!("Piercing: {:?}", bullet_attributes.pierce));
-    ui.label(format!("Speed: {:?}", tower_attributes.bullet_speed_tps));
+    colored_attribute(ui, "Damage", bullet_attributes.damage);
+    colored_attribute(ui, "Piercing", bullet_attributes.pierce);
+    colored_attribute(ui, "Speed", tower_attributes.bullet_speed_tps);
     ui.label(format!("Relative collider size: {}m", bullet_attributes.relative_collider_size));
+    ui.separator();
+    tier_list(ui);
     ui.separator();
     ui.add_space(4.0);
     draw_navigation_box(ui, "upgrades".parse().unwrap());
