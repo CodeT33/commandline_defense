@@ -1,5 +1,3 @@
-use crate::consts::BEVY_UI_BACKGROUND_COLOR;
-use crate::consts::BEVY_UI_BORDER_RADIUS;
 use crate::ecs_elements::components::CommandAutoCompletion;
 use crate::ecs_elements::resources::CommandHistory;
 use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
@@ -8,6 +6,7 @@ use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle, TextEdit};
 use bevy::ui::{ComputedNode, UiGlobalTransform, widget::TextScroll};
 use parley::{Affinity, Cursor};
+use crate::consts;
 
 pub(crate) fn spawn_command_line(commands: &mut Commands) {
     commands
@@ -32,10 +31,10 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
                     padding: px(8).all(),
                     border: px(0).all(),
                     align_items: AlignItems::Center,
-                    border_radius: BEVY_UI_BORDER_RADIUS,
+                    border_radius: consts::ui::BEVY_UI_BORDER_RADIUS,
                     ..default()
                 },
-                BackgroundColor(BEVY_UI_BACKGROUND_COLOR),
+                BackgroundColor(consts::ui::BEVY_UI_BACKGROUND_COLOR),
                 EditableText { visible_width: Some(16.0), allow_newlines: false, ..default() },
                 TextFont { font_size: FontSize::Px(20.0), ..default() },
                 TextColor(Color::WHITE),
@@ -50,10 +49,10 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
                     border: px(0).all(),
                     align_items: AlignItems::Center,
                     display: Display::None,
-                    border_radius: BEVY_UI_BORDER_RADIUS,
+                    border_radius: consts::ui::BEVY_UI_BORDER_RADIUS,
                     ..default()
                 },
-                BackgroundColor(BEVY_UI_BACKGROUND_COLOR),
+                BackgroundColor(consts::ui::BEVY_UI_BACKGROUND_COLOR),
                 Text("Hello\nidk".to_owned()),
                 TextFont { font_size: FontSize::Px(20.0), ..default() },
                 TextColor(Color::WHITE),

@@ -1,10 +1,14 @@
-use bevy::prelude::Color;
+use bevy::prelude::{BorderRadius, Color, Val};
 
 pub(crate) const CONSOLE_ERROR_COLOR: Color = Color::linear_rgb(1.0, 0.0, 0.0);
 pub(crate) const BOUNDING_BOX_DEBUG_COLOR: Color = Color::hsv(120.0, 1.0, 1.0);
 pub(crate) const BOUNDING_BOX_DEBUG_COLOR_ALT: Color = Color::hsv(0.0, 1.0, 1.0);
 /// How often the debug bounding box color toggles between the two colors.
 pub(crate) const BOUNDING_BOX_DEBUG_COLOR_TOGGLE_SECS: f32 = 0.25;
+
+pub(crate) const BEVY_UI_BACKGROUND_COLOR: Color = Color::srgba(0.1, 0.1, 0.12, 0.9);
+pub(crate) const BEVY_UI_BORDER_RADIUS: BorderRadius =
+    BorderRadius::new(Val::Px(8.0), Val::Px(8.0), Val::Px(8.0), Val::Px(8.0));
 
 pub(crate) mod health_bars {
     use bevy::prelude::Color;

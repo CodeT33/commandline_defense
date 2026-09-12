@@ -84,6 +84,7 @@ impl GameWaves {
         Self { tasks: actions }
     }
 
+    #[allow(unused)]
     pub(crate) fn expand_zapanos(mut waves: Vec<Wave>) -> Vec<Wave> {
         for wave in &mut waves {
             wave.wave_items =

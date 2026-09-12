@@ -23,9 +23,6 @@ pub(crate) const PROJECTILE_SIZE_TILES: Vec2 = Vec2::splat(1.0);
 
 pub(crate) const BULLET_ROTATION_DURATION_MS: u64 = 234;
 
-pub(crate) const BEVY_UI_BACKGROUND_COLOR: Color = Color::srgba(0.1, 0.1, 0.12, 0.9);
-pub(crate) const BEVY_UI_BORDER_RADIUS: BorderRadius =
-    BorderRadius::new(Val::Px(8.0), Val::Px(8.0), Val::Px(8.0), Val::Px(8.0));
 pub(crate) const COMMAND_OPEN_SEPARATION_CHARACTER: char = '/';
 
 /// Number of simulated seconds captured before the log is saved and the program is terminated.
