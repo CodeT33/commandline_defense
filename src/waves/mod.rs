@@ -65,44 +65,10 @@ impl GameWaves {
             for item in wave.wave_items {
                 match item {
                     WaveItem::Enemy { enemy_type, spawn_cooldown, spawn_amount } => {
-                        match enemy_type {
-                            Zapano => {
-                                actions.push_back(Task::SpawnEnemy {
-                                    enemy_type: Zapano,
-                                    cooldown: 200,
-                                });
-
-                                actions.extend(std::iter::repeat_n(
-                                    Task::SpawnEnemy { enemy_type: ZapanoBody, cooldown: 200 },
-                                    spawn_amount as usize,
-                                ));
-                                actions.push_back(Task::SpawnEnemy {
-                                    enemy_type: ZapanoBackend,
-                                    cooldown: 200,
-                                });
-                            },
-                            ZapanoOfTheNight => {
-                                actions.push_back(Task::SpawnEnemy {
-                                    enemy_type: ZapanoOfTheNight,
-                                    cooldown: 200,
-                                });
-                                actions.extend(std::iter::repeat_n(
-                                    Task::SpawnEnemy {
-                                        enemy_type: ZapanoOfTheNightBody,
-                                        cooldown: 200,
-                                    },
-                                    spawn_amount as usize,
-                                ));
-                                actions.push_back(Task::SpawnEnemy {
-                                    enemy_type: ZapanoOfTheNightBackend,
-                                    cooldown: 200,
-                                })
-                            },
-                            _ => actions.extend(std::iter::repeat_n(
-                                Task::SpawnEnemy { enemy_type, cooldown: spawn_cooldown },
-                                spawn_amount as usize,
-                            )),
-                        }
+                        actions.extend(std::iter::repeat_n(
+                            Task::SpawnEnemy { enemy_type, cooldown: spawn_cooldown },
+                            spawn_amount as usize,
+                        ));
                     },
                     WaveItem::Pause { duration_ms } => {
                         actions.push_back(Task::WaitDurationMs(duration_ms));
@@ -116,6 +82,33 @@ impl GameWaves {
             });
         }
         Self { tasks: actions }
+    }
+
+    pub(crate) fn expand_zapanos(mut waves: Vec<Wave>) -> Vec<Wave> {
+        for wave in &mut waves {
+            wave.wave_items =
+                wave.wave_items.iter().copied().flat_map(Self::expand_zapano_item).collect();
+        }
+        waves
+    }
+
+    fn expand_zapano_item(item: WaveItem) -> Vec<WaveItem> {
+        let WaveItem::Enemy { enemy_type, spawn_amount, .. } = item else {
+            return vec![item];
+        };
+        match enemy_type {
+            Zapano => vec![
+                WaveItem::new_enemy(Zapano, 200, 1),
+                WaveItem::new_enemy(ZapanoBody, 200, spawn_amount),
+                WaveItem::new_enemy(ZapanoBackend, 200, 1),
+            ],
+            ZapanoOfTheNight => vec![
+                WaveItem::new_enemy(ZapanoOfTheNight, 200, 1),
+                WaveItem::new_enemy(ZapanoOfTheNightBody, 200, spawn_amount),
+                WaveItem::new_enemy(ZapanoOfTheNightBackend, 200, 1),
+            ],
+            _ => vec![item],
+        }
     }
 
     pub(crate) fn current_task(&self) -> Option<Task> {
