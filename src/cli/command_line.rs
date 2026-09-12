@@ -1,4 +1,5 @@
-use crate::consts::COMMANDLINE_BACKGROUND_COLOR;
+use crate::consts::BEVY_UI_BORDER_RADIUS;
+use crate::consts::BEVY_UI_BACKGROUND_COLOR;
 use crate::ecs_elements::components::CommandAutoCompletion;
 use crate::ecs_elements::resources::CommandHistory;
 use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
@@ -31,9 +32,10 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
                     padding: px(8).all(),
                     border: px(0).all(),
                     align_items: AlignItems::Center,
+                    border_radius: BEVY_UI_BORDER_RADIUS,
                     ..default()
                 },
-                BackgroundColor(COMMANDLINE_BACKGROUND_COLOR),
+                BackgroundColor(BEVY_UI_BACKGROUND_COLOR),
                 EditableText { visible_width: Some(16.0), allow_newlines: false, ..default() },
                 TextFont { font_size: FontSize::Px(20.0), ..default() },
                 TextColor(Color::WHITE),
@@ -48,9 +50,10 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
                     border: px(0).all(),
                     align_items: AlignItems::Center,
                     display: Display::None,
+                    border_radius: BEVY_UI_BORDER_RADIUS,
                     ..default()
                 },
-                BackgroundColor(COMMANDLINE_BACKGROUND_COLOR),
+                BackgroundColor(BEVY_UI_BACKGROUND_COLOR),
                 Text("Hello\nidk".to_owned()),
                 TextFont { font_size: FontSize::Px(20.0), ..default() },
                 TextColor(Color::WHITE),

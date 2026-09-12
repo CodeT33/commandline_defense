@@ -1,10 +1,7 @@
-use crate::consts::COMMANDLINE_BACKGROUND_COLOR;
-use crate::ecs_elements::resources::PlayerSuiteResource;
+use crate::consts::{BEVY_UI_BACKGROUND_COLOR, BEVY_UI_BORDER_RADIUS};
+use crate::ecs_elements::resources::{DebugSettings, PlayerSuiteResource};
 use bevy::input_focus::tab_navigation::TabGroup;
-use bevy::prelude::{
-    BackgroundColor, Commands, Component, FontSize, Node, Query, Res, Text, TextFont, With,
-    default, px,
-};
+use bevy::prelude::{BackgroundColor, Commands, Component, FontSize, Node, Query, Res, Text, TextFont, With, default, px, BorderRadius, Val};
 
 #[derive(Component)]
 pub(crate) struct PlayerSuiteUi;
@@ -16,20 +13,28 @@ pub(crate) fn spawn_player_suite_ui(commands: &mut Commands) {
             margin: px(8.0).all(),
             row_gap: px(0),
             column_gap: px(0),
+            border_radius: BEVY_UI_BORDER_RADIUS,
             ..default()
         },
         TabGroup::new(0),
         Text("...".parse().unwrap()),
         TextFont { font_size: FontSize::Px(20.0), ..default() },
-        BackgroundColor(COMMANDLINE_BACKGROUND_COLOR),
+        BackgroundColor(BEVY_UI_BACKGROUND_COLOR),
         PlayerSuiteUi,
     ));
 }
 
 pub(crate) fn update_player_suite_ui(
     mut query: Query<&mut Text, With<PlayerSuiteUi>>, player_suite: Res<PlayerSuiteResource>,
+    debug_settings: Res<DebugSettings>,
 ) {
+    let paused_text = if debug_settings.paused {
+        "\n\nGame paused"
+    } else {
+        ""
+    };
+
     for mut text in &mut query {
-        **text = format!("Balance: ${}\nHealth: {}", player_suite.money, player_suite.health);
+        **text = format!("Balance: ${}\nHealth: {}{}", player_suite.money, player_suite.health, paused_text);
     }
 }
