@@ -87,7 +87,13 @@ pub fn draw_gui(
                             .default_pos(Pos2 { x: 900.0, y: 100.0 })
                             .default_size(egui::Vec2 { x: 200.0, y: 100.0 })
                             .show(&viewport_ui, |ui| {
-                                draw_tower_upgrades(ui, *tower_type);
+                                draw_tower_upgrades(
+                                    ui,
+                                    &mut contexts,
+                                    &asset_server,
+                                    &texture_pack_settings,
+                                    *tower_type,
+                                );
                             });
                     },
                     None => {},

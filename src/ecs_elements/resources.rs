@@ -1,10 +1,10 @@
 use crate::cli::command_input::ParseOutput;
 use crate::cli::preview::PreviewCommand;
-use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::entities::enemies::EnemyType;
 use crate::map::map_logic_parsing::GameMap;
 use crate::ui_overlay::ui_state::UiState;
+use crate::waves::GameWaves;
 use bevy::prelude::{Deref, DerefMut, Resource};
 
 #[derive(Resource, Deref, DerefMut)]
@@ -51,14 +51,8 @@ pub(crate) struct DebugSettings {
     pub(crate) enemy_type: EnemyType,
 }
 
-impl Default for DebugSettings {
-    fn default() -> Self {
-        Self {
-            enable_bounding_boxes: false,
-            enemy_spawn_interval_ms: consts::ENEMY_SPAWN_INTERVAL_MS,
-            sim_speed: 1.0,
-            paused: true,
-            enemy_type: EnemyType::WideBirb,
-        }
-    }
+#[allow(unused)]
+#[derive(Resource)]
+pub(crate) struct GameState {
+    pub(crate) waves: GameWaves,
 }

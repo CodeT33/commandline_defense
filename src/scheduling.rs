@@ -82,4 +82,8 @@ impl IntervalTimer {
     pub(crate) fn pause(&mut self) {
         self.paused = true;
     }
+
+    pub(crate) fn set_resume_immediately(&mut self) {
+        self.last_occurrence_ms = None
+    }
 }

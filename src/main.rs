@@ -15,6 +15,7 @@ pub(crate) mod scheduling;
 pub(crate) mod texture_packs;
 pub(crate) mod tiers;
 mod ui_overlay;
+pub mod waves;
 
 use crate::camera::{camera_zoom_and_pan, set_camera_position};
 use crate::cli::command_event_handling::handle_command_events;
@@ -24,6 +25,7 @@ use crate::cli::command_line_state_management::{
 };
 use crate::collision::calculate_collisions;
 use crate::ecs_elements::messages::EnemyReachedEnd;
+use crate::ecs_elements::resources::GameState;
 use crate::entities::bullets::{bullet_despawn_observer, bullet_spawn_observer};
 use crate::entities::enemies::{handle_enemies_reaching_end, handle_enemy_spawns};
 use crate::entities::tower::{select_tower_target_enemy, shoot_bullets};
@@ -52,8 +54,9 @@ use ecs_elements::resources::{
     TexturePackSettings,
 };
 use entities::bullets::{handle_bullet_enemy_collisions, handle_bullet_spawns, move_bullets};
-use entities::enemies::{move_enemies, request_enemy_spawns};
+use entities::enemies::move_enemies;
 use entities::tower::{handle_tower_placing_events, update_enemies_in_range};
+use waves::system::enemy_wave_handler;
 
 fn main() {
     let mut app = App::new();
@@ -95,7 +98,8 @@ fn register_resources(app: &mut App) {
         .init_resource::<MapResource>()
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
         .init_resource::<CommandHistory>()
-        .init_resource::<PlayerSuiteResource>();
+        .init_resource::<PlayerSuiteResource>()
+        .init_resource::<GameState>();
 }
 
 fn register_messages(app: &mut App) {
@@ -131,7 +135,7 @@ fn register_systems(app: &mut App) {
                 select_tower_target_enemy,
                 (
                     (shoot_bullets, handle_bullet_spawns).chain(),
-                    (request_enemy_spawns, handle_enemy_spawns).chain(),
+                    (enemy_wave_handler, handle_enemy_spawns).chain(),
                 ),
                 handle_enemies_reaching_end,
             )

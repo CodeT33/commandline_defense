@@ -67,6 +67,7 @@ pub(crate) fn move_enemies(
     }
 }
 
+#[allow(unused)]
 pub(crate) fn request_enemy_spawns(
     mut enemy_spawns: MessageWriter<SpawnEnemy>, mut timer: Local<Option<IntervalTimer>>,
     time: Res<Time>, debug_settings: Res<DebugSettings>,
