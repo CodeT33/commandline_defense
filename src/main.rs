@@ -22,7 +22,6 @@ use crate::cli::command_line::navigate_command_history;
 use crate::cli::command_line_state_management::{
     handle_command_line_actions, handle_command_line_state,
 };
-use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
 use crate::ecs_elements::messages::EnemyReachedEnd;
 use crate::entities::bullets::{bullet_despawn_observer, bullet_spawn_observer};
@@ -54,6 +53,7 @@ use ecs_elements::resources::{
 use entities::bullets::{handle_bullet_enemy_collisions, handle_bullet_spawns, move_bullets};
 use entities::enemies::{move_enemies, request_enemy_spawns};
 use entities::tower::{handle_tower_placing_events, update_enemies_in_range};
+use crate::ui_overlay::player_suite::update_player_suite_ui;
 
 fn main() {
     let mut app = App::new();
@@ -146,6 +146,7 @@ fn register_systems(app: &mut App) {
                 }),
                 draw_health_bars,
                 camera_zoom_and_pan,
+                update_player_suite_ui,
                 update_grid_preview,
                 update_selected_tile,
                 handle_command_events,
@@ -160,10 +161,9 @@ fn register_systems(app: &mut App) {
 
 fn setup(
     mut commands: Commands, asset_server: Res<AssetServer>, map_resource: Res<MapResource>,
-    texture_pack_settings: Res<TexturePackSettings>,
+    texture_pack_settings: Res<TexturePackSettings>, player_suite: Res<PlayerSuiteResource>,
 ) {
-    spawn_ui_overlay(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
-    spawn_game_cli(&mut commands);
+    spawn_ui_overlay(&mut commands, &asset_server, &map_resource, &texture_pack_settings, &player_suite);
     spawn_map_visual_layer(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
     commands.spawn((
         Camera2d,
