@@ -1,5 +1,6 @@
 use crate::ecs_elements::resources::TexturePackSettings;
 use crate::entities::enemies::EnemyType;
+use crate::tiers::{Formatting, ValueTiers};
 use crate::ui_overlay::info_sidebar::draw_navigation_box;
 use bevy::asset::AssetServer;
 use bevy::prelude::Res;
@@ -79,7 +80,18 @@ fn enemy_entry(
                 ui.label(egui::RichText::new(format!("${}", attributes.reward)).size(16.0));
             });
 
-            ui.add(egui::Image::new(egui::load::SizedTexture::new(texture_id, [64.0, 64.0])));
+            ui.add(egui::Image::new(egui::load::SizedTexture::new(texture_id, [64.0, 64.0])))
+                .on_hover_ui(|ui| {
+                    let formatting = Formatting::Roman;
+                    let format = |ui: &mut Ui, value: ValueTiers, name: &str| {
+                        ui.label(format!("{}: {}", value.format_in(formatting), name))
+                    };
+                    ui.label(format!("${}", attributes.reward));
+                    ui.separator();
+                    format(ui, attributes.health, "Health");
+                    format(ui, attributes.speed_tps, "Speed");
+                    format(ui, attributes.player_health_penalty, "Player Damage");
+                });
         });
     });
 
