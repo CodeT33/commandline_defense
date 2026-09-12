@@ -36,3 +36,37 @@ pub(crate) enum ValueTiers {
     E,
     F,
 }
+
+#[allow(unused)]
+#[derive(Copy, Clone, Debug)]
+pub enum Formatting {
+    Roman,
+    Decimal,
+    Letters,
+}
+
+impl ValueTiers {
+    pub fn format_in(self, format: Formatting) -> String {
+        match format {
+            Formatting::Roman => match self {
+                ValueTiers::S => "VII".to_string(),
+                ValueTiers::A => "VI ".to_string(),
+                ValueTiers::B => "V  ".to_string(),
+                ValueTiers::C => "IV ".to_string(),
+                ValueTiers::D => "III ".to_string(),
+                ValueTiers::E => "II  ".to_string(),
+                ValueTiers::F => "I   ".to_string(),
+            },
+            Formatting::Decimal => match self {
+                ValueTiers::S => "7".to_string(),
+                ValueTiers::A => "6".to_string(),
+                ValueTiers::B => "5".to_string(),
+                ValueTiers::C => "4".to_string(),
+                ValueTiers::D => "3".to_string(),
+                ValueTiers::E => "2".to_string(),
+                ValueTiers::F => "1".to_string(),
+            },
+            Formatting::Letters => format!("{:?}", self),
+        }
+    }
+}
