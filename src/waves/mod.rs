@@ -1,7 +1,7 @@
 #![allow(unused)]
 
 use crate::ecs_elements::messages::SpawnEnemy;
-use crate::ecs_elements::resources::DebugSettings;
+use crate::ecs_elements::resources::{DebugSettings, GameState};
 use crate::entities::enemies::EnemyType;
 use crate::scheduling::IntervalTimer;
 use bevy::prelude::{Local, MessageWriter, Res, Time};
@@ -56,5 +56,11 @@ pub(crate) fn handle_wave_enemy_spawns(
 
     while let Some(tick_time) = t.tick_if_ready(&time) {
         enemy_spawns.write(SpawnEnemy { enemy_type: debug_settings.enemy_type, time: tick_time });
+    }
+}
+
+impl Default for GameState {
+    fn default() -> Self {
+        Self { waves: GameWaves::current_default() }
     }
 }

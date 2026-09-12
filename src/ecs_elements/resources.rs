@@ -4,6 +4,7 @@ use crate::coordinates::GridCoordinate;
 use crate::entities::enemies::EnemyType;
 use crate::map::map_logic_parsing::GameMap;
 use crate::ui_overlay::ui_state::UiState;
+use crate::waves::GameWaves;
 use bevy::prelude::{Deref, DerefMut, Resource};
 
 #[derive(Resource, Deref, DerefMut)]
@@ -48,4 +49,10 @@ pub(crate) struct DebugSettings {
     pub(crate) sim_speed: f32,
     pub(crate) paused: bool,
     pub(crate) enemy_type: EnemyType,
+}
+
+#[allow(unused)]
+#[derive(Resource)]
+pub(crate) struct GameState {
+    pub(crate) waves: GameWaves,
 }
