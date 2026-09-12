@@ -197,10 +197,9 @@ fn parse_to_sendable_commands(
                 CommandInput::Clear => CommandEvent::Clear,
                 CommandInput::Pause => CommandEvent::Pause,
                 CommandInput::Resume => CommandEvent::Resume,
-                CommandInput::ExitGame => CommandEvent::ExitGame,
+                CommandInput::Exit => CommandEvent::Exit,
                 CommandInput::Set(setting) => CommandEvent::Set(setting),
                 CommandInput::Open(open_command) => CommandEvent::Open(open_command),
-                CommandInput::Help => Err("Not implemented yet")?,
             })
         })
         .collect()

@@ -37,7 +37,6 @@ pub(crate) enum Settings {
     override_usage = "<COMMAND>"
 )]
 pub(crate) enum CommandInput {
-    Help,
     Select {
         #[arg(value_parser = parse_tile)]
         tile: GridCoordinate,
@@ -48,7 +47,7 @@ pub(crate) enum CommandInput {
     Clear,
     Pause,
     Resume,
-    ExitGame,
+    Exit,
     #[command(subcommand)]
     Set(Settings),
     #[command(subcommand)]

@@ -1,3 +1,4 @@
+use std::process::exit;
 use crate::cli::command_input::{FurtherInfo, OpenCommand, Settings};
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::messages::{CommandEvent, PlaceTowerMessage};
@@ -24,7 +25,7 @@ pub(crate) fn handle_command_events(
             },
             CommandEvent::Pause => pause_game(&mut debug_settings),
             CommandEvent::Resume => resume_game(&mut debug_settings),
-            CommandEvent::ExitGame => exit_game(),
+            CommandEvent::Exit => exit_game(),
             CommandEvent::Set(setting) => match setting {
                 Settings::BoundingBoxes { value } => {
                     debug_settings.enable_bounding_boxes = value;
@@ -91,4 +92,5 @@ fn deselect_tile(selection_state: &mut SelectionState) {
 
 fn exit_game() {
     println!("Exiting game");
+    exit(0);
 }

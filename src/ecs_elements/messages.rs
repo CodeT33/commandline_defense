@@ -45,7 +45,7 @@ pub(crate) enum CommandEvent {
     Clear,
     Pause,
     Resume,
-    ExitGame,
+    Exit,
     Set(Settings),
     Open(OpenCommand),
 }
