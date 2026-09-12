@@ -1,6 +1,5 @@
 use crate::cli::command_input::{CommandInput, determine_show_error, parse_commandline_input};
 use crate::cli::command_line::cursor_screen_position;
-use crate::cli::preview::parse_command_preview;
 use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::components::CommandAutoCompletion;
@@ -31,6 +30,9 @@ pub(crate) fn handle_command_line_state(
     mut command_state: ResMut<CommandState>,
 ) {
     let Some(entity) = focus.get() else {
+        if let Ok((_, mut ui_node)) = auto_completion_text.single_mut() {
+            ui_node.display = Display::None;
+        }
         return;
     };
     let Ok((input, mut text_color, node, transform, text_scroll)) = inputs.get_mut(entity) else {
@@ -41,14 +43,12 @@ pub(crate) fn handle_command_line_state(
 
     // Preview
     if current_input != command_state.last_input {
-        command_state.last_input = current_input.clone();
-        command_state.preview = parse_command_preview(&current_input, &command_state);
-        command_state.parse_output = parse_commandline_input(&current_input);
+        command_state.update_from_input(&current_input);
 
         if let Ok((mut ui_text, mut ui_node)) = auto_completion_text.single_mut() {
-            if command_state.parse_output.autocompletion.is_empty() {
-                ui_node.display = Display::None;
-            } else {
+            if !command_state.parse_output.autocompletion.is_empty()
+                && focus.get().is_some_and(|f| f == entity)
+            {
                 ui_text.0 = command_state.parse_output.autocompletion.join("\n");
                 ui_node.display = Display::Flex;
 
@@ -78,6 +78,8 @@ pub(crate) fn handle_command_line_state(
                     }
                     ui_node.bottom = Val::Px(window.height() - input_top + AUTOCOMPLETION_GAP);
                 }
+            } else {
+                ui_node.display = Display::None;
             };
         }
 
@@ -86,10 +88,12 @@ pub(crate) fn handle_command_line_state(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn handle_command_line_actions(
     focus: Res<InputFocus>, keys: Res<ButtonInput<KeyCode>>, mut inputs: Query<&mut EditableText>,
-    command_state: Res<CommandState>, mut command_events: MessageWriter<CommandEvent>,
+    mut command_state: ResMut<CommandState>, mut command_events: MessageWriter<CommandEvent>,
     mut history: ResMut<CommandHistory>, mut selection_state: ResMut<SelectionState>,
+    mut auto_completion_text: Query<&mut Node, With<CommandAutoCompletion>>,
 ) {
     let Some(entity) = focus.get() else {
         return;
@@ -99,6 +103,12 @@ pub(crate) fn handle_command_line_actions(
     };
 
     let mut current_input = input.value().to_string();
+
+    if keys.just_pressed(KeyCode::Escape)
+        && let Ok(mut node) = auto_completion_text.single_mut()
+    {
+        node.display = Display::None;
+    }
 
     if keys.just_pressed(KeyCode::Tab) {
         let current_input_cleaned_up =
@@ -162,6 +172,10 @@ pub(crate) fn handle_command_line_actions(
         }
 
         input.clear();
+        command_state.update_from_input(&input.value().to_string());
+        if let Ok(mut node) = auto_completion_text.single_mut() {
+            node.display = Display::None;
+        }
     }
 }
 
@@ -170,25 +184,32 @@ fn parse_to_sendable_commands(
 ) -> Result<Vec<CommandEvent>, &'static str> {
     input_commands
         .iter()
+        .copied()
         .map(|ic| {
             Ok(match ic {
-                CommandInput::Help => CommandEvent::Help,
                 CommandInput::Select { tile } => {
-                    *selected_tile = (*tile).into();
-                    CommandEvent::Select { tile: *tile }
+                    *selected_tile = tile.into();
+                    CommandEvent::Select { tile }
                 },
                 CommandInput::Place { tower_type } => selected_tile
-                    .map(|p| CommandEvent::Place { tower_type: *tower_type, tower_pos: p })
+                    .map(|tower_pos| CommandEvent::Place { tower_type, tower_pos })
                     .ok_or("No Tile selected")?,
                 CommandInput::Clear => CommandEvent::Clear,
-                CommandInput::Balance => CommandEvent::Balance,
+                CommandInput::Pause => CommandEvent::Pause,
+                CommandInput::Resume => CommandEvent::Resume,
                 CommandInput::ExitGame => CommandEvent::ExitGame,
-                CommandInput::Set(setting) => CommandEvent::Set(*setting),
-                _ => {
-                    println!("juckt");
-                    Err("Leck Eier")?
-                },
+                CommandInput::Set(setting) => CommandEvent::Set(setting),
+                CommandInput::Open(open_command) => CommandEvent::Open(open_command),
+                CommandInput::Help => Err("Not implemented yet")?,
             })
         })
         .collect()
+}
+
+impl CommandState {
+    fn update_from_input(&mut self, input: &str) {
+        self.last_input = input.to_owned();
+        self.preview = self.parse_command_preview(input);
+        self.parse_output = parse_commandline_input(input);
+    }
 }

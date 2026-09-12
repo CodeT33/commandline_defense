@@ -1,4 +1,4 @@
-use crate::cli::command_input::Settings;
+use crate::cli::command_input::{OpenCommand, Settings};
 use crate::collision::CollisionPair;
 use crate::coordinates::GridCoordinate;
 use crate::entities::bullets::BulletType;
@@ -40,13 +40,14 @@ pub(crate) struct CollisionEnded(pub(crate) CollisionPair);
 
 #[derive(Message, Debug, PartialEq, Copy, Clone)]
 pub(crate) enum CommandEvent {
-    Help,
     Select { tile: GridCoordinate },
     Place { tower_type: TowerType, tower_pos: GridCoordinate },
     Clear,
-    Balance,
+    Pause,
+    Resume,
     ExitGame,
     Set(Settings),
+    Open(OpenCommand),
 }
 
 #[derive(Message)]

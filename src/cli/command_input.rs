@@ -3,8 +3,9 @@ use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::entities::enemies::EnemyType;
 use crate::entities::tower::TowerType;
+use crate::ui_overlay::ui_state::{EnemyPage, TowerPage};
 use clap::error::ErrorKind::MissingRequiredArgument;
-use clap::{Error, Parser, Subcommand, ValueEnum};
+use clap::{Error, Parser, Subcommand};
 use std::fmt::Debug;
 use std::ops::RangeBounds;
 use std::str::FromStr;
@@ -45,7 +46,8 @@ pub(crate) enum CommandInput {
         tower_type: TowerType,
     },
     Clear,
-    Balance,
+    Pause,
+    Resume,
     ExitGame,
     #[command(subcommand)]
     Set(Settings),
@@ -53,7 +55,7 @@ pub(crate) enum CommandInput {
     Open(OpenCommand),
 }
 
-#[derive(Subcommand, Debug, Clone, Copy)]
+#[derive(Subcommand, Debug, Clone, Copy, PartialEq)]
 pub(crate) enum OpenCommand {
     Info {
         #[command(subcommand)]
@@ -61,29 +63,18 @@ pub(crate) enum OpenCommand {
     },
 }
 
-#[derive(Subcommand, Debug, Clone, Copy)]
+#[derive(Subcommand, Debug, Clone, Copy, PartialEq)]
 pub(crate) enum FurtherInfo {
     Enemies {
         enemy_type: Option<EnemyType>,
         #[arg(requires = "enemy_type")]
-        further: Option<EnemyFurther>,
+        further: Option<EnemyPage>,
     },
     Towers {
         tower_type: Option<TowerType>,
         #[arg(requires = "tower_type")]
-        further: Option<TowerFurther>,
+        further: Option<TowerPage>,
     },
-}
-
-#[derive(ValueEnum, Debug, Clone, Copy)]
-pub(crate) enum EnemyFurther {
-    Description,
-}
-
-#[derive(ValueEnum, Debug, Clone, Copy)]
-pub(crate) enum TowerFurther {
-    Description,
-    Upgrades,
 }
 
 #[derive(Default)]
@@ -104,8 +95,9 @@ pub(crate) fn parse_commandline_input(input: &str) -> ParseOutput {
         .map(parse_single_command_new)
         .collect::<Vec<Result<_, Error>>>();
 
-    let autocompletion: Vec<_> =
+    let mut autocompletion: Vec<_> =
         split.last().map(get_auto_completion_single_line).unwrap_or_default();
+    autocompletion.sort();
     ParseOutput { evaluated, autocompletion }
 }
 

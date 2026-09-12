@@ -110,7 +110,10 @@ pub(crate) fn draw_tower_description(ui: &mut Ui, tower_type: TowerType) {
     ui.label(tower_type.get_description());
 }
 
-pub(crate) fn draw_tower_upgrades(ui: &mut Ui, ctx: &mut EguiContexts, asset_server: &AssetServer, texture_pack_settings: &TexturePackSettings, tower_type: TowerType) {
+pub(crate) fn draw_tower_upgrades(
+    ui: &mut Ui, ctx: &mut EguiContexts, asset_server: &AssetServer,
+    texture_pack_settings: &TexturePackSettings, tower_type: TowerType,
+) {
     let tower_name = tower_type
         .to_possible_value()
         .map(|pv| pv.get_name().to_owned())

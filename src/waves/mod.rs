@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use crate::ecs_elements::messages::SpawnEnemy;
 use crate::ecs_elements::resources::DebugSettings;
 use crate::entities::enemies::EnemyType;

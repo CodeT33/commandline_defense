@@ -4,6 +4,7 @@ use crate::consts;
 use crate::coordinates::GridCoordinate;
 use crate::entities::enemies::EnemyType;
 use crate::map::map_logic_parsing::GameMap;
+use crate::ui_overlay::ui_state::UiState;
 use bevy::prelude::{Deref, DerefMut, Resource};
 
 #[derive(Resource, Deref, DerefMut)]
@@ -18,6 +19,7 @@ pub(crate) struct CommandHistory {
 #[derive(Resource, Default)]
 pub(crate) struct CommandState {
     pub(crate) preview: PreviewCommand,
+    pub(crate) persistent_preview: Option<UiState>,
     pub(crate) last_input: String,
     pub(crate) parse_output: ParseOutput,
 }
@@ -45,6 +47,7 @@ pub(crate) struct DebugSettings {
     pub(crate) enable_bounding_boxes: bool,
     pub(crate) enemy_spawn_interval_ms: u64,
     pub(crate) sim_speed: f32,
+    pub(crate) paused: bool,
     pub(crate) enemy_type: EnemyType,
 }
 
@@ -54,6 +57,7 @@ impl Default for DebugSettings {
             enable_bounding_boxes: false,
             enemy_spawn_interval_ms: consts::ENEMY_SPAWN_INTERVAL_MS,
             sim_speed: 1.0,
+            paused: true,
             enemy_type: EnemyType::WideBirb,
         }
     }
