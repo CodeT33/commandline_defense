@@ -6,7 +6,6 @@ use bevy::prelude::Res;
 use bevy_egui::{EguiContexts, EguiTextureHandle};
 use clap::ValueEnum;
 use egui::Ui;
-use crate::tiers::ValueTiers;
 
 pub(crate) fn draw_tower_info(
     ui: &mut Ui, ctx: &mut EguiContexts, asset_server: &Res<AssetServer>,
@@ -43,7 +42,7 @@ pub(crate) fn draw_tower_info(
     ui.separator();
 
     ui.label(egui::RichText::new("Bullet Attributes").strong());
-    colored_attribute(ui,"Damage", bullet_attributes.damage);
+    colored_attribute(ui, "Damage", bullet_attributes.damage);
     colored_attribute(ui, "Piercing", bullet_attributes.pierce);
     colored_attribute(ui, "Speed", tower_attributes.bullet_speed_tps);
     ui.label(format!("Relative collider size: {}m", bullet_attributes.relative_collider_size));

@@ -5,6 +5,7 @@ pub mod info_towers;
 
 use crate::cli::preview::PreviewCommand;
 use crate::ecs_elements::resources::{CommandState, TexturePackSettings};
+use crate::tiers::ValueTiers;
 use crate::ui_overlay::info_sidebar::info_enemies::{
     draw_enemy_description, draw_enemy_info, draw_enemy_list,
 };
@@ -16,7 +17,6 @@ use crate::ui_overlay::ui_state::{EnemyPage, TowerPage, UiState};
 use bevy::prelude::*;
 use bevy_egui::{EguiContexts, egui};
 use egui::{LayerId, Pos2, Ui, UiBuilder};
-use crate::tiers::ValueTiers;
 
 pub fn draw_gui(
     mut contexts: EguiContexts, command_state: Res<CommandState>, asset_server: Res<AssetServer>,
@@ -149,17 +149,14 @@ fn draw_navigation_box(ui: &mut Ui, text: String) -> egui::response::InnerRespon
     })
 }
 
-pub(crate) fn colored_attribute(
-    ui: &mut Ui,
-    attribute_name: &str,
-    attribute_value: ValueTiers,
-) {
+pub(crate) fn colored_attribute(ui: &mut Ui, attribute_name: &str, attribute_value: ValueTiers) {
     ui.horizontal(|ui| {
         ui.label(format!("{}: ", attribute_name));
 
         ui.label(
             egui::RichText::new(format!("{:?}", attribute_value))
-                .color(attribute_value.get_tier_color()).strong(),
+                .color(attribute_value.get_tier_color())
+                .strong(),
         );
     });
 }
