@@ -661,7 +661,7 @@ pub(crate) mod waves {
     impl GameWaves {
         #[allow(unused)]
         pub(crate) fn current_default() -> GameWaves {
-            GameWaves::build(vec![
+            GameWaves::build(Self::expand_zapanos(vec![
                 Wave::new(vec![WaveItem::new_enemy(Zapano, 0, 1)], 50),
                 Wave::new(
                     vec![
@@ -733,7 +733,7 @@ pub(crate) mod waves {
                     ],
                     250,
                 ),
-            ])
+            ]))
         }
     }
 }
