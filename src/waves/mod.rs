@@ -27,12 +27,8 @@ impl GameWaves {
     pub(crate) fn new(waves: Vec<Wave>) -> Self {
         GameWaves {
             waves,
-            cursor: Some(WavesCursor {
-                current_wave: 0,
-                current_item: 0,
-                current_enemy_idx: 0,
-                paused: false,
-            }),
+            cursor: Some(WavesCursor { current_wave: 0, current_item: 0, current_enemy_idx: 0 }),
+            paused: true,
         }
     }
 }
@@ -51,12 +47,12 @@ pub(crate) struct WavesCursor {
     current_wave: usize,
     current_item: usize,
     current_enemy_idx: usize,
-    paused: bool,
 }
 
 pub(crate) struct GameWaves {
     waves: Vec<Wave>,
     cursor: Option<WavesCursor>,
+    paused: bool,
 }
 
 pub(crate) fn enemy_wave_handler(
@@ -65,7 +61,7 @@ pub(crate) fn enemy_wave_handler(
 ) {
     let timer = local_timer.get_or_insert_with(|| IntervalTimer::new(0));
 
-    if game_state.waiting {
+    if game_state.waves.is_paused() || game_state.waves.is_finished() {
         return;
     }
 
@@ -83,7 +79,6 @@ pub(crate) fn enemy_wave_handler(
                 }
             },
             Increment::WaitingForNextWave { reward, next_wave: wave_idx } => {
-                game_state.waiting = true;
                 timer.set_resume_immediately()
             },
         }
@@ -92,7 +87,7 @@ pub(crate) fn enemy_wave_handler(
 
 impl Default for GameState {
     fn default() -> Self {
-        Self { waves: GameWaves::current_default(), waiting: false }
+        Self { waves: GameWaves::current_default() }
     }
 }
 
@@ -105,5 +100,15 @@ impl GameWaves {
     /// Returns the WaveItem and the optional reward
     pub(crate) fn increment_cursor(&mut self) -> Result<Increment, ()> {
         todo!()
+    }
+
+    pub(crate) fn is_paused(&self) -> bool {
+        self.paused
+    }
+    pub(crate) fn is_finished(&self) -> bool {
+        self.cursor.is_none()
+    }
+    pub(crate) fn resume(&mut self) {
+        self.paused = false;
     }
 }

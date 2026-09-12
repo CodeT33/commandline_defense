@@ -55,5 +55,4 @@ pub(crate) struct DebugSettings {
 #[derive(Resource)]
 pub(crate) struct GameState {
     pub(crate) waves: GameWaves,
-    pub(crate) waiting: bool,
 }

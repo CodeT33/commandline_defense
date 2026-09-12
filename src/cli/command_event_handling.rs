@@ -26,13 +26,13 @@ pub(crate) fn handle_command_events(
                 command_state.persistent_preview = None;
             },
             CommandEvent::Pause => {
-                if !game_state.waiting {
+                if !game_state.waves.is_paused() {
                     debug_settings.paused = true;
                 }
             },
             CommandEvent::Resume => {
-                if game_state.waiting {
-                    game_state.waiting = false;
+                if game_state.waves.is_paused() {
+                    game_state.waves.resume()
                 }
                 debug_settings.paused = false;
             },
