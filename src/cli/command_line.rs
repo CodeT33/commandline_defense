@@ -1,5 +1,5 @@
-use crate::consts::BEVY_UI_BORDER_RADIUS;
 use crate::consts::BEVY_UI_BACKGROUND_COLOR;
+use crate::consts::BEVY_UI_BORDER_RADIUS;
 use crate::ecs_elements::components::CommandAutoCompletion;
 use crate::ecs_elements::resources::CommandHistory;
 use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
@@ -96,7 +96,7 @@ fn set_input_text(input: &mut EditableText, text: &str) {
 
 /// Written using AI
 /// Logical window-space position of the caret sitting at `char_index` in `input`,
-/// in the same units as [`Val::Px`](bevy::ui::Val). Multiply-based UI positions
+/// in the same units as [`Val::Px`](Val). Multiply-based UI positions
 /// (e.g. `Node.left`) take these directly; UI layout itself is physical, hence
 /// the [`ComputedNode::inverse_scale_factor`] at the end.
 ///

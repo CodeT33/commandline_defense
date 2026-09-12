@@ -1,7 +1,10 @@
 use crate::consts::{BEVY_UI_BACKGROUND_COLOR, BEVY_UI_BORDER_RADIUS};
 use crate::ecs_elements::resources::{DebugSettings, PlayerSuiteResource};
 use bevy::input_focus::tab_navigation::TabGroup;
-use bevy::prelude::{BackgroundColor, Commands, Component, FontSize, Node, Query, Res, Text, TextFont, With, default, px, BorderRadius, Val};
+use bevy::prelude::{
+    BackgroundColor, Commands, Component, FontSize, Node, Query, Res, Text, TextFont, With,
+    default, px,
+};
 
 #[derive(Component)]
 pub(crate) struct PlayerSuiteUi;
@@ -28,13 +31,12 @@ pub(crate) fn update_player_suite_ui(
     mut query: Query<&mut Text, With<PlayerSuiteUi>>, player_suite: Res<PlayerSuiteResource>,
     debug_settings: Res<DebugSettings>,
 ) {
-    let paused_text = if debug_settings.paused {
-        "\n\nGame paused"
-    } else {
-        ""
-    };
+    let paused_text = if debug_settings.paused { "\n\nGame paused" } else { "" };
 
     for mut text in &mut query {
-        **text = format!("Balance: ${}\nHealth: {}{}", player_suite.money, player_suite.health, paused_text);
+        **text = format!(
+            "Balance: ${}\nHealth: {}{}",
+            player_suite.money, player_suite.health, paused_text
+        );
     }
 }
