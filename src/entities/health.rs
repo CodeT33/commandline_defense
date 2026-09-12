@@ -1,6 +1,6 @@
 pub(crate) struct HealthStatsInner {
     pub(crate) current_health: f32,
-    pub (crate) max_health: f32,
+    pub(crate) max_health: f32,
 }
 
 impl HealthStatsInner {
