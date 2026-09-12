@@ -1,5 +1,5 @@
 use crate::consts::{BEVY_UI_BACKGROUND_COLOR, BEVY_UI_BORDER_RADIUS};
-use crate::ecs_elements::resources::{DebugSettings, PlayerSuiteResource};
+use crate::ecs_elements::resources::{DebugSettings, GameState, PlayerSuiteResource};
 use bevy::input_focus::tab_navigation::TabGroup;
 use bevy::prelude::{
     BackgroundColor, Commands, Component, FontSize, Node, Query, Res, Text, TextFont, With,
@@ -29,11 +29,13 @@ pub(crate) fn spawn_player_suite_ui(commands: &mut Commands) {
 
 pub(crate) fn update_player_suite_ui(
     mut query: Query<&mut Text, With<PlayerSuiteUi>>, player_suite: Res<PlayerSuiteResource>,
-    debug_settings: Res<DebugSettings>,
+    debug_settings: Res<DebugSettings>, game_state: Res<GameState>,
 ) {
-    let paused_text = if debug_settings.paused { "\n\nGame paused" } else { "" };
+    let paused = game_state.waves.is_waiting_for_resume() || debug_settings.paused;
 
-    let wave_text = if debug_settings.paused {
+    let paused_text = if paused { "\nGame paused" } else { "" };
+
+    let wave_text = if paused {
         format!("Next wave: {}", player_suite.next_wave)
     } else {
         format!("Current wave: {}", player_suite.next_wave)
@@ -41,7 +43,7 @@ pub(crate) fn update_player_suite_ui(
 
     for mut text in &mut query {
         **text = format!(
-            "Balance: ${}\nHealth: {}\n{}{}",
+            "Balance: ${}\nHealth: {}\n\n{}{}",
             player_suite.money, player_suite.health, wave_text, paused_text
         );
     }

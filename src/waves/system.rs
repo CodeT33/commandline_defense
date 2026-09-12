@@ -1,6 +1,6 @@
 use crate::ecs_elements::components::Enemy;
 use crate::ecs_elements::messages::SpawnEnemy;
-use crate::ecs_elements::resources::{DebugSettings, GameState, PlayerSuiteResource};
+use crate::ecs_elements::resources::{GameState, PlayerSuiteResource};
 use crate::scheduling::IntervalTimer;
 use crate::waves::Task;
 use bevy::prelude::{Local, MessageWriter, Query, Res, ResMut, Time, With};
@@ -8,7 +8,7 @@ use bevy::prelude::{Local, MessageWriter, Query, Res, ResMut, Time, With};
 pub(crate) fn enemy_wave_handler(
     mut enemy_spawns: MessageWriter<SpawnEnemy>, mut local_timer: Local<Option<IntervalTimer>>,
     time: Res<Time>, mut game_state: ResMut<GameState>, enemies: Query<(), With<Enemy>>,
-    mut player_suite: ResMut<PlayerSuiteResource>, mut debug_settings: ResMut<DebugSettings>,
+    mut player_suite: ResMut<PlayerSuiteResource>,
 ) {
     let timer = local_timer.get_or_insert_with(|| IntervalTimer::new(0));
 
@@ -18,7 +18,6 @@ pub(crate) fn enemy_wave_handler(
         };
         match task {
             Task::WaitForResume => {
-                debug_settings.paused = true;
                 timer.set_resume_immediately();
                 return;
             },
