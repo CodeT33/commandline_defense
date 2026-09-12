@@ -1,0 +1,207 @@
+use crate::entities::bullets::BulletType;
+use crate::entities::tower::{TargetingType, TowerAttributes, TowerType};
+use crate::texture_packs::TexturePackAssets;
+use crate::tiers::ValueTiers;
+use bevy::prelude::Vec2;
+
+impl TowerType {
+    pub(crate) fn get_attributes(self) -> TowerAttributes {
+        match self {
+            TowerType::AssaultTower => TowerAttributes {
+                price: 120,
+                size_tiles: Vec2::splat(1.0),
+                range: ValueTiers::B,
+                cooldown_ms: ValueTiers::B,
+                bullet_speed_tps: ValueTiers::B,
+                bullet_type: BulletType::SmallGoldBullet,
+                preview_sprite: TexturePackAssets::Troops_Assault_AssaultTroopLvl1,
+                sprites: [
+                    TexturePackAssets::Troops_Assault_AssaultTroopLvl1,
+                    TexturePackAssets::Troops_Assault_AssaultTroopLvl2,
+                    TexturePackAssets::Troops_Assault_AssaultTroopLvl3,
+                    TexturePackAssets::Troops_Assault_AssaultTroopLvl3,
+                ],
+                tower_rotates: true,
+                targeting_type: TargetingType::Predictive,
+            },
+            TowerType::BoomTower => TowerAttributes {
+                price: 280,
+                size_tiles: Vec2::splat(1.0),
+                range: ValueTiers::C,
+                cooldown_ms: ValueTiers::E,
+                bullet_speed_tps: ValueTiers::C,
+                bullet_type: BulletType::MediumMetalBall,
+                preview_sprite: TexturePackAssets::Troops_Boom_BoomTroopLvl1,
+                sprites: [
+                    TexturePackAssets::Troops_Boom_BoomTroopLvl1,
+                    TexturePackAssets::Troops_Boom_BoomTroopLvl2,
+                    TexturePackAssets::Troops_Boom_BoomTroopLvl3,
+                    TexturePackAssets::Troops_Boom_BoomTroopLvl3,
+                ],
+                tower_rotates: true,
+                targeting_type: TargetingType::Basic,
+            },
+            TowerType::GatlingTower => TowerAttributes {
+                price: 240,
+                size_tiles: Vec2::splat(1.0),
+                range: ValueTiers::B,
+                cooldown_ms: ValueTiers::S,
+                bullet_speed_tps: ValueTiers::B,
+                bullet_type: BulletType::SmallCopperBullet,
+                preview_sprite: TexturePackAssets::Troops_Gatling_GatlingTroopLvl1,
+                sprites: [
+                    TexturePackAssets::Troops_Gatling_GatlingTroopLvl1,
+                    TexturePackAssets::Troops_Gatling_GatlingTroopLvl2,
+                    TexturePackAssets::Troops_Gatling_GatlingTroopLvl3,
+                    TexturePackAssets::Troops_Gatling_GatlingTroopLvl3,
+                ],
+                tower_rotates: true,
+                targeting_type: TargetingType::Basic,
+            },
+            TowerType::SniperTower => TowerAttributes {
+                price: 520,
+                size_tiles: Vec2::splat(1.0),
+                range: ValueTiers::S,
+                cooldown_ms: ValueTiers::F,
+                bullet_speed_tps: ValueTiers::S,
+                bullet_type: BulletType::MediumGoldBullet,
+                preview_sprite: TexturePackAssets::Troops_Sniper_SniperTroopLvl1,
+                sprites: [
+                    TexturePackAssets::Troops_Sniper_SniperTroopLvl1,
+                    TexturePackAssets::Troops_Sniper_SniperTroopLvl2,
+                    TexturePackAssets::Troops_Sniper_SniperTroopLvl3,
+                    TexturePackAssets::Troops_Sniper_SniperTroopLvl3,
+                ],
+                tower_rotates: true,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+            },
+            TowerType::RocketTroop => TowerAttributes {
+                price: 1028,
+                size_tiles: Vec2::splat(2.0),
+                range: ValueTiers::S,
+                cooldown_ms: ValueTiers::F,
+                bullet_speed_tps: ValueTiers::F,
+                bullet_type: BulletType::MediumOrangeRocket,
+                preview_sprite: TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                sprites: [
+                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                    TexturePackAssets::Troops_Rocket_RocketTroopLvl1,
+                ],
+                tower_rotates: true,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+            },
+            TowerType::Eitshtu => TowerAttributes {
+                price: 160,
+                size_tiles: Vec2::splat(1.0),
+                range: ValueTiers::C,
+                cooldown_ms: ValueTiers::S,
+                bullet_speed_tps: ValueTiers::A,
+                bullet_type: BulletType::EitshtuProjectile,
+                preview_sprite: TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl1,
+                sprites: [
+                    TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl1,
+                    TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl2,
+                    TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl3,
+                    TexturePackAssets::ElementalRunes_Eitshtu_EitshtuLvl4,
+                ],
+                tower_rotates: false,
+                targeting_type: TargetingType::Basic,
+            },
+            TowerType::Acitonion => TowerAttributes {
+                price: 260,
+                size_tiles: Vec2::splat(1.0),
+                range: ValueTiers::D,
+                cooldown_ms: ValueTiers::C,
+                bullet_speed_tps: ValueTiers::C,
+                bullet_type: BulletType::AcitonionProjectile,
+                preview_sprite: TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl1,
+                sprites: [
+                    TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl1,
+                    TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl2,
+                    TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl3,
+                    TexturePackAssets::ElementalRunes_Acitonion_AcitonionLvl4,
+                ],
+                tower_rotates: false,
+                targeting_type: TargetingType::Basic,
+            },
+            TowerType::Strorm => TowerAttributes {
+                price: 420,
+                size_tiles: Vec2::splat(1.0),
+                range: ValueTiers::A,
+                cooldown_ms: ValueTiers::F,
+                bullet_speed_tps: ValueTiers::A,
+                bullet_type: BulletType::StrormProjectile,
+                preview_sprite: TexturePackAssets::ElementalRunes_Strorm_StrormLvl1,
+                sprites: [
+                    TexturePackAssets::ElementalRunes_Strorm_StrormLvl1,
+                    TexturePackAssets::ElementalRunes_Strorm_StrormLvl2,
+                    TexturePackAssets::ElementalRunes_Strorm_StrormLvl3,
+                    TexturePackAssets::ElementalRunes_Strorm_StrormLvl4,
+                ],
+                tower_rotates: false,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+            },
+            TowerType::Infernon => TowerAttributes {
+                price: 380,
+                size_tiles: Vec2::splat(1.0),
+                range: ValueTiers::B,
+                cooldown_ms: ValueTiers::D,
+                bullet_speed_tps: ValueTiers::E,
+                bullet_type: BulletType::InfernonProjectile,
+                preview_sprite: TexturePackAssets::ElementalRunes_Infernon_InfernonLvl1,
+                sprites: [
+                    TexturePackAssets::ElementalRunes_Infernon_InfernonLvl2,
+                    TexturePackAssets::ElementalRunes_Infernon_InfernonLvl2,
+                    TexturePackAssets::ElementalRunes_Infernon_InfernonLvl3,
+                    TexturePackAssets::ElementalRunes_Infernon_InfernonLvl4,
+                ],
+                tower_rotates: false,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+            },
+            TowerType::Icebyte => TowerAttributes {
+                price: 95,
+                size_tiles: Vec2::splat(1.0),
+                range: ValueTiers::B,
+                cooldown_ms: ValueTiers::C,
+                bullet_speed_tps: ValueTiers::A,
+                bullet_type: BulletType::IcebyteProjectile,
+                preview_sprite: TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl1,
+                sprites: [
+                    TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl2,
+                    TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl2,
+                    TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl3,
+                    TexturePackAssets::ElementalRunes_Icebyte_IcebyteLvl4,
+                ],
+                tower_rotates: false,
+                targeting_type: TargetingType::Basic,
+            },
+
+            // Memes
+            TowerType::DonBanano => TowerAttributes {
+                price: 10000,
+                size_tiles: Vec2::splat(3.0),
+                range: ValueTiers::S,
+                cooldown_ms: ValueTiers::S,
+                bullet_speed_tps: ValueTiers::S,
+                bullet_type: BulletType::DonsBananos,
+                preview_sprite: TexturePackAssets::WipSprites_DonBananoCool,
+                sprites: [
+                    TexturePackAssets::WipSprites_DonBananoCool,
+                    TexturePackAssets::WipSprites_DonBananoCool,
+                    TexturePackAssets::WipSprites_DonBananoCool,
+                    TexturePackAssets::WipSprites_DonBananoCool,
+                ],
+                tower_rotates: false,
+                targeting_type: TargetingType::PredictiveWithLoadBalancing,
+            },
+        }
+    }
+    pub(crate) fn get_description(self) -> String {
+        match self {
+            TowerType::AssaultTower => "Normal ahh tower".to_string(),
+            _ => "No description...".to_string(),
+        }
+    }
+}

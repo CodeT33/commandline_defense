@@ -2,7 +2,7 @@
 mod camera;
 pub(crate) mod cli;
 pub(crate) mod collision;
-pub(crate) mod consts;
+mod consts;
 pub(crate) mod coordinates;
 #[cfg(feature = "determinism")]
 pub(crate) mod determinism_harness;
