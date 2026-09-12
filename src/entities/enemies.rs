@@ -14,7 +14,6 @@ use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
 use clap::ValueEnum;
 use std::f32;
-use crate::waves::WaveItem;
 
 #[allow(unused)]
 #[derive(Debug, Clone, Copy, ValueEnum, PartialEq, Eq)]

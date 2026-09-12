@@ -16,7 +16,7 @@ pub(crate) enum ReturnStatus {
 
 impl Default for PlayerSuiteResource {
     fn default() -> Self {
-        PlayerSuiteResource { health: 100, shield: 0, points: 0, money: 320 , next_wave: 0}
+        PlayerSuiteResource { health: 100, shield: 0, points: 0, money: 320, next_wave: 0 }
     }
 }
 

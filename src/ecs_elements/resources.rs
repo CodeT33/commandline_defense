@@ -29,7 +29,7 @@ pub(crate) struct PlayerSuiteResource {
     pub(crate) shield: u16,
     pub(crate) points: u16,
     pub(crate) money: u16,
-    pub(crate) next_wave: u16, 
+    pub(crate) next_wave: u16,
 }
 
 #[derive(Resource)]

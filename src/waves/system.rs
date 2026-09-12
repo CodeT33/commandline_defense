@@ -41,7 +41,7 @@ pub(crate) fn enemy_wave_handler(
             Task::RoundFinished { reward, finished_round } => {
                 timer.set_resume_immediately();
                 game_state.waves.pop_front();
-                player_suite.next_wave = (finished_round+1) as u16;
+                player_suite.next_wave = (finished_round + 1) as u16;
                 println!("Finished Round {} with reward {}", finished_round, reward);
                 player_suite.money += reward;
             },

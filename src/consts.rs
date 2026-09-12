@@ -653,19 +653,16 @@ impl ValueTiers {
 }
 
 pub(crate) mod waves {
-    use crate::entities::enemies::EnemyType::{Mausmeister, Rocher, RocherOfTheNight, Zapano, ZapanoOfTheNight};
+    use crate::entities::enemies::EnemyType::{
+        Mausmeister, Rocher, RocherOfTheNight, Zapano, ZapanoOfTheNight,
+    };
     use crate::waves::{GameWaves, Wave, WaveItem};
 
     impl GameWaves {
         #[allow(unused)]
         pub(crate) fn current_default() -> GameWaves {
             GameWaves::build(vec![
-                Wave::new(
-                    vec![
-                        WaveItem::new_enemy(Zapano, 0, 1),
-                    ],
-                    50
-                ),
+                Wave::new(vec![WaveItem::new_enemy(Zapano, 0, 1)], 50),
                 Wave::new(
                     vec![
                         WaveItem::new_enemy(Zapano, 0, 5),
@@ -720,27 +717,21 @@ pub(crate) mod waves {
                     ],
                     200,
                 ),
-                Wave::new(
-                    vec![
-                        WaveItem::new_enemy(RocherOfTheNight, 0, 1),
-                    ], 200
-                ),
+                Wave::new(vec![WaveItem::new_enemy(RocherOfTheNight, 0, 1)], 200),
                 Wave::new(
                     vec![
                         WaveItem::new_enemy(RocherOfTheNight, 500, 3),
                         WaveItem::new_enemy(ZapanoOfTheNight, 0, 20),
-                    ], 250
+                    ],
+                    250,
                 ),
-                Wave::new(
-                    vec![
-                        WaveItem::new_enemy(Mausmeister, 100, 3),
-                    ], 25000
-                ),
+                Wave::new(vec![WaveItem::new_enemy(Mausmeister, 100, 3)], 25000),
                 Wave::new(
                     vec![
                         WaveItem::new_enemy(RocherOfTheNight, 500, 3),
                         WaveItem::new_enemy(ZapanoOfTheNight, 0, 20),
-                    ], 250
+                    ],
+                    250,
                 ),
             ])
         }

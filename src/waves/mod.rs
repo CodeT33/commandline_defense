@@ -2,7 +2,10 @@ pub mod system;
 
 use crate::ecs_elements::resources::GameState;
 use crate::entities::enemies::EnemyType;
-use crate::entities::enemies::EnemyType::{Zapano, ZapanoBackend, ZapanoBody, ZapanoOfTheNight, ZapanoOfTheNightBody, ZapanoOfTheNightBackend};
+use crate::entities::enemies::EnemyType::{
+    Zapano, ZapanoBackend, ZapanoBody, ZapanoOfTheNight, ZapanoOfTheNightBackend,
+    ZapanoOfTheNightBody,
+};
 use std::cmp::PartialEq;
 use std::collections::VecDeque;
 
@@ -70,10 +73,7 @@ impl GameWaves {
                                 });
 
                                 actions.extend(std::iter::repeat_n(
-                                    Task::SpawnEnemy {
-                                        enemy_type: ZapanoBody,
-                                        cooldown: 200,
-                                    },
+                                    Task::SpawnEnemy { enemy_type: ZapanoBody, cooldown: 200 },
                                     spawn_amount as usize,
                                 ));
                                 actions.push_back(Task::SpawnEnemy {
@@ -97,7 +97,7 @@ impl GameWaves {
                                     enemy_type: ZapanoOfTheNightBackend,
                                     cooldown: 200,
                                 })
-                            }
+                            },
                             _ => actions.extend(std::iter::repeat_n(
                                 Task::SpawnEnemy { enemy_type, cooldown: spawn_cooldown },
                                 spawn_amount as usize,
