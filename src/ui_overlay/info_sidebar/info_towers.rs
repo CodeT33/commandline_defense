@@ -98,7 +98,13 @@ fn tower_entry(
                 .on_hover_ui(|ui| {
                     let formatting = Formatting::Roman;
                     let format = |ui: &mut Ui, value: ValueTiers, name: &str| {
-                        ui.label(format!("{}: {}", value.format_in(formatting), name))
+                        ui.horizontal(|ui| {
+                            ui.label(
+                                egui::RichText::new(value.format_in(formatting))
+                                    .color(value.get_tier_color()),
+                            );
+                            ui.label(format!(": {}", name));
+                        });
                     };
                     ui.label(format!("${}", attributes.price));
                     ui.separator();
