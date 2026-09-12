@@ -1,6 +1,6 @@
 use crate::ecs_elements::resources::TexturePackSettings;
 use crate::entities::enemies::EnemyType;
-use crate::ui_overlay::info_sidebar::draw_navigation_box;
+use crate::ui_overlay::info_sidebar::{colored_attribute, draw_navigation_box, tier_list};
 use bevy::asset::AssetServer;
 use bevy::prelude::Res;
 use bevy_egui::{EguiContexts, EguiTextureHandle};
@@ -30,13 +30,15 @@ pub(crate) fn draw_enemy_info(
     ui.separator();
 
     ui.label(egui::RichText::new("Enemy Attributes").strong());
-    ui.label(format!("Health: {:?}", enemy_attributes.health));
-    ui.label(format!("Speed: {:?}", enemy_attributes.speed_tps));
+    colored_attribute(ui, "Health", enemy_attributes.health);
+    colored_attribute(ui, "Speed", enemy_attributes.speed_tps);
     ui.label(format!(
         "Enemy size: {}x{}m",
         enemy_attributes.texture_size_tiles, enemy_attributes.texture_size_tiles
     ));
     ui.label(format!("Relative collider size: {}m", enemy_attributes.relative_collider_size));
+    ui.separator();
+    tier_list(ui);
     ui.separator();
     ui.add_space(4.0);
     draw_navigation_box(ui, "description".parse().unwrap());

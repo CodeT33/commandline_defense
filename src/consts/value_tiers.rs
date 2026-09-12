@@ -1,3 +1,5 @@
+use bevy::color::Color;
+use egui::Color32;
 use crate::tiers::{ValueTiers, ValueType};
 
 impl ValueTiers {
@@ -90,6 +92,32 @@ impl ValueTiers {
                 ValueTiers::E => 1.0,
                 ValueTiers::F => 0.0,
             },
+        }
+    }
+
+    pub(crate) fn get_tier_color(&self) -> Color32 {
+        match self {
+            ValueTiers::S => {
+                Color32::from_rgb(255, 255, 0)
+            }
+            ValueTiers::A => {
+                Color32::from_rgb(255, 0, 255)
+            }
+            ValueTiers::B => {
+                Color32::from_rgb(150, 150, 255)
+            }
+            ValueTiers::C => {
+                Color32::from_rgb(100, 100, 255)
+            }
+            ValueTiers::D => {
+                Color32::from_rgb(150, 255, 150)
+            }
+            ValueTiers::E => {
+                Color32::from_rgb(100, 255, 100)
+            }
+            ValueTiers::F => {
+                Color32::from_rgb(200, 200, 200)
+            }
         }
     }
 }
