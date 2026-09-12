@@ -1,12 +1,14 @@
 use crate::cli::command_line::spawn_command_line;
 use crate::consts;
-use crate::ecs_elements::resources::{MapResource, PlayerSuiteResource, TexturePackSettings};
+use crate::ecs_elements::resources::{MapResource, TexturePackSettings};
 use crate::texture_packs::TexturePackAssets;
 use crate::ui_overlay::grid::{spawn_contrast_overlay, spawn_grid, spawn_grid_positions};
 use crate::ui_overlay::player_suite::spawn_player_suite_ui;
 use crate::ui_overlay::selection::spawn_tile_highlight;
 use bevy::asset::AssetServer;
-use bevy::prelude::{default, Commands, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2};
+use bevy::prelude::{
+    Commands, Sprite, SpriteImageMode, SpriteScalingMode, Transform, Vec2, default,
+};
 
 pub(crate) mod debug;
 pub(crate) mod grid;
@@ -18,7 +20,7 @@ pub(crate) mod ui_state;
 
 pub(crate) fn spawn_ui_overlay(
     commands: &mut Commands, asset_server: &AssetServer, map_resource: &MapResource,
-    texture_pack_settings: &TexturePackSettings, player_suite: &PlayerSuiteResource
+    texture_pack_settings: &TexturePackSettings,
 ) {
     spawn_player_suite_ui(commands);
     spawn_command_line(commands);

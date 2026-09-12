@@ -1,7 +1,10 @@
 use crate::consts::COMMANDLINE_BACKGROUND_COLOR;
 use crate::ecs_elements::resources::PlayerSuiteResource;
 use bevy::input_focus::tab_navigation::TabGroup;
-use bevy::prelude::{BackgroundColor, Commands, FontSize, Node, Res, Text, TextFont, default, px, Component, Query, With};
+use bevy::prelude::{
+    BackgroundColor, Commands, Component, FontSize, Node, Query, Res, Text, TextFont, With,
+    default, px,
+};
 
 #[derive(Component)]
 pub(crate) struct PlayerSuiteUi;
@@ -24,8 +27,7 @@ pub(crate) fn spawn_player_suite_ui(commands: &mut Commands) {
 }
 
 pub(crate) fn update_player_suite_ui(
-    mut query: Query<&mut Text, With<PlayerSuiteUi>>,
-    player_suite: Res<PlayerSuiteResource>,
+    mut query: Query<&mut Text, With<PlayerSuiteUi>>, player_suite: Res<PlayerSuiteResource>,
 ) {
     for mut text in &mut query {
         **text = format!("Balance: ${}\nHealth: {}", player_suite.money, player_suite.health);

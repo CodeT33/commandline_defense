@@ -35,6 +35,7 @@ use crate::ui_overlay::debug::{draw_bounding_boxes, set_simulation_speed};
 use crate::ui_overlay::grid::update_grid_preview;
 use crate::ui_overlay::health_bars::draw_health_bars;
 use crate::ui_overlay::info_sidebar::draw_gui;
+use crate::ui_overlay::player_suite::update_player_suite_ui;
 use crate::ui_overlay::selection::update_selected_tile;
 use crate::ui_overlay::spawn_ui_overlay;
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
@@ -53,7 +54,6 @@ use ecs_elements::resources::{
 use entities::bullets::{handle_bullet_enemy_collisions, handle_bullet_spawns, move_bullets};
 use entities::enemies::{move_enemies, request_enemy_spawns};
 use entities::tower::{handle_tower_placing_events, update_enemies_in_range};
-use crate::ui_overlay::player_suite::update_player_suite_ui;
 
 fn main() {
     let mut app = App::new();
@@ -161,9 +161,9 @@ fn register_systems(app: &mut App) {
 
 fn setup(
     mut commands: Commands, asset_server: Res<AssetServer>, map_resource: Res<MapResource>,
-    texture_pack_settings: Res<TexturePackSettings>, player_suite: Res<PlayerSuiteResource>,
+    texture_pack_settings: Res<TexturePackSettings>,
 ) {
-    spawn_ui_overlay(&mut commands, &asset_server, &map_resource, &texture_pack_settings, &player_suite);
+    spawn_ui_overlay(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
     spawn_map_visual_layer(&mut commands, &asset_server, &map_resource, &texture_pack_settings);
     commands.spawn((
         Camera2d,
