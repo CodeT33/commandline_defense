@@ -6,7 +6,7 @@ pub(crate) mod ui;
 mod value_tiers;
 
 use bevy::math::U16Vec2;
-use bevy::prelude::{BorderRadius, Color, Val, Vec2};
+use bevy::prelude::Vec2;
 
 pub(crate) const WINDOW_TITLE: &str = "Commandline Defense";
 pub(crate) const WINDOW_RESOLUTION: [u32; 2] = [800, 450];

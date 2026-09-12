@@ -1,10 +1,10 @@
+use crate::consts;
 use crate::ecs_elements::resources::{DebugSettings, GameState, PlayerSuiteResource};
 use bevy::input_focus::tab_navigation::TabGroup;
 use bevy::prelude::{
     BackgroundColor, Commands, Component, FontSize, Node, Query, Res, Text, TextFont, With,
     default, px,
 };
-use crate::consts;
 
 #[derive(Component)]
 pub(crate) struct PlayerSuiteUi;

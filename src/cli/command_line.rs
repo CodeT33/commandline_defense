@@ -1,3 +1,4 @@
+use crate::consts;
 use crate::ecs_elements::components::CommandAutoCompletion;
 use crate::ecs_elements::resources::CommandHistory;
 use bevy::input_focus::tab_navigation::{TabGroup, TabIndex};
@@ -6,7 +7,6 @@ use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle, TextEdit};
 use bevy::ui::{ComputedNode, UiGlobalTransform, widget::TextScroll};
 use parley::{Affinity, Cursor};
-use crate::consts;
 
 pub(crate) fn spawn_command_line(commands: &mut Commands) {
     commands
