@@ -1,10 +1,13 @@
 #![allow(unused)]
 
+pub mod cursor;
+
 use crate::ecs_elements::messages::SpawnEnemy;
 use crate::ecs_elements::resources::{DebugSettings, GameState};
 use crate::entities::enemies::EnemyType;
 use crate::scheduling::IntervalTimer;
 use bevy::prelude::{Local, MessageWriter, Res, ResMut, Time};
+use cursor::WavesCursor;
 
 impl WaveItem {
     pub(crate) fn new_enemy(
@@ -13,7 +16,7 @@ impl WaveItem {
         WaveItem::Enemy { enemy_type, spawn_cooldown, spawn_amount }
     }
     pub(crate) fn new_pause(milliseconds: u16) -> WaveItem {
-        WaveItem::Pause { milliseconds }
+        WaveItem::Pause { duration_ms: milliseconds }
     }
 }
 
@@ -25,28 +28,19 @@ impl Wave {
 
 impl GameWaves {
     pub(crate) fn new(waves: Vec<Wave>) -> Self {
-        GameWaves {
-            waves,
-            cursor: Some(WavesCursor { current_wave: 0, current_item: 0, current_enemy_idx: 0 }),
-            paused: true,
-        }
+        GameWaves { waves, cursor: Some(WavesCursor::default()), paused: true }
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum WaveItem {
     Enemy { enemy_type: EnemyType, spawn_cooldown: u16, spawn_amount: u16 },
-    Pause { milliseconds: u16 },
+    Pause { duration_ms: u16 },
 }
 
 pub(crate) struct Wave {
     pub(crate) wave_items: Vec<WaveItem>,
     pub(crate) finishing_reward: u16,
-}
-
-pub(crate) struct WavesCursor {
-    current_wave: usize,
-    current_item: usize,
-    current_enemy_idx: usize,
 }
 
 pub(crate) struct GameWaves {
@@ -93,13 +87,47 @@ impl Default for GameState {
 
 pub(crate) enum Increment {
     GameRunning { enemy: Option<EnemyType>, cooldown: u16 },
-    WaitingForNextWave { next_wave: usize, reward: Option<u16> },
+    WaitingForNextWave { next_wave: usize, reward: u16 },
 }
 
 impl GameWaves {
-    /// Returns the WaveItem and the optional reward
+    /// Returns the WaveItem and the optional reward.
+    /// Resumes the game.
     pub(crate) fn increment_cursor(&mut self) -> Result<Increment, ()> {
-        todo!()
+        if let Some(cursor) = &mut self.cursor {
+            let Some(current_wave) = self.waves.get(cursor.wave_idx()) else {
+                self.cursor = None;
+                return Err(());
+            };
+            let Some(&wave_item) = current_wave.wave_items.get(cursor.item_idx()) else {
+                cursor.increment_wave();
+                self.paused = true;
+
+                return Ok(Increment::WaitingForNextWave {
+                    next_wave: cursor.wave_idx(),
+                    reward: current_wave.finishing_reward,
+                });
+            };
+            match wave_item {
+                WaveItem::Pause { duration_ms } => {
+                    cursor.increment_item();
+                    Ok(Increment::GameRunning { cooldown: duration_ms, enemy: None })
+                },
+                WaveItem::Enemy { enemy_type, spawn_cooldown, spawn_amount } => {
+                    if cursor.item_inner_idx() + 1 >= spawn_amount as usize {
+                        cursor.increment_item()
+                    } else {
+                        cursor.increment_item_inner()
+                    }
+                    Ok(Increment::GameRunning {
+                        cooldown: spawn_cooldown,
+                        enemy: enemy_type.into(),
+                    })
+                },
+            }
+        } else {
+            Err(())
+        }
     }
 
     pub(crate) fn is_paused(&self) -> bool {
