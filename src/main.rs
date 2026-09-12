@@ -26,6 +26,7 @@ use crate::cli::command_line_state_management::{
 use crate::cli::spawn_game_cli;
 use crate::collision::calculate_collisions;
 use crate::ecs_elements::messages::EnemyReachedEnd;
+use crate::ecs_elements::resources::GameState;
 use crate::entities::bullets::{bullet_despawn_observer, bullet_spawn_observer};
 use crate::entities::enemies::{handle_enemies_reaching_end, handle_enemy_spawns};
 use crate::entities::tower::{select_tower_target_enemy, shoot_bullets};
@@ -97,7 +98,8 @@ fn register_resources(app: &mut App) {
         .init_resource::<MapResource>()
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
         .init_resource::<CommandHistory>()
-        .init_resource::<PlayerSuiteResource>();
+        .init_resource::<PlayerSuiteResource>()
+        .init_resource::<GameState>();
 }
 
 fn register_messages(app: &mut App) {
