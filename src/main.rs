@@ -19,7 +19,9 @@ pub mod waves;
 
 use crate::camera::{camera_zoom_and_pan, set_camera_position};
 use crate::cli::command_event_handling::handle_command_events;
-use crate::cli::command_line::navigate_command_history;
+use crate::cli::command_line::{
+    block_egui_keyboard_input_when_console_focused, navigate_command_history,
+};
 use crate::cli::command_line_state_management::{
     handle_command_line_actions, handle_command_line_state,
 };
@@ -43,7 +45,7 @@ use crate::ui_overlay::spawn_ui_overlay;
 use bevy::input_focus::tab_navigation::TabNavigationPlugin;
 use bevy::prelude::*;
 use bevy::window::PresentMode;
-use bevy_egui::{EguiPlugin, EguiPrimaryContextPass};
+use bevy_egui::{EguiInputSet, EguiPlugin, EguiPrimaryContextPass};
 use bevy_vector_shapes::prelude::*;
 use ecs_elements::messages::{
     CollisionEnded, CollisionStarted, CollisionSustained, CommandEvent, PlaceTowerMessage,
@@ -51,7 +53,7 @@ use ecs_elements::messages::{
 };
 use ecs_elements::resources::{
     CommandHistory, CommandState, DebugSettings, MapResource, PlayerSuiteResource, SelectionState,
-    TexturePackSettings,
+    TexturePackSettings, UiHover,
 };
 use entities::bullets::{handle_bullet_enemy_collisions, handle_bullet_spawns, move_bullets};
 use entities::enemies::move_enemies;
@@ -94,6 +96,7 @@ fn register_resources(app: &mut App) {
     app.init_resource::<CommandState>()
         .init_resource::<DebugSettings>()
         .init_resource::<SelectionState>()
+        .init_resource::<UiHover>()
         .init_resource::<TexturePackSettings>()
         .init_resource::<MapResource>()
         .insert_resource(Time::<Fixed>::from_hz(consts::PHYSICS_FRAME_RATE as f64))
@@ -121,6 +124,10 @@ fn register_events(app: &mut App) {
 
 fn register_systems(app: &mut App) {
     app.add_systems(Startup, (setup, set_camera_position).chain())
+        .add_systems(
+            PreUpdate,
+            block_egui_keyboard_input_when_console_focused.before(EguiInputSet::ReadBevyMessages),
+        )
         .add_systems(
             // physics
             FixedUpdate,

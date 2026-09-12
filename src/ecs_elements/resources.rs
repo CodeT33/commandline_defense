@@ -42,6 +42,9 @@ pub(crate) struct SelectionState {
     pub(crate) selected_tile: Option<GridCoordinate>,
 }
 
+#[derive(Resource, Default)]
+pub(crate) struct UiHover(pub(crate) bool);
+
 #[derive(Resource)]
 pub(crate) struct DebugSettings {
     pub(crate) enable_bounding_boxes: bool,

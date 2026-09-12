@@ -1,5 +1,5 @@
 use crate::consts;
-use crate::ecs_elements::resources::MapResource;
+use crate::ecs_elements::resources::{MapResource, UiHover};
 use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
@@ -31,7 +31,11 @@ pub(crate) fn camera_zoom_and_pan(
     mut camera: Query<(&mut Transform, &mut Projection), With<Camera2d>>,
     windows: Query<&Window, With<PrimaryWindow>>, buttons: Res<ButtonInput<MouseButton>>,
     mut mouse_wheel: MessageReader<MouseWheel>, mut last_cursor_pos: Local<Option<Vec2>>,
+    ui_hover: Res<UiHover>,
 ) {
+    // Always drain the wheel
+    let wheel_delta: f32 = mouse_wheel.read().map(|event| event.y).sum();
+
     let Ok((mut camera_transform, mut projection)) = camera.single_mut() else {
         return;
     };
@@ -49,6 +53,13 @@ pub(crate) fn camera_zoom_and_pan(
         *last_cursor_pos = None;
         return;
     };
+
+    if ui_hover.0 {
+        *last_cursor_pos = Some(current_cursor_pos);
+        return;
+    }
+
+    // Pan
     let mouse_delta = last_cursor_pos.map(|p| current_cursor_pos - p).unwrap_or(Vec2::ZERO);
     *last_cursor_pos = Some(current_cursor_pos);
 
@@ -60,12 +71,6 @@ pub(crate) fn camera_zoom_and_pan(
     }
 
     // Zooming
-
-    let mut wheel_delta = 0.0;
-
-    for event in mouse_wheel.read() {
-        wheel_delta += event.y;
-    }
 
     if wheel_delta == 0.0 {
         return;

@@ -7,6 +7,7 @@ use bevy::input_focus::{AutoFocus, InputFocus};
 use bevy::prelude::*;
 use bevy::text::{EditableText, TextCursorStyle, TextEdit};
 use bevy::ui::{ComputedNode, UiGlobalTransform, widget::TextScroll};
+use bevy_egui::EguiGlobalSettings;
 use parley::{Affinity, Cursor};
 
 pub(crate) fn spawn_command_line(commands: &mut Commands) {
@@ -60,6 +61,14 @@ pub(crate) fn spawn_command_line(commands: &mut Commands) {
                 TextCursorStyle::default(),
             ));
         });
+}
+
+pub(crate) fn block_egui_keyboard_input_when_console_focused(
+    focus: Res<InputFocus>, inputs: Query<(), With<EditableText>>,
+    mut egui_settings: ResMut<EguiGlobalSettings>,
+) {
+    let console_focused = focus.get().is_some_and(|entity| inputs.contains(entity));
+    egui_settings.input_system_settings.run_write_keyboard_input_messages_system = !console_focused;
 }
 
 pub(crate) fn navigate_command_history(

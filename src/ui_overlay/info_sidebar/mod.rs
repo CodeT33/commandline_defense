@@ -4,7 +4,7 @@ pub mod info_menus;
 pub mod info_towers;
 
 use crate::cli::preview::PreviewCommand;
-use crate::ecs_elements::resources::{CommandState, TexturePackSettings};
+use crate::ecs_elements::resources::{CommandState, TexturePackSettings, UiHover};
 use crate::ui_overlay::info_sidebar::info_enemies::{
     draw_enemy_description, draw_enemy_info, draw_enemy_list,
 };
@@ -19,7 +19,7 @@ use egui::{LayerId, Pos2, Ui, UiBuilder};
 
 pub fn draw_gui(
     mut contexts: EguiContexts, command_state: Res<CommandState>, asset_server: Res<AssetServer>,
-    texture_pack_settings: Res<TexturePackSettings>,
+    texture_pack_settings: Res<TexturePackSettings>, mut ui_hover: ResMut<UiHover>,
 ) -> Result {
     let ctx = contexts.ctx_mut()?;
 
@@ -33,6 +33,7 @@ pub fn draw_gui(
         PreviewCommand::SidebarState(sidebar_state) => sidebar_state,
         _ => {
             let Some(sidebar_state) = command_state.persistent_preview.as_ref() else {
+                ui_hover.0 = false;
                 return Ok(());
             };
             sidebar_state
@@ -139,6 +140,13 @@ pub fn draw_gui(
         },
         _ => {},
     }
+
+    let ctx = contexts.ctx_mut()?;
+    let pointer = ctx.input(|input| input.pointer.interact_pos());
+    let egui_hover = ctx.is_pointer_over_egui() || ctx.egui_wants_pointer_input();
+
+    ui_hover.0 = egui_hover
+        || pointer.is_some_and(|p| !viewport_ui.available_rect_before_wrap().contains(p));
     Ok(())
 }
 
