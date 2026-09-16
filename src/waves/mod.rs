@@ -1,5 +1,7 @@
 pub mod system;
 
+use either::Either;
+
 use crate::ecs_elements::resources::GameState;
 use crate::entities::enemies::EnemyType;
 use crate::entities::enemies::EnemyType::{
@@ -60,30 +62,28 @@ impl Default for GameState {
 impl GameWaves {
     pub(crate) fn build(waves: Vec<Wave>) -> Self {
         let iterator = waves.into_iter().enumerate().flat_map(|(wave_idx, wave)| {
+            let wave_items = wave.wave_items.into_iter().flat_map(|item| match item {
+                WaveItem::Enemy { enemy_type, spawn_cooldown, spawn_amount } => {
+                    Either::Left(std::iter::repeat_n(
+                        Task::SpawnEnemy { enemy_type, cooldown: spawn_cooldown },
+                        spawn_amount as usize,
+                    ))
+                },
+                WaveItem::Pause { duration_ms } => {
+                    Either::Right(iter::once(Task::WaitDurationMs(duration_ms)))
+                },
+            });
+
             iter::once(Task::WaitForResume)
-                .chain(wave.wave_items.into_iter().flat_map(|item| {
-                    let list: Box<dyn Iterator<Item = Task> + Send + Sync> = match item {
-                        WaveItem::Enemy { enemy_type, spawn_cooldown, spawn_amount } => {
-                            Box::new(std::iter::repeat_n(
-                                Task::SpawnEnemy { enemy_type, cooldown: spawn_cooldown },
-                                spawn_amount as usize,
-                            ))
-                        },
-                        WaveItem::Pause { duration_ms } => {
-                            Box::new(iter::once(Task::WaitDurationMs(duration_ms)))
-                        },
-                    };
-                    list
-                }))
+                .chain(wave_items)
                 .chain(iter::once(Task::WaitForEnemiesDead))
                 .chain(iter::once(Task::RoundFinished {
                     reward: wave.finishing_reward,
                     finished_round: wave_idx,
                 }))
         });
-        let iterator_box: Box<dyn Iterator<Item = Task> + Send + Sync + 'static> =
-            Box::new(iterator);
-        Self { tasks: iterator_box.peekable() }
+        let tasks: Box<dyn Iterator<Item = Task> + Send + Sync + 'static> = Box::new(iterator);
+        Self { tasks: tasks.peekable() }
     }
 
     pub(crate) fn expand_zapanos(mut waves: Vec<Wave>) -> Vec<Wave> {
