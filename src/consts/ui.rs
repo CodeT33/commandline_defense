@@ -25,7 +25,7 @@ pub(crate) mod grid {
     use bevy::prelude::{Color, FontWeight};
 
     pub(crate) const GRID_POSITION: FontSettings = FontSettings {
-        font_size: 12.0,
+        font_size: 12.0 * 2.0,
         font_weight: FontWeight(160),
         color: Color::srgba(0.5, 1.0, 0.5, 0.5),
     };

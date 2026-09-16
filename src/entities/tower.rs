@@ -138,7 +138,7 @@ impl TowerData {
     ) {
         let attributes = tower_data.tower_type.get_attributes();
         let sprite: Sprite = Sprite {
-            image: asset_server.load(texture_pack_settings.get_asset_path(attributes.sprites[0])),
+            image: texture_pack_settings.load_nearest(asset_server, attributes.sprites[0]),
             custom_size: attributes.size_tiles.into(),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

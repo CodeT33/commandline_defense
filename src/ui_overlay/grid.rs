@@ -1,5 +1,5 @@
 use crate::cli::preview::PreviewCommand;
-use crate::consts::ui::grid::GRID_LINE_THICKNESS;
+use crate::consts::ui::grid::{GRID_LINE_THICKNESS, GRID_POSITION, GRID_POSITION_TILE_COLORS};
 use crate::consts::{self};
 use crate::coordinates::GridCoordinate;
 use crate::ecs_elements::components::{GridLine, GridOverlay, GridPositionLabel};
@@ -63,19 +63,19 @@ pub(crate) fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapRe
 
             let tile_type: TileType = map_resource.return_tile_type(coordinate);
             let text_color = match tile_type {
-                TileType::None => consts::ui::grid::GRID_POSITION_TILE_COLORS.none,
-                TileType::PathStart => consts::ui::grid::GRID_POSITION_TILE_COLORS.path_start,
-                TileType::Path => consts::ui::grid::GRID_POSITION_TILE_COLORS.path,
-                TileType::Restricted => consts::ui::grid::GRID_POSITION_TILE_COLORS.restricted,
-                TileType::Placeable => consts::ui::grid::GRID_POSITION_TILE_COLORS.placeable,
-                TileType::Water => consts::ui::grid::GRID_POSITION_TILE_COLORS.water,
+                TileType::None => GRID_POSITION_TILE_COLORS.none,
+                TileType::PathStart => GRID_POSITION_TILE_COLORS.path_start,
+                TileType::Path => GRID_POSITION_TILE_COLORS.path,
+                TileType::Restricted => GRID_POSITION_TILE_COLORS.restricted,
+                TileType::Placeable => GRID_POSITION_TILE_COLORS.placeable,
+                TileType::Water => GRID_POSITION_TILE_COLORS.water,
             };
 
             commands.spawn((
                 Text2d::new(position),
                 TextFont {
-                    font_size: FontSize::Px(consts::ui::grid::GRID_POSITION.font_size),
-                    weight: consts::ui::grid::GRID_POSITION.font_weight,
+                    font_size: FontSize::Px(GRID_POSITION.font_size),
+                    weight: GRID_POSITION.font_weight,
                     ..default()
                 },
                 TextColor(text_color),
@@ -84,7 +84,7 @@ pub(crate) fn spawn_grid_positions(commands: &mut Commands, map_resource: &MapRe
                     y as f32 + 0.5,
                     consts::rendering_layers::GRID_LABEL,
                 )
-                .with_scale(Vec3::splat(0.025)),
+                .with_scale(Vec3::splat(0.025 / 2.0)),
                 GridPositionLabel,
                 GridOverlay,
             ));
