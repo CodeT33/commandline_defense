@@ -5,7 +5,7 @@ pub mod info_towers;
 
 use crate::cli::preview::PreviewCommand;
 use crate::ecs_elements::resources::{CommandState, TexturePackSettings, UiHover};
-use crate::tiers::ValueTiers;
+use crate::tiers::{Formatting, ValueTiers};
 use crate::ui_overlay::info_sidebar::info_enemies::{
     draw_enemy_description, draw_enemy_info, draw_enemy_list,
 };
@@ -159,25 +159,24 @@ fn draw_navigation_box(ui: &mut Ui, text: String) -> egui::response::InnerRespon
 
 pub(crate) fn colored_attribute(ui: &mut Ui, attribute_name: &str, attribute_value: ValueTiers) {
     ui.horizontal(|ui| {
-        ui.label(format!("{}: ", attribute_name));
-
         ui.label(
-            egui::RichText::new(format!("{:?}", attribute_value))
+            egui::RichText::new(attribute_value.format_in(Formatting::Roman).to_string())
                 .color(attribute_value.get_tier_color())
                 .strong(),
         );
+        ui.label(attribute_name.to_string());
     });
 }
 
 pub(crate) fn tier_list(ui: &mut Ui) {
     ui.horizontal(|ui| {
         ui.label("Tier range:");
-        ui.label(egui::RichText::new("S").color(ValueTiers::S.get_tier_color()).strong());
-        ui.label(egui::RichText::new("A").color(ValueTiers::A.get_tier_color()).strong());
-        ui.label(egui::RichText::new("B").color(ValueTiers::B.get_tier_color()).strong());
-        ui.label(egui::RichText::new("C").color(ValueTiers::C.get_tier_color()).strong());
-        ui.label(egui::RichText::new("D").color(ValueTiers::D.get_tier_color()).strong());
-        ui.label(egui::RichText::new("E").color(ValueTiers::E.get_tier_color()).strong());
-        ui.label(egui::RichText::new("F").color(ValueTiers::F.get_tier_color()).strong());
+        ui.label(egui::RichText::new("VII").color(ValueTiers::S.get_tier_color()).strong());
+        ui.label(egui::RichText::new("VI").color(ValueTiers::A.get_tier_color()).strong());
+        ui.label(egui::RichText::new("V").color(ValueTiers::B.get_tier_color()).strong());
+        ui.label(egui::RichText::new("IV").color(ValueTiers::C.get_tier_color()).strong());
+        ui.label(egui::RichText::new("III").color(ValueTiers::D.get_tier_color()).strong());
+        ui.label(egui::RichText::new("II").color(ValueTiers::E.get_tier_color()).strong());
+        ui.label(egui::RichText::new("I").color(ValueTiers::F.get_tier_color()).strong());
     });
 }
