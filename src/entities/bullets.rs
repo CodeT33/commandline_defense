@@ -113,7 +113,7 @@ pub(crate) fn handle_bullet_spawns(
             DeleteWhenOutOfMap,
             Transform::from_translation(message.position.extend(consts::rendering_layers::ENTITY)),
             Sprite {
-                image: asset_server.load(texture_pack_settings.get_asset_path(stats.asset)),
+                image: texture_pack_settings.load_nearest(&asset_server, stats.asset),
                 custom_size: Some(Vec2::splat(stats.texture_size_tiles)),
                 image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
                 ..default()

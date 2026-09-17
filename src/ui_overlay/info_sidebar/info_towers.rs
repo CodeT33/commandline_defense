@@ -16,7 +16,7 @@ pub(crate) fn draw_tower_info(
     let bullet_attributes = tower_attributes.bullet_type.get_attributes();
 
     let image_handle =
-        asset_server.load(texture_pack_settings.get_asset_path(tower_attributes.preview_sprite));
+        texture_pack_settings.load_nearest(asset_server, tower_attributes.preview_sprite);
     let texture_id = ctx.add_image(EguiTextureHandle::Strong(image_handle));
 
     let tower_name = tower_type
@@ -82,8 +82,7 @@ fn tower_entry(
 
     let attributes = tower_type.get_attributes();
 
-    let image_handle =
-        asset_server.load(texture_pack_settings.get_asset_path(attributes.preview_sprite));
+    let image_handle = texture_pack_settings.load_nearest(asset_server, attributes.preview_sprite);
 
     let texture_id = contexts.add_image(EguiTextureHandle::Strong(image_handle));
 
@@ -154,19 +153,19 @@ pub(crate) fn draw_tower_upgrades(
     let tower_attributes = tower_type.get_attributes();
 
     let image_handle0 =
-        asset_server.load(texture_pack_settings.get_asset_path(tower_attributes.sprites[0]));
+        texture_pack_settings.load_nearest(asset_server, tower_attributes.sprites[0]);
     let texture_id0 = ctx.add_image(EguiTextureHandle::Strong(image_handle0));
 
     let image_handle1 =
-        asset_server.load(texture_pack_settings.get_asset_path(tower_attributes.sprites[1]));
+        texture_pack_settings.load_nearest(asset_server, tower_attributes.sprites[1]);
     let texture_id1 = ctx.add_image(EguiTextureHandle::Strong(image_handle1));
 
     let image_handle2 =
-        asset_server.load(texture_pack_settings.get_asset_path(tower_attributes.sprites[2]));
+        texture_pack_settings.load_nearest(asset_server, tower_attributes.sprites[2]);
     let texture_id2 = ctx.add_image(EguiTextureHandle::Strong(image_handle2));
 
     let image_handle3 =
-        asset_server.load(texture_pack_settings.get_asset_path(tower_attributes.sprites[3]));
+        texture_pack_settings.load_nearest(asset_server, tower_attributes.sprites[3]);
     let texture_id3 = ctx.add_image(EguiTextureHandle::Strong(image_handle3));
 
     ui.heading(tower_name);

@@ -1,5 +1,6 @@
 use crate::consts;
 use crate::ecs_elements::resources::{DebugSettings, GameState, PlayerSuiteResource};
+use bevy::ecs::system::ResMut;
 use bevy::input_focus::tab_navigation::TabGroup;
 use bevy::prelude::{
     BackgroundColor, Commands, Component, FontSize, Node, Query, Res, Text, TextFont, With,
@@ -29,7 +30,7 @@ pub(crate) fn spawn_player_suite_ui(commands: &mut Commands) {
 
 pub(crate) fn update_player_suite_ui(
     mut query: Query<&mut Text, With<PlayerSuiteUi>>, player_suite: Res<PlayerSuiteResource>,
-    debug_settings: Res<DebugSettings>, game_state: Res<GameState>,
+    debug_settings: Res<DebugSettings>, mut game_state: ResMut<GameState>,
 ) {
     let paused = game_state.waves.is_waiting_for_resume() || debug_settings.paused;
 

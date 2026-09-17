@@ -14,8 +14,7 @@ pub(crate) fn draw_enemy_info(
 ) {
     let enemy_attributes = enemy_type.get_attributes();
 
-    let image_handle =
-        asset_server.load(texture_pack_settings.get_asset_path(enemy_attributes.asset));
+    let image_handle = texture_pack_settings.load_nearest(asset_server, enemy_attributes.asset);
     let texture_id = ctx.add_image(EguiTextureHandle::Strong(image_handle));
 
     let enemy_name = enemy_type
@@ -71,7 +70,7 @@ fn enemy_entry(
 
     let attributes = enemy_type.get_attributes();
 
-    let image_handle = asset_server.load(texture_pack_settings.get_asset_path(attributes.asset));
+    let image_handle = texture_pack_settings.load_nearest(asset_server, attributes.asset);
 
     let texture_id = contexts.add_image(EguiTextureHandle::Strong(image_handle));
 

@@ -17,10 +17,8 @@ pub(crate) fn spawn_tile_highlight(
 ) {
     commands.spawn((
         Sprite {
-            image: asset_server.load(
-                texture_pack_settings
-                    .get_asset_path(TexturePackAssets::WipSprites_SelectionSquareArrowTop),
-            ),
+            image: texture_pack_settings
+                .load_nearest(asset_server, TexturePackAssets::WipSprites_SelectionSquareArrowTop),
             custom_size: Option::from(Vec2::splat(TILE_SIZE as f32 / 8.0)),
             image_mode: SpriteImageMode::Scale(SpriteScalingMode::FitCenter),
             ..default()

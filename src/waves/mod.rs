@@ -1,5 +1,7 @@
 pub mod system;
 
+use either::Either;
+
 use crate::ecs_elements::resources::GameState;
 use crate::entities::enemies::EnemyType;
 use crate::entities::enemies::EnemyType::{
@@ -7,7 +9,7 @@ use crate::entities::enemies::EnemyType::{
     ZapanoOfTheNightBody,
 };
 use std::cmp::PartialEq;
-use std::collections::VecDeque;
+use std::iter::{self, Peekable};
 
 impl WaveItem {
     pub(crate) fn new_enemy(
@@ -48,7 +50,7 @@ pub(crate) enum Task {
 }
 
 pub(crate) struct GameWaves {
-    tasks: VecDeque<Task>,
+    tasks: Peekable<Box<dyn Iterator<Item = Task> + Send + Sync + 'static>>,
 }
 
 impl Default for GameState {
@@ -59,29 +61,29 @@ impl Default for GameState {
 
 impl GameWaves {
     pub(crate) fn build(waves: Vec<Wave>) -> Self {
-        let mut actions = VecDeque::new();
-        for (wave_idx, wave) in waves.into_iter().enumerate() {
-            actions.push_back(Task::WaitForResume);
-            for item in wave.wave_items {
-                match item {
-                    WaveItem::Enemy { enemy_type, spawn_cooldown, spawn_amount } => {
-                        actions.extend(std::iter::repeat_n(
-                            Task::SpawnEnemy { enemy_type, cooldown: spawn_cooldown },
-                            spawn_amount as usize,
-                        ));
-                    },
-                    WaveItem::Pause { duration_ms } => {
-                        actions.push_back(Task::WaitDurationMs(duration_ms));
-                    },
-                }
-            }
-            actions.push_back(Task::WaitForEnemiesDead);
-            actions.push_back(Task::RoundFinished {
-                reward: wave.finishing_reward,
-                finished_round: wave_idx,
+        let iterator = waves.into_iter().enumerate().flat_map(|(wave_idx, wave)| {
+            let wave_items = wave.wave_items.into_iter().flat_map(|item| match item {
+                WaveItem::Enemy { enemy_type, spawn_cooldown, spawn_amount } => {
+                    Either::Left(std::iter::repeat_n(
+                        Task::SpawnEnemy { enemy_type, cooldown: spawn_cooldown },
+                        spawn_amount as usize,
+                    ))
+                },
+                WaveItem::Pause { duration_ms } => {
+                    Either::Right(iter::once(Task::WaitDurationMs(duration_ms)))
+                },
             });
-        }
-        Self { tasks: actions }
+
+            iter::once(Task::WaitForResume)
+                .chain(wave_items)
+                .chain(iter::once(Task::WaitForEnemiesDead))
+                .chain(iter::once(Task::RoundFinished {
+                    reward: wave.finishing_reward,
+                    finished_round: wave_idx,
+                }))
+        });
+        let tasks: Box<dyn Iterator<Item = Task> + Send + Sync + 'static> = Box::new(iterator);
+        Self { tasks: tasks.peekable() }
     }
 
     pub(crate) fn expand_zapanos(mut waves: Vec<Wave>) -> Vec<Wave> {
@@ -111,21 +113,21 @@ impl GameWaves {
         }
     }
 
-    pub(crate) fn current_task(&self) -> Option<Task> {
-        self.tasks.front().copied()
+    pub(crate) fn current_task(&mut self) -> Option<Task> {
+        self.tasks.peek().copied()
     }
 
     pub(crate) fn resume(&mut self) {
-        if self.tasks.front().copied() == Some(Task::WaitForResume) {
-            self.tasks.pop_front();
+        if self.current_task() == Some(Task::WaitForResume) {
+            self.pop_front();
         }
     }
 
-    pub(crate) fn is_waiting_for_resume(&self) -> bool {
-        self.tasks.front().copied() == Some(Task::WaitForResume)
+    pub(crate) fn is_waiting_for_resume(&mut self) -> bool {
+        self.current_task() == Some(Task::WaitForResume)
     }
 
     pub(crate) fn pop_front(&mut self) {
-        self.tasks.pop_front();
+        self.tasks.next();
     }
 }

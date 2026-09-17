@@ -82,7 +82,7 @@ fn register_plugins(app: &mut App) {
                 }),
                 ..default()
             })
-            .set(ImagePlugin::default_nearest())
+            .set(ImagePlugin::default_linear())
             .set(AssetPlugin { file_path: "./".to_owned(), ..default() }),
         TabNavigationPlugin,
         Shape2dPlugin::default(),
