@@ -271,7 +271,7 @@ pub(crate) fn shoot_bullets(
                     speed_tps: tower_attributes.bullet_speed_tps.get_value(BulletSpeed),
                     target_entity: matches!(
                         tower_attributes.targeting_type,
-                        TargetingType::PredictiveWithLoadBalancing
+                        TargetingType::Predictive | TargetingType::PredictiveWithLoadBalancing
                     )
                     .then_some(*target_entity),
                 });
